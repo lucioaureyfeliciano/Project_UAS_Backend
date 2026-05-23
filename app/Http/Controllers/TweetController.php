@@ -42,7 +42,7 @@ class TweetController extends Controller
         }
 
         $tweet->delete();
-        return response()->json(['message' => 'Tweet deleted successfully']);
+        return back()->with('success', 'Tweet deleted successfully');
     }
 
     public function edit_tweet(Request $request, $id)
@@ -63,6 +63,6 @@ class TweetController extends Controller
             'content' => $request->input('content'),
         ]);
 
-        return response()->json(['message' => 'Tweet updated successfully', 'tweet' => $tweet]);
+        return back()->with('success', 'Tweet updated successfully');
     }
 }

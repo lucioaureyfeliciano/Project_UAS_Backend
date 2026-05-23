@@ -85,23 +85,92 @@
             font-weight: bold;
             color: #3490dc;
         }
+
+        .menu-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .menu-button {
+            background: #3490dc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: white;
+            min-width: 150px;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .menu-dropdown a,
+        .menu-dropdown button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            text-decoration: none;
+            color: black;
+        }
+
+        .menu-dropdown a:hover,
+        .menu-dropdown button:hover {
+            background: #f2f2f2;
+        }
+
+        .menu-container:hover .menu-dropdown {
+            display: block;
+        }
     </style>
 </head>
 <body>
 
 <div class="navbar">
+
     <div>Social Media</div>
 
-    <form method="POST" action="/logout">
-        @csrf
-        <button class="logout-btn">Logout</button>
-    </form>
+    <div class="menu-container">
+
+        <button class="menu-button">
+            ☰
+        </button>
+
+        <div class="menu-dropdown">
+
+            <a href="/profile">
+                Profile
+            </a>
+
+            <form method="POST" action="/logout">
+                @csrf
+
+                <button type="submit">
+                    Logout
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+
 </div>
 
 <div class="container">
 
     @if(session('success'))
-        <div class="card" style="border: 1px solid #2ecc71; background: #ecf9f1; color: #155724;">
+        <div class="card" id="successAlert" style="border: 1px solid #2ecc71; background: #ecf9f1; color: #155724;">
             {{ session('success') }}
         </div>
     @endif
@@ -165,6 +234,27 @@
     </div>
 
 </div>
+
+<script>
+
+    setTimeout(() => {
+
+        const alertBox = document.getElementById('successAlert');
+
+        if (alertBox) {
+
+            alertBox.style.transition = '0.5s';
+            alertBox.style.opacity = '0';
+
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 500);
+
+        }
+
+    }, 5000);
+
+</script>
 
 </body>
 </html>
