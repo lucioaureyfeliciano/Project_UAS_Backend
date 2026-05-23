@@ -23,4 +23,9 @@ class Tweet extends Model
     {
         return $this->hasMany(Dislike::class);
     }
+
+    public function likes()
+    {
+    return $this->hasMany(Like::class);
+    }
 }

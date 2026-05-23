@@ -61,6 +61,30 @@
             font-weight: bold;
             color: #e74c3c;
         }
+
+        .like-btn {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            margin-right: 8px;
+        }
+
+        .like-btn:hover {
+            background: #e8f5ff;
+            border-color: #3490dc;
+            transform: scale(1.05);
+        }
+
+        .like-btn span {
+            font-weight: bold;
+            color: #3490dc;
+        }
     </style>
 </head>
 <body>
@@ -128,6 +152,11 @@
                         {{ $tweet->dislikes->count() }}
                     </span>
                 </button>
+                <button class="like-btn" data-id="{{ $tweet->id }}">
+                    👍 <span id="like-count-{{ $tweet->id }}">
+                        {{ $tweet->likes ? $tweet->likes->count() : 0 }}
+                    </span>
+                </button>
             @endforeach
         @endif
 
@@ -158,6 +187,31 @@ document.querySelectorAll('.dislike-btn').forEach(button => {
         .then(res => res.json())
         .then(data => {
             document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
+        })
+        .catch(err => console.log(err));
+
+    });
+});
+</script>
+
+{{-- JavaScript agar saat like dipencet tidak reload page dan langsung update jumlah like-nya --}}
+<script>
+document.querySelectorAll('.like-btn').forEach(button => {
+    button.addEventListener('click', function () {
+
+        const tweetId = this.dataset.id;
+
+        fetch(`/tweets/${tweetId}/like`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById(`like-count-${tweetId}`).innerText = data.count;
         })
         .catch(err => console.log(err));
 
