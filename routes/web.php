@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TweetController;
 use App\Http\Controllers\DislikeController;
+use App\Http\Controllers\LikeController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -13,7 +14,7 @@ use App\Models\Tweet;
 
 # Dashboard Route
 Route::get('/dashboard', function () {
-    $tweets = Tweet::with('user')->latest()->get();
+    $tweets = Tweet::with('user', 'likes', 'dislikes')->latest()->get();
     return view('dashboard', compact('tweets'));
 })->middleware('auth');
 
@@ -34,3 +35,6 @@ Route::middleware('auth')->group(function () {
 
 # Dislike Routes
 Route::post('/tweets/{tweet}/dislike', [DislikeController::class, 'toggle'])->middleware('auth');
+
+# Like ROutes
+Route::post('/tweets/{tweet}/like', [LikeController::class, 'toggle'])->middleware('auth');
