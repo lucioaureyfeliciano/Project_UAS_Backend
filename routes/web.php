@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TweetController;
 use App\Http\Controllers\DislikeController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -38,3 +39,9 @@ Route::post('/tweets/{tweet}/dislike', [DislikeController::class, 'toggle'])->mi
 
 # Like ROutes
 Route::post('/tweets/{tweet}/like', [LikeController::class, 'toggle'])->middleware('auth');
+
+# Profile Routes
+Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth');
+
+# Update Description Profile
+Route::post('/profile/update-description', [ProfileController::class, 'updateDescription']);
