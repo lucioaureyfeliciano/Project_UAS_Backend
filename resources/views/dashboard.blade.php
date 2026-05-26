@@ -259,6 +259,29 @@
             cursor: pointer;
             font-size: 12px;
         }
+
+                #scrollTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            background: #3b8edb;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        #scrollTopBtn:hover {
+            background: #2f7cc2;
+            transform: translateY(-3px);
+        }
+
     </style>
 </head>
 <body>
@@ -478,6 +501,10 @@
 
 </div>
 
+<button id="scrollTopBtn" onclick="scrollToTop()">
+    ↑
+</button>
+
 <script>
 
     setTimeout(() => {
@@ -588,6 +615,7 @@ document.querySelectorAll('.repost-btn').forEach(button => {
 
 </script>
 
+
 <script>
 
 function openEdit(id) {
@@ -614,5 +642,30 @@ setTimeout(() => {
     }
 
 }, 5000);
+
+window.onscroll = function () {
+
+    const button = document.getElementById("scrollTopBtn");
+
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+
+        button.style.display = "block";
+
+    } else {
+
+        button.style.display = "none";
+
+    }
+
+};
+
+function scrollToTop() {
+
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+}
 
 </script>
