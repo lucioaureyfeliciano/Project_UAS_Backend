@@ -38,6 +38,29 @@
             padding: 5px 10px;
             cursor: pointer;
         }
+
+        .dislike-btn {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .dislike-btn:hover {
+            background: #ffe5e5;
+            border-color: #ff6b6b;
+            transform: scale(1.05);
+        }
+
+        .dislike-btn span {
+            font-weight: bold;
+            color: #e74c3c;
+        }
     </style>
 </head>
 <body>
@@ -99,11 +122,45 @@
                     <p style="margin:0 0 8px 0;">{{ $tweet->content }}</p>
                     <small>By {{ $tweet->user?->username ?? 'Unknown' }} · {{ $tweet->created_at->diffForHumans() }}</small>
                 </div>
+
+                <button class="dislike-btn" data-id="{{ $tweet->id }}">
+                    👎 <span id="dislike-count-{{ $tweet->id }}">
+                        {{ $tweet->dislikes->count() }}
+                    </span>
+                </button>
             @endforeach
         @endif
+
+
+
     </div>
 
 </div>
 
 </body>
 </html>
+
+{{-- JavaScript agar saat dislike dipencet tidak reload page dan langsung update jumlah dislike-nya --}}
+<script>
+document.querySelectorAll('.dislike-btn').forEach(button => {
+    button.addEventListener('click', function () {
+
+        const tweetId = this.dataset.id;
+
+        fetch(`/tweets/${tweetId}/dislike`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
+        })
+        .catch(err => console.log(err));
+
+    });
+});
+</script>

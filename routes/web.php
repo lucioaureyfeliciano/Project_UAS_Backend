@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TweetController;
+use App\Http\Controllers\DislikeController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -30,3 +31,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/tweets/{id}', [TweetController::class, 'delete_tweet']);
     Route::put('/tweets/{id}', [TweetController::class, 'edit_tweet']);
 });
+
+# Dislike Routes
+Route::post('/tweets/{tweet}/dislike', [DislikeController::class, 'toggle'])->middleware('auth');
