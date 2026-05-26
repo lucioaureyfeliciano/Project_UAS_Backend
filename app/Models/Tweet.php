@@ -18,4 +18,9 @@ class Tweet extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function dislikes()
+    {
+        return $this->hasMany(Dislike::class);
+    }
 }
