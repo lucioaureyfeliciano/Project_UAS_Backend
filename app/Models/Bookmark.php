@@ -18,7 +18,7 @@ class Bookmark extends Model
         parent::boot();
         static::creating(function ($model) {
             if (empty($model->id)) {
-                $model->id = 'bookmark_' . Str::random(16);
+                $model->id = 'bm_' . Str::random(16);
             }
         });
     }
