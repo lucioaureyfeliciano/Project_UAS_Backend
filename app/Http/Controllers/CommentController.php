@@ -1,119 +1,75 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
+use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Tweet;
 use Illuminate\Http\Request;
 
-class CommentController extends Controller
+class CommentWebController extends Controller
 {
-    public function store(Request $request, $id)
+    public function index($tweet_id)
     {
-        $tweet = Tweet::findOrFail($id);
-        
-        $validated = $request->validate([
-            'content' => 'required|string|max:500',
-        ]);
-
-        $comment = Comment::create([
-            'content' => $validated['content'],
-            'user_id' => auth()->id(),
-            'tweet_id' => $tweet->id,
-        ]);
-
-        return response()->json([
-            'message' => 'Comment created successfully',
-            'comment' => $comment->load('user')
-        ], 201);
-    }
-
-    public function index($id)
-    {
-        $tweet = Tweet::findOrFail($id);
-        $comments = Comment::where('tweet_id', $tweet->id)
+        $tweet = Tweet::with('user')->findOrFail($tweet_id);
+        $comments = Comment::where('tweet_id', $tweet_id)
             ->whereNull('parent_id')
             ->with(['user', 'replies.user'])
             ->latest()
             ->get();
 
-        return response()->json($comments);
+        return view('comments.index', compact('tweet', 'comments'));
     }
 
-    public function count($id)
+    public function create($tweet_id)
     {
-        $tweet = Tweet::findOrFail($id);
-        $count = Comment::where('tweet_id', $tweet->id)->count();
-
-        return response()->json(['count' => $count]);
+        $tweet = Tweet::findOrFail($tweet_id);
+        return view('comments.create', compact('tweet'));
     }
 
-    public function show($id)
+    public function store(Request $request, $tweet_id)
     {
-        $comment = Comment::with(['user', 'tweet', 'parent', 'replies.user'])->findOrFail($id);
+        $validated = request()->validate(['content' => 'required|max:500']);
 
-        return response()->json($comment);
+        $comment = Comment::create([
+            'content' => $validated['content'],
+            'user_id' => auth()->id(),
+            'tweet_id' => $tweet_id,
+        ]);
+
+        return redirect()->route('comments.index', $tweet_id)->with('success', 'Comment added!');
     }
 
-    public function update(Request $request, $id)
+    public function edit($id)
     {
         $comment = Comment::findOrFail($id);
+        if ($comment->user_id !== auth()->id()) abort(403);
+        return view('comments.edit', compact('comment'));
+    }
 
-        if ($comment->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+    public function update($id)
+    {
+        $comment = Comment::findOrFail($id);
+        if ($comment->user_id !== auth()->id()) abort(403);
 
-        $validated = $request->validate([
-            'content' => 'required|string|max:500',
-        ]);
-
-        $comment->update($validated);
-
-        return response()->json([
-            'message' => 'Comment updated successfully',
-            'comment' => $comment
-        ]);
+        $comment->update(request()->validate(['content' => 'required|max:500']));
+        return redirect()->route('comments.index', $comment->tweet_id)->with('success', 'Updated!');
     }
 
     public function destroy($id)
     {
         $comment = Comment::findOrFail($id);
+        if ($comment->user_id !== auth()->id()) abort(403);
 
-        if ($comment->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
+        $tweet_id = $comment->tweet_id;
         $comment->delete();
-
-        return response()->json(['message' => 'Comment deleted successfully']);
+        return redirect()->route('comments.index', $tweet_id)->with('success', 'Deleted!');
     }
 
-    public function storeReply(Request $request, $id)
-    {
-        $parentComment = Comment::findOrFail($id);
-        
-        $validated = $request->validate([
-            'content' => 'required|string|max:500',
-        ]);
-
-        $reply = Comment::create([
-            'content' => $validated['content'],
-            'user_id' => auth()->id(),
-            'tweet_id' => $parentComment->tweet_id,
-            'parent_id' => $parentComment->id,
-        ]);
-
-        return response()->json([
-            'message' => 'Reply created successfully',
-            'reply' => $reply->load('user')
-        ], 201);
-    }
-
-    public function replies($id)
+    public function show($id)
     {
         $comment = Comment::findOrFail($id);
-        $replies = $comment->replies()->with('user')->latest()->get();
-
-        return response()->json($replies);
+        return view('comments.show', compact('comment'));
     }
+
 }

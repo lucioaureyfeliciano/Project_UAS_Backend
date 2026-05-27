@@ -1,106 +1,43 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
+use App\Http\Controllers\Controller;
 use App\Models\Bookmark;
-use App\Models\Tweet;
-use Illuminate\Http\Request;
 
-class BookmarkController extends Controller
+class BookmarkWebController extends Controller
 {
-    public function store(Request $request, $id)
+    public function index()
     {
-        if (auth()->id() != $id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        $bookmarks = Bookmark::where('user_id', auth()->id())
+            ->with('tweet.user')
+            ->latest()
+            ->paginate(15);
+
+        return view('bookmarks.index', compact('bookmarks'));
+    }
+
+    public function store()
+    {
+        $validated = request()->validate(['tweet_id' => 'required|exists:tweets,id']);
+
+        if (Bookmark::where('user_id', auth()->id())->where('tweet_id', $validated['tweet_id'])->exists()) {
+            return back()->with('error', 'Already bookmarked');
         }
 
-        $validated = $request->validate([
-            'tweet_id' => 'required|exists:tweets,id',
-        ]);
-
-        $exists = Bookmark::where('user_id', $id)
-            ->where('tweet_id', $validated['tweet_id'])
-            ->exists();
-
-        if ($exists) {
-            return response()->json(['message' => 'Tweet already bookmarked'], 400);
-        }
-
-        $bookmark = Bookmark::create([
-            'user_id' => $id,
+        Bookmark::create([
+            'user_id' => auth()->id(),
             'tweet_id' => $validated['tweet_id'],
         ]);
 
-        return response()->json([
-            'message' => 'Bookmark created successfully',
-            'bookmark' => $bookmark
-        ], 201);
+        return back()->with('success', 'Bookmarked!');
     }
 
-    public function index($id)
+    public function destroy($tweet_id)
     {
-        if (auth()->id() != $id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $bookmarks = Bookmark::where('user_id', $id)
-            ->with('tweet.user')
-            ->latest()
-            ->get();
-
-        return response()->json($bookmarks);
-    }
-
-    public function check($id, $tweet_id)
-    {
-        if (auth()->id() != $id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $exists = Bookmark::where('user_id', $id)
-            ->where('tweet_id', $tweet_id)
-            ->exists();
-
-        return response()->json(['bookmarked' => $exists]);
-    }
-
-    public function destroy($id, $tweet_id)
-    {
-        if (auth()->id() != $id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $bookmark = Bookmark::where('user_id', $id)
-            ->where('tweet_id', $tweet_id)
-            ->firstOrFail();
-
+        $bookmark = Bookmark::where('user_id', auth()->id())
+            ->where('tweet_id', $tweet_id)->firstOrFail();
         $bookmark->delete();
-
-        return response()->json(['message' => 'Bookmark deleted successfully']);
-    }
-
-    public function destroyAll($id)
-    {
-        if (auth()->id() != $id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $count = Bookmark::where('user_id', $id)->delete();
-
-        return response()->json([
-            'message' => 'All bookmarks deleted successfully',
-            'deleted_count' => $count
-        ]);
-    }
-
-    public function count($id)
-    {
-        if (auth()->id() != $id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $count = Bookmark::where('user_id', $id)->count();
-
-        return response()->json(['count' => $count]);
+        return back()->with('success', 'Removed!');
     }
 }
