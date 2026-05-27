@@ -13,18 +13,28 @@ return new class extends Migration
     {
         Schema::create('communities', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->text('description');
+            $table->boolean('is_private')->default(false);
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-    });
-}
+        });
+
+        Schema::create('community_user', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('community_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+            $table->unique(['community_id', 'user_id']);
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
+        Schema::dropIfExists('community_user');
         Schema::dropIfExists('communities');
     }
 };
