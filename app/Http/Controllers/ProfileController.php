@@ -11,7 +11,7 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
 
-        $tweets = Tweet::with('likes')
+        $tweets = Tweet::with('likes', 'reposts')
             ->where('user_id', $user->id)
             ->latest()
             ->get();

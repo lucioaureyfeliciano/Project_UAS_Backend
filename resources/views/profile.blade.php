@@ -417,7 +417,7 @@
                 </div>
 
                 <div>
-                    🔁 0
+                    🔁 {{ $tweet->reposts->count() }}
                 </div>
 
             </div>
