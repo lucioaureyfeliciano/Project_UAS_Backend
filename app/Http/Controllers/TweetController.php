@@ -14,23 +14,19 @@ class TweetController extends Controller
             'content' => 'required|string',
         ]);
 
-        $tweet = Tweet::create([
+        Tweet::create([
             'title' => $request->input('title'),
             'content' => $request->input('content'),
             'user_id' => auth()->id(),
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json(['message' => 'Tweet posted successfully', 'tweet' => $tweet], 201);
-        }
-
-        return redirect('/dashboard')->with('success', 'Tweet posted successfully');
+        return redirect('/dashboard')->with('success', 'Tweet posted successfully.');
     }
 
     public function show_tweets()
     {
-        $tweets = Tweet::with('user')->latest()->get();
-        return response()->json($tweets);
+        $tweets = Tweet::with('user', 'likes', 'dislikes')->latest()->get();
+        return view('dashboard', compact('tweets'));
     }
 
     public function delete_tweet($id)
@@ -38,10 +34,11 @@ class TweetController extends Controller
         $tweet = Tweet::findOrFail($id);
 
         if ($tweet->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return abort(403, 'Unauthorized action.');
         }
 
         $tweet->delete();
+
         return back()->with('success', 'Tweet deleted successfully');
     }
 
@@ -50,7 +47,7 @@ class TweetController extends Controller
         $tweet = Tweet::findOrFail($id);
 
         if ($tweet->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return abort(403, 'Unauthorized action.');
         }
 
         $request->validate([
