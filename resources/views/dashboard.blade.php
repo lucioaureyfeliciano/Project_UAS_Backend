@@ -39,30 +39,7 @@
             cursor: pointer;
         }
 
-        .dislike-btn {
-            background: #fff;
-            border: 1px solid #ddd;
-            padding: 6px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.2s;
-        }
-
-        .dislike-btn:hover {
-            background: #ffe5e5;
-            border-color: #ff6b6b;
-            transform: scale(1.05);
-        }
-
-        .dislike-btn span {
-            font-weight: bold;
-            color: #e74c3c;
-        }
-
-        .like-btn {
+        .reaction-btn {
             background: #fff;
             border: 1px solid #ddd;
             padding: 6px 12px;
@@ -75,15 +52,70 @@
             margin-right: 8px;
         }
 
-        .like-btn:hover {
-            background: #e8f5ff;
-            border-color: #3490dc;
+        .reaction-btn:hover {
             transform: scale(1.05);
         }
 
-        .like-btn span {
-            font-weight: bold;
+        .dislike-btn {
+            color: #e74c3c;
+        }
+
+        .dislike-btn:hover {
+            background: #ffe5e5;
+            border-color: #ff6b6b;
+        }
+
+        .like-btn {
             color: #3490dc;
+        }
+
+        .like-btn:hover {
+            background: #e8f5ff;
+            border-color: #3490dc;
+        }
+
+        .repost-btn {
+            color: #6c5ce7;
+        }
+
+        .repost-btn:hover {
+            background: #f0e6ff;
+            border-color: #9b59b6;
+        }
+
+        .tweet-card {
+            margin-bottom: 18px;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background: white;
+        }
+
+        .tweet-card h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.1rem;
+        }
+
+        .tweet-card p {
+            margin: 0 0 10px 0;
+            line-height: 1.5;
+        }
+
+        .tweet-card small {
+            color: #666;
+        }
+
+        .tweet-actions {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .like-btn span,
+        .dislike-btn span,
+        .repost-btn span {
+            font-weight: bold;
         }
 
         .menu-container {
@@ -133,6 +165,7 @@
         .menu-container:hover .menu-dropdown {
             display: block;
         }
+
     </style>
 </head>
 <body>
@@ -210,22 +243,31 @@
             <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
         @else
             @foreach($tweets as $tweet)
-                <div style="margin-bottom:15px; padding:12px; border:1px solid #ddd; border-radius:8px;">
-                    <h4 style="margin:0 0 6px 0;">{{ $tweet->title }}</h4>
-                    <p style="margin:0 0 8px 0;">{{ $tweet->content }}</p>
-                    <small>By {{ $tweet->user?->username ?? 'Unknown' }} · {{ $tweet->created_at->diffForHumans() }}</small>
-                </div>
+                <div class="tweet-card">
+                    <div class="tweet-content">
+                        <h4>{{ $tweet->title }}</h4>
+                        <p>{{ $tweet->content }}</p>
+                        <small>By {{ $tweet->user?->username ?? 'Unknown' }} · {{ $tweet->created_at->diffForHumans() }}</small>
+                    </div>
 
-                <button class="dislike-btn" data-id="{{ $tweet->id }}">
-                    👎 <span id="dislike-count-{{ $tweet->id }}">
-                        {{ $tweet->dislikes->count() }}
-                    </span>
-                </button>
-                <button class="like-btn" data-id="{{ $tweet->id }}">
-                    👍 <span id="like-count-{{ $tweet->id }}">
-                        {{ $tweet->likes ? $tweet->likes->count() : 0 }}
-                    </span>
-                </button>
+                    <div class="tweet-actions">
+                        <button class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
+                            👎 <span id="dislike-count-{{ $tweet->id }}">
+                                {{ $tweet->dislikes->count() }}
+                            </span>
+                        </button>
+                        <button class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
+                            👍 <span id="like-count-{{ $tweet->id }}">
+                                {{ $tweet->likes ? $tweet->likes->count() : 0 }}
+                            </span>
+                        </button>
+                        <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
+                            🔁 <span id="repost-count-{{ $tweet->id }}">
+                                {{ $tweet->reposts->count() }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
             @endforeach
         @endif
 
@@ -307,4 +349,40 @@ document.querySelectorAll('.like-btn').forEach(button => {
 
     });
 });
+</script>
+
+{{-- JavaScript agar saat repost dipencet tidak reload page dan langsung update jumlah like-nya --}}
+<script>
+document.querySelectorAll('.repost-btn').forEach(button => {
+
+    button.addEventListener('click', function () {
+
+        const tweetId = this.dataset.id;
+
+        fetch(`/tweets/${tweetId}/repost`, {
+
+            method: 'POST',
+
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+
+        })
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            document.getElementById(
+                `repost-count-${tweetId}`
+            ).innerText = data.count;
+
+        });
+
+    });
+
+});
+
 </script>

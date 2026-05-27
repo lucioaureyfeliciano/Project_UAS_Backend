@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\Repost;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -26,6 +27,11 @@ class Tweet extends Model
 
     public function likes()
     {
-    return $this->hasMany(Like::class);
+        return $this->hasMany(Like::class);
+    }
+
+    public function reposts()
+    {
+        return $this->hasMany(Repost::class);
     }
 }
