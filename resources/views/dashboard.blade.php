@@ -166,6 +166,25 @@
             display: block;
         }
 
+        .edit-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -243,6 +262,46 @@
             <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
         @else
             @foreach($tweets as $tweet)
+                <div style="margin-bottom:15px; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h4 style="margin:0 0 6px 0;">{{ $tweet->title }}</h4>
+                            <p style="margin:0 0 8px 0;">{{ $tweet->content }}</p>
+                            <small>By {{ $tweet->user?->username ?? 'unknown' }} | {{ $tweet->created_at->diffForHumans() }}</small>
+                        </div>
+                    
+                        {{-- Tombol delete --}}
+                        @if($tweet->user_id === auth()->id())
+                            <div style="display: flex; gap: 5px;">
+                                <form method="POST" action="/tweets/{{ $tweet->id }}" onsubmit="return confirm('Yakin ingin menghapus tweet ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="delete-btn">Delete</button>
+                                </form>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Menu edit --}}
+                    @if($tweet->user_id === auth()->id())
+                        <details style="margin-top: 10px; font-size: 13px;">
+                            <summary style="cursor:pointer; color: #3490dc; font-weight: bold;">Edit Tweet</summary>
+                            <form method="POST" action="/tweets/{{ $tweet->id }}" style="margin-top: 8px; background: #f9f9f9; padding: 10px; border-radius: 6px;">
+                                @csrf
+                                @method('PUT')
+                                <div style="margin-bottom: 6px;">
+                                    <label style="font-weight: bold;">Title:</label>
+                                    <input type="text" name="title" value="{{ $tweet->title }}" style="width:100%; padding:6px; margin-top:4px;" required>
+                                </div>
+                                <div style="margin-bottom: 6px;">
+                                    <label style="font-weight: bold;">Content:</label>
+                                    <textarea name="content" style="width:100%; padding:6px; margin-top:4px;" rows="2" required>{{ $tweet->content }}</textarea>
+                                </div>
+                                <button type="submit" class="edit-btn">Save Changes</button>
+                            </form>
+                        </details>
+                    @endif
+                </div>
                 <div class="tweet-card">
                     <div class="tweet-content">
                         <h4>{{ $tweet->title }}</h4>
