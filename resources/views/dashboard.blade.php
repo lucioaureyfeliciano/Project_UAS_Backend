@@ -123,6 +123,7 @@
             display: inline-block;
         }
 
+
         .menu-button {
             background: #3490dc;
             color: white;
@@ -193,30 +194,39 @@
 
     <div>Social Media</div>
 
-    <div class="menu-container">
+    <div style="display:flex; gap:10px; align-items:center;">
 
-        <button class="menu-button">
-            ☰
-        </button>
+        {{-- Tombol Inbox / DM --}}
+        <a class="menu-button" href="/messages/inbox">
+            💬
+        </a>
 
-        <div class="menu-dropdown">
+        {{-- Tombol Menu --}}
+        <div class="menu-container">
 
-            <a href="/profile">
-                Profile
-            </a>
+            <button class="menu-button">
+                ☰
+            </button>
 
-            <form method="POST" action="/logout">
-                @csrf
+            <div class="menu-dropdown">
 
-                <button type="submit">
-                    Logout
-                </button>
-            </form>
+                <a href="/profile">
+                    Profile
+                </a>
+
+                <form method="POST" action="/logout">
+                    @csrf
+
+                    <button type="submit">
+                        Logout
+                    </button>
+                </form>
+
+            </div>
 
         </div>
 
     </div>
-
 </div>
 
 <div class="container">
@@ -302,6 +312,7 @@
                         </details>
                     @endif
                 </div>
+                
                 <div class="tweet-card">
                     <div class="tweet-content">
                         <h4>{{ $tweet->title }}</h4>
