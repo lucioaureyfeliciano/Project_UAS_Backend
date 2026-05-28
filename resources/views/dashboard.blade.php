@@ -281,7 +281,6 @@
                 ☰
             </button>
 
-<<<<<<< HEAD
             <a href="/community">
                 Community
             </a>
@@ -292,9 +291,7 @@
 
             <form method="POST" action="/logout">
                 @csrf
-=======
             <div class="menu-dropdown">
->>>>>>> main
 
                 <a href="/profile">
                     Profile
