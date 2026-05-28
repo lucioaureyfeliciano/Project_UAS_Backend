@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TweetController;
+use App\Http\Controllers\UsageController;
 use App\Http\Controllers\CommunityController;
 
 Route::get('/', function () {
@@ -27,6 +28,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/tweets', [TweetController::class, 'show_tweets']);
     Route::delete('/tweets/{id}', [TweetController::class, 'delete_tweet']);
     Route::put('/tweets/{id}', [TweetController::class, 'edit_tweet']);
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/usage', [UsageController::class, 'index']);
 });
 
 Route::middleware('auth')->group(function () {
