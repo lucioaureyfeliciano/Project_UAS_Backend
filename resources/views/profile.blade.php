@@ -58,18 +58,41 @@
 
         .description-section {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
             margin-top: 10px;
+        }
+
+        .description-text {
             font-size: 16px;
             color: #444;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            max-width: 100%;
+            line-height: 1.6;
+        }
+
+        .profile-edit-row {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #555;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .edit-description-btn {
             border: none;
             background: transparent;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 13px;
+            color: #555;
+            padding: 0;
+        }
+
+        .edit-description-btn:hover {
+            text-decoration: underline;
         }
 
         .stats {
@@ -266,19 +289,19 @@
 
             <h1>{{ $user->username }}</h1>
 
-            <div class="description-section">
-
-                <span>
-                    {{ $user->description ?? '[Deskripsi]' }}
-                </span>
-
+            <div class="profile-edit-row">
                 <button
                     class="edit-description-btn"
                     onclick="openDescriptionEdit()"
                 >
                     [edit]
                 </button>
+            </div>
 
+            <div class="description-section">
+                <div class="description-text">
+                    {{ $user->description ?? '[Deskripsi]' }}
+                </div>
             </div>
 
         </div>
@@ -307,6 +330,17 @@
             </div>
 
             <div class="stat-box">
+                <div class="stat-title">Dislikes</div>
+                <div class="stat-number">
+
+                    {{ $tweets->sum(function($tweet) {
+                        return $tweet->dislikes->count();
+                    }) }}
+
+                </div>
+            </div>
+
+            <div class="stat-box">
                 <div class="stat-title">Tweets</div>
                 <div class="stat-number">
                     {{ $tweets->count() }}
@@ -315,7 +349,13 @@
 
             <div class="stat-box">
                 <div class="stat-title">Repost</div>
-                <div class="stat-number">0</div>
+                <div class="stat-number">
+
+                    {{ $tweets->sum(function($tweet) {
+                        return $tweet->reposts->count();
+                    }) }}
+
+                </div>
             </div>
 
         </div>
