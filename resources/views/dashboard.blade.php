@@ -371,7 +371,6 @@
                                 •
                                 {{ $tweet->created_at->diffForHumans() }}
                             </small>
-                            <small>By {{ $tweet->user?->username ?? 'Unknown' }} · {{ $tweet->created_at->diffForHumans() }}</small>
                         </div>
 
                         {{-- AKSI SISI KANAN TWEET CARD --}}
