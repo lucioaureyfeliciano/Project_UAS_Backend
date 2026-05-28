@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TweetController;
+use App\Http\Controllers\UsageController;
+use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\DislikeController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\ProfileController;
@@ -14,20 +16,17 @@ Route::get('/', function () {
 
 use App\Models\Tweet;
 
-# Dashboard Route
 Route::get('/dashboard', function () {
     $tweets = Tweet::with('user', 'likes', 'dislikes')->latest()->get();
     return view('dashboard', compact('tweets'));
 })->middleware('auth');
 
-# Authentication Routes
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-# Tweet Routes
 Route::middleware('auth')->group(function () {
     Route::post('/tweets', [TweetController::class, 'post_tweet']);
     Route::get('/tweets', [TweetController::class, 'show_tweets']);
@@ -35,10 +34,26 @@ Route::middleware('auth')->group(function () {
     Route::put('/tweets/{id}', [TweetController::class, 'edit_tweet']);
 });
 
+# Usage Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/usage', [UsageController::class, 'index']);
+});
+
+# Community Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/community', [CommunityController::class, 'index']);
+    Route::post('/community', [CommunityController::class, 'create']);
+    Route::get('/community/{id}', [CommunityController::class, 'show']);
+    Route::put('/community/{id}', [CommunityController::class, 'edit']);
+    Route::delete('/community/{id}', [CommunityController::class, 'destroy']);
+    Route::post('/community/{id}/join', [CommunityController::class, 'join']);
+    Route::post('/community/{id}/leave', [CommunityController::class, 'leave']);
+});
+
 # Dislike Routes
 Route::post('/tweets/{tweet}/dislike', [DislikeController::class, 'toggle'])->middleware('auth');
 
-# Like ROutes
+# Like Routes
 Route::post('/tweets/{tweet}/like', [LikeController::class, 'toggle'])->middleware('auth');
 
 # Profile Routes
