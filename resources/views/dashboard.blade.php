@@ -281,20 +281,18 @@
                 ☰
             </button>
 
-            <a href="/community">
-                Community
-            </a>
-
-            <a href="/usage">
-                Usage Statistics
-            </a>
-
-            <form method="POST" action="/logout">
-                @csrf
             <div class="menu-dropdown">
 
                 <a href="/profile">
                     Profile
+                </a>
+
+                <a href="/community">
+                    Community
+                </a>
+
+                <a href="/usage">
+                    Usage Statistics
                 </a>
 
                 <form method="POST" action="/logout">
