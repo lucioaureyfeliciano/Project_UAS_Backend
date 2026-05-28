@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Web;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bookmark;
 
-class BookmarkWebController extends Controller
+class BookmarkController extends Controller
 {
     public function index()
     {
@@ -40,4 +40,11 @@ class BookmarkWebController extends Controller
         $bookmark->delete();
         return back()->with('success', 'Removed!');
     }
+
+    public function show($id)
+    {
+        $bookmark = Bookmark::where('user_id', auth()->id())->findOrFail($id);
+        return view('bookmarks.show', compact('bookmark'));
+    }
+
 }

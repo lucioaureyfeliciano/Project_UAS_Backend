@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Web;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Tweet;
 use Illuminate\Http\Request;
 
-class CommentWebController extends Controller
+class CommentController extends Controller
 {
     public function index($tweet_id)
     {
