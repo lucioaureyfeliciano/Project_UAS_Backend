@@ -9,6 +9,7 @@ use App\Http\Controllers\DislikeController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RepostController;
+use App\Http\Controllers\MessageController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -64,3 +65,20 @@ Route::post('/profile/update-description', [ProfileController::class, 'updateDes
 
 # Repost Routes
 Route::post('/tweets/{tweet}/repost', [RepostController::class, 'toggle'])->middleware('auth');
+
+#Message Routes
+Route::middleware('auth')->group(function () {
+
+    Route::get('/messages/inbox', [MessageController::class, 'inbox']);
+
+    Route::get('/messages/chat/{userId}', [MessageController::class, 'chat']);
+
+    Route::post('/messages', [MessageController::class, 'store']);
+
+    Route::put('/messages/{messageId}', [MessageController::class, 'update']);
+
+    Route::delete('/messages/{messageId}', [MessageController::class, 'destroy']);
+
+    Route::get('/messages/search', [MessageController::class, 'search']);
+});
+
