@@ -91,6 +91,79 @@
             background: white;
         }
 
+        .tweet-menu-container {
+            position: relative;
+        }
+
+        .tweet-menu-btn {
+            border: none;
+            background: transparent;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .tweet-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+            min-width: 120px;
+        }
+
+        .tweet-dropdown button {
+            width: 100%;
+            border: none;
+            background: white;
+            padding: 12px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .tweet-dropdown button:hover {
+            background: #f5f5f5;
+        }
+
+        .tweet-menu-container:hover .tweet-dropdown {
+            display: block;
+        }
+
+        .edit-modal {
+            display: none;
+            margin-top: 20px;
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .edit-modal input,
+        .edit-modal textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .save-btn {
+            background: #b7e4c7;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background: #f5c2c7;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
         .tweet-card h4 {
             margin: 0 0 8px 0;
             font-size: 1.1rem;
@@ -122,6 +195,7 @@
             position: relative;
             display: inline-block;
         }
+
 
         .menu-button {
             background: #3490dc;
@@ -193,18 +267,21 @@
 
     <div>Social Media</div>
 
-    <div class="menu-container">
+    <div style="display:flex; gap:10px; align-items:center;">
 
-        <button class="menu-button">
-            ☰
-        </button>
+        {{-- Tombol Inbox / DM --}}
+        <a class="menu-button" href="/messages/inbox">
+            💬
+        </a>
 
-        <div class="menu-dropdown">
+        {{-- Tombol Menu --}}
+        <div class="menu-container">
 
-            <a href="/profile">
-                Profile
-            </a>
+            <button class="menu-button">
+                ☰
+            </button>
 
+<<<<<<< HEAD
             <a href="/community">
                 Community
             </a>
@@ -215,16 +292,27 @@
 
             <form method="POST" action="/logout">
                 @csrf
+=======
+            <div class="menu-dropdown">
+>>>>>>> main
 
-                <button type="submit">
-                    Logout
-                </button>
-            </form>
+                <a href="/profile">
+                    Profile
+                </a>
+
+                <form method="POST" action="/logout">
+                    @csrf
+
+                    <button type="submit">
+                        Logout
+                    </button>
+                </form>
+
+            </div>
 
         </div>
 
     </div>
-
 </div>
 
 <div class="container">
@@ -270,71 +358,122 @@
             <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
         @else
             @foreach($tweets as $tweet)
-                <div style="margin-bottom:15px; padding:12px; border:1px solid #ddd; border-radius:8px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div>
-                            <h4 style="margin:0 0 6px 0;">{{ $tweet->title }}</h4>
-                            <p style="margin:0 0 8px 0;">{{ $tweet->content }}</p>
-                            <small>By {{ $tweet->user?->username ?? 'unknown' }} | {{ $tweet->created_at->diffForHumans() }}</small>
-                        </div>
-                    
-                        {{-- Tombol delete --}}
-                        @if($tweet->user_id === auth()->id())
-                            <div style="display: flex; gap: 5px;">
-                                <form method="POST" action="/tweets/{{ $tweet->id }}" onsubmit="return confirm('Yakin ingin menghapus tweet ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="delete-btn">Delete</button>
-                                </form>
-                            </div>
-                        @endif
-                    </div>
-
-                    {{-- Menu edit --}}
-                    @if($tweet->user_id === auth()->id())
-                        <details style="margin-top: 10px; font-size: 13px;">
-                            <summary style="cursor:pointer; color: #3490dc; font-weight: bold;">Edit Tweet</summary>
-                            <form method="POST" action="/tweets/{{ $tweet->id }}" style="margin-top: 8px; background: #f9f9f9; padding: 10px; border-radius: 6px;">
-                                @csrf
-                                @method('PUT')
-                                <div style="margin-bottom: 6px;">
-                                    <label style="font-weight: bold;">Title:</label>
-                                    <input type="text" name="title" value="{{ $tweet->title }}" style="width:100%; padding:6px; margin-top:4px;" required>
-                                </div>
-                                <div style="margin-bottom: 6px;">
-                                    <label style="font-weight: bold;">Content:</label>
-                                    <textarea name="content" style="width:100%; padding:6px; margin-top:4px;" rows="2" required>{{ $tweet->content }}</textarea>
-                                </div>
-                                <button type="submit" class="edit-btn">Save Changes</button>
-                            </form>
-                        </details>
-                    @endif
-                </div>
+                
                 <div class="tweet-card">
-                    <div class="tweet-content">
-                        <h4>{{ $tweet->title }}</h4>
-                        <p>{{ $tweet->content }}</p>
-                        <small>By {{ $tweet->user?->username ?? 'Unknown' }} · {{ $tweet->created_at->diffForHumans() }}</small>
+
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+
+                        <div class="tweet-content">
+                            <h4>{{ $tweet->title }}</h4>
+                            <p>{{ $tweet->content }}</p>
+                            <small>
+                                By {{ $tweet->user?->username ?? 'Unknown' }}
+                                ·
+                                {{ $tweet->created_at->diffForHumans() }}
+                            </small>
+                        </div>
+
+                        @if($tweet->user_id === auth()->id())
+
+                            <div class="tweet-menu-container">
+
+                                <button class="tweet-menu-btn">
+                                    •••
+                                </button>
+
+                                <div class="tweet-dropdown">
+
+                                    <button onclick="openEdit({{ $tweet->id }})">
+                                        Edit
+                                    </button>
+
+                                    <form action="/tweets/{{ $tweet->id }}" method="POST">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button
+                                            type="submit"
+                                            style="color:red;"
+                                        >
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        @endif
+
                     </div>
 
                     <div class="tweet-actions">
-                        <button class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            👎 <span id="dislike-count-{{ $tweet->id }}">
-                                {{ $tweet->dislikes->count() }}
-                            </span>
-                        </button>
+
                         <button class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            👍 <span id="like-count-{{ $tweet->id }}">
+                            👍
+                            <span id="like-count-{{ $tweet->id }}">
                                 {{ $tweet->likes ? $tweet->likes->count() : 0 }}
                             </span>
                         </button>
+
+                        <button class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
+                            👎
+                            <span id="dislike-count-{{ $tweet->id }}">
+                                {{ $tweet->dislikes->count() }}
+                            </span>
+                        </button>
+
                         <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            🔁 <span id="repost-count-{{ $tweet->id }}">
+                            🔁
+                            <span id="repost-count-{{ $tweet->id }}">
                                 {{ $tweet->reposts->count() }}
                             </span>
                         </button>
+
                     </div>
+
                 </div>
+
+                <div class="edit-modal" id="edit-{{ $tweet->id }}">
+
+                    <form action="/tweets/{{ $tweet->id }}" method="POST">
+
+                        @csrf
+                        @method('PUT')
+
+                        <input
+                            type="text"
+                            name="title"
+                            value="{{ $tweet->title }}"
+                        >
+
+                        <textarea
+                            name="content"
+                            rows="4"
+                        >{{ $tweet->content }}</textarea>
+
+                        <div class="description-actions">
+
+                            <button type="submit" class="save-btn">
+                                Save
+                            </button>
+
+                            <button
+                                type="button"
+                                class="cancel-btn"
+                                onclick="closeEdit({{ $tweet->id }})"
+                            >
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
             @endforeach
         @endif
 
@@ -451,5 +590,34 @@ document.querySelectorAll('.repost-btn').forEach(button => {
     });
 
 });
+
+</script>
+
+<script>
+
+function openEdit(id) {
+    document.getElementById(`edit-${id}`).style.display = 'block';
+}
+
+function closeEdit(id) {
+    document.getElementById(`edit-${id}`).style.display = 'none';
+}
+
+setTimeout(() => {
+
+    const alertBox = document.getElementById('successAlert');
+
+    if (alertBox) {
+
+        alertBox.style.transition = '0.5s';
+        alertBox.style.opacity = '0';
+
+        setTimeout(() => {
+            alertBox.style.display = 'none';
+        }, 500);
+
+    }
+
+}, 5000);
 
 </script>
