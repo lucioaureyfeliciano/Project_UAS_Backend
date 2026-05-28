@@ -293,6 +293,12 @@
 <div class="navbar">
     <div>Social Media</div>
     <div style="display:flex; gap:10px; align-items:center;">
+        {{-- Notifications --}}
+        <a class="menu-button" href="{{ route('notifications.index') }}">🔔</a>
+
+        {{-- Bookmarks --}}
+        <a class="menu-button" href="{{ route('bookmarks.index') }}">🔖</a>
+
         {{-- Tombol Inbox / DM --}}
         <a class="menu-button" href="/messages/inbox">💬</a>
 
@@ -447,6 +453,26 @@
                         <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
                             🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
                         </button>
+
+                        {{-- COMMENT --}}
+                        <a href="{{ route('comments.index', $tweet->id) }}"
+                            class="reaction-btn"
+                            style="text-decoration:none; color:#3490dc;">
+                            💬 Comment
+                        </a>
+
+                        {{-- BOOKMARK --}}
+                        <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
+                            @csrf
+
+                            <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
+
+                            <button type="submit"
+                                class="reaction-btn"
+                                style="color:#3490dc; background:white; font-size:14px;">
+                                🔖 Bookmark
+                            </button>
+                        </form>
                     </div>
 
                 </div>
