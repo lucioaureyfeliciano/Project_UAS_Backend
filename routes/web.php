@@ -5,6 +5,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TweetController;
 use App\Http\Controllers\UsageController;
 use App\Http\Controllers\CommunityController;
+use App\Http\Controllers\DislikeController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RepostController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -13,7 +17,7 @@ Route::get('/', function () {
 use App\Models\Tweet;
 
 Route::get('/dashboard', function () {
-    $tweets = Tweet::with('user')->latest()->get();
+    $tweets = Tweet::with('user', 'likes', 'dislikes')->latest()->get();
     return view('dashboard', compact('tweets'));
 })->middleware('auth');
 
@@ -30,10 +34,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/tweets/{id}', [TweetController::class, 'edit_tweet']);
 });
 
+# Usage Routes
 Route::middleware('auth')->group(function () {
     Route::get('/usage', [UsageController::class, 'index']);
 });
 
+# Community Routes
 Route::middleware('auth')->group(function () {
     Route::get('/community', [CommunityController::class, 'index']);
     Route::post('/community', [CommunityController::class, 'create']);
@@ -43,3 +49,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/community/{id}/join', [CommunityController::class, 'join']);
     Route::post('/community/{id}/leave', [CommunityController::class, 'leave']);
 });
+
+# Dislike Routes
+Route::post('/tweets/{tweet}/dislike', [DislikeController::class, 'toggle'])->middleware('auth');
+
+# Like Routes
+Route::post('/tweets/{tweet}/like', [LikeController::class, 'toggle'])->middleware('auth');
+
+# Profile Routes
+Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth');
+
+# Update Description Profile
+Route::post('/profile/update-description', [ProfileController::class, 'updateDescription']);
+
+# Repost Routes
+Route::post('/tweets/{tweet}/repost', [RepostController::class, 'toggle'])->middleware('auth');

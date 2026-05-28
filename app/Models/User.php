@@ -60,4 +60,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Community::class);
     }
+
+    public function dislikes(): HasMany
+    {
+        return $this->hasMany(Dislike::class);
+    }
 }
