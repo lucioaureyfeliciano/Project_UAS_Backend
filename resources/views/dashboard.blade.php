@@ -185,6 +185,33 @@
             cursor: pointer;
             font-size: 12px;
         }
+
+        .block-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .block-btn:hover {
+            background: #7f8c8d;
+        }
+
+        .mute-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .mute-btn:hover {
+            background: #d35400;
+        }
     </style>
 </head>
 <body>
@@ -227,6 +254,12 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="card" style="border: 1px solid #e74c3c; background: #fdf2f2; color: #721c24;">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="card">
         <h3>Welcome, {{ auth()->user()->username }}</h3>
         <p>This is your dashboard</p>
@@ -262,26 +295,53 @@
             <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
         @else
             @foreach($tweets as $tweet)
-                <div style="margin-bottom:15px; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                <div class="tweet-card">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div>
+                        <div class="tweet-content">
                             <h4 style="margin:0 0 6px 0;">{{ $tweet->title }}</h4>
                             <p style="margin:0 0 8px 0;">{{ $tweet->content }}</p>
                             <small>By {{ $tweet->user?->username ?? 'unknown' }} | {{ $tweet->created_at->diffForHumans() }}</small>
                         </div>
                     
-                        {{-- Tombol delete --}}
-                        @if($tweet->user_id === auth()->id())
-                            <div style="display: flex; gap: 5px;">
+                        <div style="display: flex; gap: 5px;">
+                            {{-- Tombol delete --}}
+                            @if($tweet->user_id === auth()->id())
                                 <form method="POST" action="/tweets/{{ $tweet->id }}" onsubmit="return confirm('Yakin ingin menghapus tweet ini?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="delete-btn">Delete</button>
                                 </form>
-                            </div>
-                        @endif
-                    </div>
+                            @endif
 
+                            {{-- Tombol Block --}}
+                            @if($tweet->user_id !== auth()->id())
+                                @php
+                                    $isBlocked = \App\Models\Block::where('user_id', auth()->id())
+                                        ->where('blocked_user_id', $tweet->user_id)
+                                        ->exists();
+                                    
+                                    $isMuted = \App\Models\Mute::where('user_id', auth()->id())
+                                        ->where('muted_user_id', $tweet->user_id)
+                                        ->exists();
+                                @endphp
+
+                                @if(!$isBlocked)
+                                    <form method="POST" action="{{ route('block', $tweet->user_id) }}" onsubmit="return confirm('Yakin ingin memblokir akun ini?')">
+                                        @csrf
+                                        <button type="submit" class="block-btn">Block</button>
+                                    </form>
+                                @endif
+
+                                @if(!$isBlocked && !$isMuted)
+                                    <form method="POST" action="{{ route('mute', $tweet->user_id) }}" onsubmit="return confirm('Yakin ingin membisukan akun ini?')">
+                                    @csrf
+                                        <button type="submit" class="mute-btn">Mute</button>
+                                    </form>
+                                @endif
+                            @endif
+                        </div>
+                    </div>
+                    
                     {{-- Menu edit --}}
                     @if($tweet->user_id === auth()->id())
                         <details style="margin-top: 10px; font-size: 13px;">
@@ -301,37 +361,71 @@
                             </form>
                         </details>
                     @endif
-                </div>
-                <div class="tweet-card">
-                    <div class="tweet-content">
-                        <h4>{{ $tweet->title }}</h4>
-                        <p>{{ $tweet->content }}</p>
-                        <small>By {{ $tweet->user?->username ?? 'Unknown' }} · {{ $tweet->created_at->diffForHumans() }}</small>
-                    </div>
 
                     <div class="tweet-actions">
                         <button class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            👎 <span id="dislike-count-{{ $tweet->id }}">
-                                {{ $tweet->dislikes->count() }}
-                            </span>
+                            👎 <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
                         </button>
                         <button class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            👍 <span id="like-count-{{ $tweet->id }}">
-                                {{ $tweet->likes ? $tweet->likes->count() : 0 }}
-                            </span>
+                            👍 <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
                         </button>
                         <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            🔁 <span id="repost-count-{{ $tweet->id }}">
-                                {{ $tweet->reposts->count() }}
-                            </span>
+                            🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
                         </button>
                     </div>
                 </div>
             @endforeach
         @endif
+    </div>
 
+    <div class="card" style="margin-top: 30px; border-top: 3px solid #e74c3c;">
+        <h3>Daftar Akun Terblokir</h3>
 
+        @php
+            $blocked_users= \App\Models\Block::where('user_id', auth()->id())->with('blockedUser')->get();
+        @endphp
 
+        @if($blocked_users->isEmpty())
+            <p style="color: #666; font-style: italic;">Tidak ada akun yang sedang diblokir.</p>
+        @else
+            <ul style="list-style: none; padding: 0;">
+                @foreach($blocked_users as $blockData)
+                    <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
+                        <span><strong>{{ $blockData->blockedUser?->username ?? 'Unknown User' }}</strong></span>
+
+                        <form method="POST" action="{{ route('block', $blockData->blocked_user_id) }}" onsubmit="return confirm('Yakin ingin membuka blokir akun ini?')">
+                            @csrf
+                            <button type="submit" class="block-btn" style="background: #3490dc;">Unblock</button>
+                        </form>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </div>
+
+    <div class="card" style="margin-top: 20px; border-top: 3px solid #f39c12;">
+        <h3>Daftar Akun Terbisukan</h3>
+
+        @php
+            $muted_users = \App\Models\Mute::where('user_id', auth()->id())->with('mutedUser')->get();
+        @endphp
+
+        @if($muted_users->isEmpty())
+            <p style="color: #666; font-style: italic;">Tidak ada akun yang sedang dibisukan.</p>
+        @else
+            <ul style="list-style: none; padding: 0;">
+                @foreach($muted_users as $muteData)
+                    <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
+                        <span><strong>{{ $muteData->mutedUser?->username ?? 'Unknown User' }}</strong></span>
+
+                        <form method="POST" action="{{ route('mute', $muteData->muted_user_id) }}" onsubmit="return confirm('Yakin ingin membunyikan kembali akun ini?')">
+                            @csrf
+                            <button type="submit" class="mute-btn" style="background: #3490dc;">Unmute</button>
+                        </form>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
     </div>
 
 </div>
