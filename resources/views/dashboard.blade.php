@@ -314,7 +314,7 @@
             @csrf
             <div style="margin-bottom: 12px;">
                 <label for="title">Title</label><br>
-                <input id="title" name="title" type="text" value="{{ old('title') }}" style="width:100%; padding:8px; margin-top:4px;" />
+                <input id="title" name="title" type="text" value="{{ old('title') }}" style="width:95.5%; padding:8px; margin-top:4px;" />
                 @error('title')
                     <div style="color:red; margin-top:4px;">{{ $message }}</div>
                 @enderror
@@ -322,7 +322,7 @@
 
             <div style="margin-bottom: 12px;">
                 <label for="content">Content</label><br>
-                <textarea id="content" name="content" rows="4" style="width:100%; padding:8px; margin-top:4px;">{{ old('content') }}</textarea>
+                <textarea id="content" name="content" rows="4" style="width:96%; padding:8px; margin-top:4px;">{{ old('content') }}</textarea>
                 @error('content')
                     <div style="color:red; margin-top:4px;">{{ $message }}</div>
                 @enderror

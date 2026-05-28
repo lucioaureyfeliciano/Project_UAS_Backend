@@ -47,8 +47,10 @@
             padding: 28px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 30px;
+            gap: 40px;
+            flex-wrap: nowrap;
         }
 
         .profile-left h1 {
@@ -56,27 +58,54 @@
             font-size: 32px;
         }
 
-        .description-section {
+        .profile-left {
+            width: 50%;
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .description-section {
+            width: 100%;
             margin-top: 10px;
+        }
+
+        .description-text {
             font-size: 16px;
             color: #444;
+            line-height: 1.6;
+            text-align: left;
+            margin: 0;
+        }
+
+        .profile-edit-row {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #555;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .edit-description-btn {
             border: none;
             background: transparent;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 13px;
+            color: #555;
+            padding: 0;
+        }
+
+        .edit-description-btn:hover {
+            text-decoration: underline;
         }
 
         .stats {
             display: flex;
             gap: 28px;
-            justify-content: center;
-            align-items: center;
+            margin-top: 15px;
+            flex-shrink: 0;
         }
 
         .stat-box {
@@ -266,19 +295,19 @@
 
             <h1>{{ $user->username }}</h1>
 
-            <div class="description-section">
-
-                <span>
-                    {{ $user->description ?? '[Deskripsi]' }}
-                </span>
-
+            <div class="profile-edit-row">
                 <button
                     class="edit-description-btn"
                     onclick="openDescriptionEdit()"
                 >
                     [edit]
                 </button>
+            </div>
 
+            <div class="description-section">
+                <p class="description-text">
+                    {{ $user->description ?? '[Deskripsi]' }}
+                </p>
             </div>
 
         </div>
@@ -307,6 +336,17 @@
             </div>
 
             <div class="stat-box">
+                <div class="stat-title">Dislikes</div>
+                <div class="stat-number">
+
+                    {{ $tweets->sum(function($tweet) {
+                        return $tweet->dislikes->count();
+                    }) }}
+
+                </div>
+            </div>
+
+            <div class="stat-box">
                 <div class="stat-title">Tweets</div>
                 <div class="stat-number">
                     {{ $tweets->count() }}
@@ -315,7 +355,13 @@
 
             <div class="stat-box">
                 <div class="stat-title">Repost</div>
-                <div class="stat-number">0</div>
+                <div class="stat-number">
+
+                    {{ $tweets->sum(function($tweet) {
+                        return $tweet->reposts->count();
+                    }) }}
+
+                </div>
             </div>
 
         </div>
@@ -413,7 +459,11 @@
             <div class="tweet-actions">
 
                 <div>
-                    ❤️ {{ $tweet->likes->count() }}
+                    👍 {{ $tweet->likes->count() }}
+                </div>
+
+                <div>
+                    👎 {{ $tweet->dislikes->count() }}
                 </div>
 
                 <div>
