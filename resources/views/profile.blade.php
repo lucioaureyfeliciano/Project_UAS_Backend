@@ -47,8 +47,10 @@
             padding: 28px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 30px;
+            gap: 40px;
+            flex-wrap: nowrap;
         }
 
         .profile-left h1 {
@@ -56,21 +58,25 @@
             font-size: 32px;
         }
 
-        .description-section {
+        .profile-left {
+            width: 50%;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .description-section {
+            width: 100%;
             margin-top: 10px;
         }
 
         .description-text {
             font-size: 16px;
             color: #444;
-            white-space: pre-wrap;
-            word-break: break-word;
-            overflow-wrap: anywhere;
-            max-width: 100%;
             line-height: 1.6;
+            text-align: left;
+            margin: 0;
         }
 
         .profile-edit-row {
@@ -98,8 +104,8 @@
         .stats {
             display: flex;
             gap: 28px;
-            justify-content: center;
-            align-items: center;
+            margin-top: 15px;
+            flex-shrink: 0;
         }
 
         .stat-box {
@@ -299,9 +305,9 @@
             </div>
 
             <div class="description-section">
-                <div class="description-text">
+                <p class="description-text">
                     {{ $user->description ?? '[Deskripsi]' }}
-                </div>
+                </p>
             </div>
 
         </div>
