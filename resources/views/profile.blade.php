@@ -413,7 +413,11 @@
             <div class="tweet-actions">
 
                 <div>
-                    ❤️ {{ $tweet->likes->count() }}
+                    👍 {{ $tweet->likes->count() }}
+                </div>
+
+                <div>
+                    👎 {{ $tweet->dislikes->count() }}
                 </div>
 
                 <div>
