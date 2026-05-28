@@ -111,6 +111,7 @@
             overflow: hidden;
             box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
             min-width: 120px;
+            z-index: 10;
         }
 
         .tweet-dropdown button {
@@ -136,6 +137,7 @@
             background: #fafafa;
             padding: 20px;
             border-radius: 15px;
+            border: 1px solid #ddd;
         }
 
         .edit-modal input,
@@ -185,17 +187,10 @@
             gap: 8px;
         }
 
-        .like-btn span,
-        .dislike-btn span,
-        .repost-btn span {
-            font-weight: bold;
-        }
-
         .menu-container {
             position: relative;
             display: inline-block;
         }
-
 
         .menu-button {
             background: #3490dc;
@@ -205,6 +200,7 @@
             font-size: 20px;
             cursor: pointer;
             border-radius: 5px;
+            text-decoration: none;
         }
 
         .menu-dropdown {
@@ -216,6 +212,7 @@
             box-shadow: 0px 2px 8px rgba(0,0,0,0.2);
             border-radius: 5px;
             overflow: hidden;
+            z-index: 10;
         }
 
         .menu-dropdown a,
@@ -240,7 +237,21 @@
             display: block;
         }
 
-        .edit-btn {
+        .block-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .block-btn:hover {
+            background: #7f8c8d;
+        }
+
+        .mute-btn {
             background: #f39c12;
             color: white;
             border: none;
@@ -249,64 +260,32 @@
             cursor: pointer;
             font-size: 12px;
         }
-
-        .delete-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
+        .mute-btn:hover {
+            background: #d35400;
         }
     </style>
 </head>
 <body>
 
 <div class="navbar">
-
     <div>Social Media</div>
-
     <div style="display:flex; gap:10px; align-items:center;">
-
         {{-- Tombol Inbox / DM --}}
-        <a class="menu-button" href="/messages/inbox">
-            💬
-        </a>
+        <a class="menu-button" href="/messages/inbox">💬</a>
 
         {{-- Tombol Menu --}}
         <div class="menu-container">
-
-            <button class="menu-button">
-                ☰
-            </button>
-
+            <button class="menu-button">☰</button>
             <div class="menu-dropdown">
-
-                <a href="/profile">
-                    Profile
-                </a>
-
-                <a href="/community">
-                    Community
-                </a>
-
-                <a href="/usage">
-                    Usage Statistics
-                </a>
-
+                <a href="/profile">Profile</a>
+                <a href="/community">Community</a>
+                <a href="/usage">Usage Statistics</a>
                 <form method="POST" action="/logout">
                     @csrf
-
-                    <button type="submit">
-                        Logout
-                    </button>
+                    <button type="submit">Logout</button>
                 </form>
-
             </div>
-
         </div>
-
     </div>
 </div>
 
@@ -315,6 +294,12 @@
     @if(session('success'))
         <div class="card" id="successAlert" style="border: 1px solid #2ecc71; background: #ecf9f1; color: #155724;">
             {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="card" style="border: 1px solid #e74c3c; background: #fdf2f2; color: #721c24;">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -353,162 +338,170 @@
             <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
         @else
             @foreach($tweets as $tweet)
-                
                 <div class="tweet-card">
-
                     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-
                         <div class="tweet-content">
                             <h4>{{ $tweet->title }}</h4>
                             <p>{{ $tweet->content }}</p>
-                            <small>
-                                By {{ $tweet->user?->username ?? 'Unknown' }}
-                                ·
-                                {{ $tweet->created_at->diffForHumans() }}
-                            </small>
+                            <small>By {{ $tweet->user?->username ?? 'Unknown' }} · {{ $tweet->created_at->diffForHumans() }}</small>
                         </div>
 
-                        @if($tweet->user_id === auth()->id())
-
-                            <div class="tweet-menu-container">
-
-                                <button class="tweet-menu-btn">
-                                    •••
-                                </button>
-
-                                <div class="tweet-dropdown">
-
-                                    <button onclick="openEdit({{ $tweet->id }})">
-                                        Edit
-                                    </button>
-
-                                    <form action="/tweets/{{ $tweet->id }}" method="POST">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button
-                                            type="submit"
-                                            style="color:red;"
-                                        >
-                                            Delete
-                                        </button>
-
-                                    </form>
-
+                        {{-- AKSI SISI KANAN TWEET CARD --}}
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            {{-- FITUR TEMAN: Tombol Titik Tiga Dropdown (Hanya muncul jika Tweet milik sendiri) --}}
+                            @if($tweet->user_id === auth()->id())
+                                <div class="tweet-menu-container">
+                                    <button class="tweet-menu-btn">•••</button>
+                                    <div class="tweet-dropdown">
+                                        <button onclick="openEdit({{ $tweet->id }})">Edit</button>
+                                        <form action="/tweets/{{ $tweet->id }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" style="color:red;">Delete</button>
+                                        </form>
+                                    </div>
                                 </div>
+                            @endif
 
-                            </div>
+                            {{-- FITUR KAMU: Tombol Block & Mute (Hanya muncul jika Tweet milik orang lain) --}}
+                            @if($tweet->user_id !== auth()->id())
+                                @php
+                                    $isBlocked = \App\Models\Block::where('user_id', auth()->id())
+                                        ->where('blocked_user_id', $tweet->user_id)
+                                        ->exists();
+                                    
+                                    $isMuted = \App\Models\Mute::where('user_id', auth()->id())
+                                        ->where('muted_user_id', $tweet->user_id)
+                                        ->exists();
+                                @endphp
 
-                        @endif
+                                @if(!$isBlocked)
+                                    <form method="POST" action="{{ route('block', $tweet->user_id) }}" onsubmit="return confirm('Yakin ingin memblokir akun ini?')">
+                                        @csrf
+                                        <button type="submit" class="block-btn">Block</button>
+                                    </form>
+                                @endif
 
-                    </div>
-
-                    <div class="tweet-actions">
-
-                        <button class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            👍
-                            <span id="like-count-{{ $tweet->id }}">
-                                {{ $tweet->likes ? $tweet->likes->count() : 0 }}
-                            </span>
-                        </button>
-
-                        <button class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            👎
-                            <span id="dislike-count-{{ $tweet->id }}">
-                                {{ $tweet->dislikes->count() }}
-                            </span>
-                        </button>
-
-                        <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            🔁
-                            <span id="repost-count-{{ $tweet->id }}">
-                                {{ $tweet->reposts->count() }}
-                            </span>
-                        </button>
-
-                    </div>
-
-                </div>
-
-                <div class="edit-modal" id="edit-{{ $tweet->id }}">
-
-                    <form action="/tweets/{{ $tweet->id }}" method="POST">
-
-                        @csrf
-                        @method('PUT')
-
-                        <input
-                            type="text"
-                            name="title"
-                            value="{{ $tweet->title }}"
-                        >
-
-                        <textarea
-                            name="content"
-                            rows="4"
-                        >{{ $tweet->content }}</textarea>
-
-                        <div class="description-actions">
-
-                            <button type="submit" class="save-btn">
-                                Save
-                            </button>
-
-                            <button
-                                type="button"
-                                class="cancel-btn"
-                                onclick="closeEdit({{ $tweet->id }})"
-                            >
-                                Cancel
-                            </button>
-
+                                @if(!$isBlocked && !$isMuted)
+                                    <form method="POST" action="{{ route('mute', $tweet->user_id) }}" onsubmit="return confirm('Yakin ingin membisukan akun ini?')">
+                                        @csrf
+                                        <button type="submit" class="mute-btn">Mute</button>
+                                    </form>
+                                @endif
+                            @endif
                         </div>
+                    </div>
 
-                    </form>
+                    {{-- FITUR TEMAN: Modal Box Pop-up untuk Edit Tweet --}}
+                    @if($tweet->user_id === auth()->id())
+                        <div class="edit-modal" id="edit-{{ $tweet->id }}">
+                            <form action="/tweets/{{ $tweet->id }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="text" name="title" value="{{ $tweet->title }}">
+                                <textarea name="content" rows="4">{{ $tweet->content }}</textarea>
+                                <div class="description-actions">
+                                    <button type="submit" class="save-btn">Save</button>
+                                    <button type="button" class="cancel-btn" onclick="closeEdit({{ $tweet->id }})">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    @endif
+
+                    {{-- TOMBOL REAKSI: Like, Dislike, Repost --}}
+                    <div class="tweet-actions">
+                        <button class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
+                            👍 <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
+                        </button>
+                        <button class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
+                            👎 <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
+                        </button>
+                        <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
+                            🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
+                        </button>
+                    </div>
 
                 </div>
-
             @endforeach
         @endif
+    </div>
 
+    {{-- FITUR KAMU: Daftar Akun Terblokir --}}
+    <div class="card" style="margin-top: 30px; border-top: 3px solid #e74c3c;">
+        <h3>Daftar Akun Terblokir</h3>
+        @php
+            $blocked_users = \App\Models\Block::where('user_id', auth()->id())->with('blockedUser')->get();
+        @endphp
 
+        @if($blocked_users->isEmpty())
+            <p style="color: #666; font-style: italic;">Tidak ada akun yang sedang diblokir.</p>
+        @else
+            <ul style="list-style: none; padding: 0;">
+                @foreach($blocked_users as $blockData)
+                    <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
+                        <span><strong>{{ $blockData->blockedUser?->username ?? 'Unknown User' }}</strong></span>
+                        <form method="POST" action="{{ route('block', $blockData->blocked_user_id) }}" onsubmit="return confirm('Yakin ingin membuka blokir akun ini?')">
+                            @csrf
+                            <button type="submit" class="block-btn" style="background: #3490dc;">Unblock</button>
+                        </form>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </div>
 
+    {{-- FITUR KAMU: Daftar Akun Terbisukan --}}
+    <div class="card" style="margin-top: 20px; border-top: 3px solid #f39c12;">
+        <h3>Daftar Akun Terbisukan</h3>
+        @php
+            $muted_users = \App\Models\Mute::where('user_id', auth()->id())->with('mutedUser')->get();
+        @endphp
+
+        @if($muted_users->isEmpty())
+            <p style="color: #666; font-style: italic;">Tidak ada akun yang sedang dibisukan.</p>
+        @else
+            <ul style="list-style: none; padding: 0;">
+                @foreach($muted_users as $muteData)
+                    <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
+                        <span><strong>{{ $muteData->mutedUser?->username ?? 'Unknown User' }}</strong></span>
+                        <form method="POST" action="{{ route('mute', $muteData->muted_user_id) }}" onsubmit="return confirm('Yakin ingin membunyikan kembali akun ini?')">
+                            @csrf
+                            <button type="submit" class="mute-btn" style="background: #3490dc;">Unmute</button>
+                        </form>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
     </div>
 
 </div>
 
+{{-- JAVASCRIPT: Pengendali Utama Gabungan Fungsi Aplikasi --}}
 <script>
+function openEdit(id) {
+    document.getElementById(`edit-${id}`).style.display = 'block';
+}
 
-    setTimeout(() => {
+function closeEdit(id) {
+    document.getElementById(`edit-${id}`).style.display = 'none';
+}
 
-        const alertBox = document.getElementById('successAlert');
+{{-- FITUR TEMAN: Menghilangkan Alert Sukses Otomatis --}}
+setTimeout(() => {
+    const alertBox = document.getElementById('successAlert');
+    if (alertBox) {
+        alertBox.style.transition = '0.5s';
+        alertBox.style.opacity = '0';
+        setTimeout(() => {
+            alertBox.style.display = 'none';
+        }, 500);
+    }
+}, 5000);
 
-        if (alertBox) {
-
-            alertBox.style.transition = '0.5s';
-            alertBox.style.opacity = '0';
-
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 500);
-
-        }
-
-    }, 5000);
-
-</script>
-
-</body>
-</html>
-
-{{-- JavaScript agar saat dislike dipencet tidak reload page dan langsung update jumlah dislike-nya --}}
-<script>
+// AJAX Dislike
 document.querySelectorAll('.dislike-btn').forEach(button => {
     button.addEventListener('click', function () {
-
         const tweetId = this.dataset.id;
-
         fetch(`/tweets/${tweetId}/dislike`, {
             method: 'POST',
             headers: {
@@ -522,18 +515,13 @@ document.querySelectorAll('.dislike-btn').forEach(button => {
             document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
         })
         .catch(err => console.log(err));
-
     });
 });
-</script>
 
-{{-- JavaScript agar saat like dipencet tidak reload page dan langsung update jumlah like-nya --}}
-<script>
+// AJAX Like
 document.querySelectorAll('.like-btn').forEach(button => {
     button.addEventListener('click', function () {
-
         const tweetId = this.dataset.id;
-
         fetch(`/tweets/${tweetId}/like`, {
             method: 'POST',
             headers: {
@@ -547,72 +535,28 @@ document.querySelectorAll('.like-btn').forEach(button => {
             document.getElementById(`like-count-${tweetId}`).innerText = data.count;
         })
         .catch(err => console.log(err));
-
     });
 });
-</script>
 
-{{-- JavaScript agar saat repost dipencet tidak reload page dan langsung update jumlah like-nya --}}
-<script>
+// AJAX Repost
 document.querySelectorAll('.repost-btn').forEach(button => {
-
     button.addEventListener('click', function () {
-
         const tweetId = this.dataset.id;
-
         fetch(`/tweets/${tweetId}/repost`, {
-
             method: 'POST',
-
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
-
         })
-
         .then(res => res.json())
-
         .then(data => {
-
-            document.getElementById(
-                `repost-count-${tweetId}`
-            ).innerText = data.count;
-
+            document.getElementById(`repost-count-${tweetId}`).innerText = data.count;
         });
-
     });
-
 });
-
 </script>
 
-<script>
-
-function openEdit(id) {
-    document.getElementById(`edit-${id}`).style.display = 'block';
-}
-
-function closeEdit(id) {
-    document.getElementById(`edit-${id}`).style.display = 'none';
-}
-
-setTimeout(() => {
-
-    const alertBox = document.getElementById('successAlert');
-
-    if (alertBox) {
-
-        alertBox.style.transition = '0.5s';
-        alertBox.style.opacity = '0';
-
-        setTimeout(() => {
-            alertBox.style.display = 'none';
-        }, 500);
-
-    }
-
-}, 5000);
-
-</script>
+</body>
+</html>
