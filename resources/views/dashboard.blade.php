@@ -287,6 +287,14 @@
                     Profile
                 </a>
 
+                <a href="/community">
+                    Community
+                </a>
+
+                <a href="/usage">
+                    Usage Statistics
+                </a>
+
                 <form method="POST" action="/logout">
                     @csrf
 
