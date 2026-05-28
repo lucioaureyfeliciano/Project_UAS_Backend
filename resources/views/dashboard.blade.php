@@ -385,8 +385,8 @@
                             <h4>{{ $tweet->title }}</h4>
                             <p>{{ $tweet->content }}</p>
                             <small>
-                                By {{ $tweet->user?->username ?? 'Unknown' }}
-                                ·
+                                {{ $tweet->user?->username ?? 'Unknown' }}
+                                •
                                 {{ $tweet->created_at->diffForHumans() }}
                             </small>
                         </div>

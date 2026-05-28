@@ -310,7 +310,7 @@
 
     @endif
 
-
+    <h1 class="section-title">Profile</h1>
     <div class="profile-card">
 
         <div class="profile-left">
