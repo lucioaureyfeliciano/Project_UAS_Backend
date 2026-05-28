@@ -54,12 +54,12 @@ class CommunityController extends Controller
         $community = Community::findOrFail($id);
 
         if ($community->members()->where('user_id', auth()->id())->exists()) {
-            return response()->json(['message' => 'Already a member'], 409);
+            return redirect()->back()->with('error', 'Already a member');
         }
 
         $community->members()->attach(auth()->id());
 
-        return response()->json(['message' => 'Successfully joined community']);
+        return redirect()->back()->with('success', 'Successfully joined community');
     }
 
     public function leave($id)
@@ -67,14 +67,12 @@ class CommunityController extends Controller
         $community = Community::findOrFail($id);
 
         if ($community->user_id === auth()->id()) {
-            return response()->json([
-                'message' => 'Creator cannot leave the community'
-            ], 403);
+            return redirect()->back()->with('error', 'Creator cannot leave the community');
         }
 
         $community->members()->detach(auth()->id());
 
-        return response()->json(['message' => 'Successfully left community']);
+        return redirect()->back()->with('success', 'Successfully left community');
     }
 
     public function edit(Request $request, $id)
@@ -82,21 +80,22 @@ class CommunityController extends Controller
         $community = Community::findOrFail($id);
 
         if ($community->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->back()->with('error', 'Unauthorized');
         }
 
         $request->validate([
             'name'        => 'sometimes|string|max:255|unique:communities,name,' . $id,
             'description' => 'sometimes|string',
-            'is_private'  => 'sometimes|boolean',
+            'is_private'  => 'nullable|boolean',
         ]);
 
-        $community->update($request->only(['name', 'description', 'is_private']));
-
-        return response()->json([
-            'message'   => 'Community updated successfully',
-            'community' => $community,
+        $community->update([
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'is_private' => $request->has('is_private'),
         ]);
+
+        return redirect('/community/' . $community->id)->with('success', 'Community updated successfully');
     }
 
     public function destroy($id)
@@ -104,11 +103,11 @@ class CommunityController extends Controller
         $community = Community::findOrFail($id);
 
         if ($community->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return redirect()->back()->with('error', 'Unauthorized');
         }
 
         $community->delete();
 
-        return response()->json(['message' => 'Community deleted successfully']);
+        return redirect('/community')->with('success', 'Community deleted successfully');
     }
 }
