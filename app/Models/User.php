@@ -75,4 +75,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class, 'receiver_id');
     }
+    
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(Bookmark::class);
+    }
 }

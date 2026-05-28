@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Repost;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tweet extends Model
 {
@@ -33,5 +34,20 @@ class Tweet extends Model
     public function reposts()
     {
         return $this->hasMany(Repost::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
     }
 }
