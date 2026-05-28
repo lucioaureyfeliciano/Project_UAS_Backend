@@ -260,6 +260,29 @@
             cursor: pointer;
             font-size: 12px;
         }
+
+                #scrollTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            background: #3b8edb;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        #scrollTopBtn:hover {
+            background: #2f7cc2;
+            transform: translateY(-3px);
+        }
+
         .mute-btn:hover {
             background: #d35400;
         }
@@ -343,6 +366,11 @@
                         <div class="tweet-content">
                             <h4>{{ $tweet->title }}</h4>
                             <p>{{ $tweet->content }}</p>
+                            <small>
+                                {{ $tweet->user?->username ?? 'Unknown' }}
+                                •
+                                {{ $tweet->created_at->diffForHumans() }}
+                            </small>
                             <small>By {{ $tweet->user?->username ?? 'Unknown' }} · {{ $tweet->created_at->diffForHumans() }}</small>
                         </div>
 
@@ -476,6 +504,10 @@
 
 </div>
 
+<button id="scrollTopBtn" onclick="scrollToTop()">
+    ↑
+</button>
+
 {{-- JAVASCRIPT: Pengendali Utama Gabungan Fungsi Aplikasi --}}
 <script>
 function openEdit(id) {
@@ -558,5 +590,59 @@ document.querySelectorAll('.repost-btn').forEach(button => {
 });
 </script>
 
+
+<script>
+
+function openEdit(id) {
+    document.getElementById(`edit-${id}`).style.display = 'block';
+}
+
+function closeEdit(id) {
+    document.getElementById(`edit-${id}`).style.display = 'none';
+}
+
+setTimeout(() => {
+
+    const alertBox = document.getElementById('successAlert');
+
+    if (alertBox) {
+
+        alertBox.style.transition = '0.5s';
+        alertBox.style.opacity = '0';
+
+        setTimeout(() => {
+            alertBox.style.display = 'none';
+        }, 500);
+
+    }
+
+}, 5000);
+
+window.onscroll = function () {
+
+    const button = document.getElementById("scrollTopBtn");
+
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+
+        button.style.display = "block";
+
+    } else {
+
+        button.style.display = "none";
+
+    }
+
+};
+
+function scrollToTop() {
+
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+}
+
+</script>
 </body>
 </html>
