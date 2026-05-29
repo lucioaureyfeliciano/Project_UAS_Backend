@@ -61,6 +61,11 @@
 
     <h3>
         <a href="/community/{{ $community->id }}">{{ $community->name }}</a>
+
+        <small>
+            ({{ $community->members->count() }} Members)
+        </small>
+
         @if($community->is_private)
             <small>(Private)</small>
         @endif
