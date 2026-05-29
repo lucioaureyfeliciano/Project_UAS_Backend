@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Tweet;
 use Illuminate\Http\Request;
+use App\Models\Notification;
 
 class CommentController extends Controller
 {
@@ -37,6 +38,18 @@ class CommentController extends Controller
             'tweet_id' => $tweet_id,
         ]);
 
+        $tweet = Tweet::find($tweet_id);
+        if ($tweet && $tweet->user_id !== auth()->id()) {
+            Notification::create([
+                'user_id'         => $tweet->user_id,
+                'type'            => 'comment',
+                'message'         => auth()->user()->username . ' commented on your tweet "' . $tweet->title . '"',
+                'is_read'         => false,
+                'related_user_id' => auth()->id(),
+                'tweet_id'        => $tweet_id,
+            ]);
+
+        }
         return redirect()->route('comments.index', $tweet_id)->with('success', 'Comment added!');
     }
 
