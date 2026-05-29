@@ -73,7 +73,7 @@
 
     <p>{{ $community->description }}</p>
 
-    <small>Created by {{ $community->creator->username }}</small>
+    <small>Created by {{ $community->creator->username }} • {{ $community->created_at->diffForHumans() }}</small>
 
     <br>
 
