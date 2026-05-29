@@ -286,15 +286,47 @@
         .mute-btn:hover {
             background: #d35400;
         }
+
+        .notification-btn {
+            position: relative;
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
+
+@php
+    $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
+        ->where('is_read', false)
+        ->count();
+@endphp
 
 <div class="navbar">
     <div>Social Media</div>
     <div style="display:flex; gap:10px; align-items:center;">
         {{-- Notifications --}}
-        <a class="menu-button" href="{{ route('notifications.index') }}">🔔</a>
+        <a class="menu-button notification-btn" href="{{ route('notifications.index') }}"> 🔔
+            @if($unreadCount > 0)
+                <span class="notif-badge">
+                    {{ $unreadCount }}
+                </span>
+            @endif
+        </a>
 
         {{-- Bookmarks --}}
         <a class="menu-button" href="{{ route('bookmarks.index') }}">🔖</a>
