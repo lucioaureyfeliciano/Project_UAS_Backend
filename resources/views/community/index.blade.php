@@ -77,10 +77,17 @@
 
     <br>
 
-    <form method="POST" action="/community/{{ $community->id }}/join">
-        @csrf
-        <button type="submit">Join</button>
-    </form>
+    @if($community->members->contains(auth()->id()))
+        <form method="POST" action="/community/{{ $community->id }}/leave">
+            @csrf
+            <button type="submit">Leave</button>
+        </form>
+    @else
+        <form method="POST" action="/community/{{ $community->id }}/join">
+            @csrf
+            <button type="submit">Join</button>
+        </form>
+    @endif
 
     <hr>
 
