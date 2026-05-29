@@ -5,7 +5,23 @@
 </head>
 <body>
 
+<div style="margin-bottom: 15px;">
+    <a href="/dashboard">Back to Dashboard</a>
+</div>
+
 <h1>Community List</h1>
+
+<form method="GET" action="/community">
+    <input type="text" name="search" placeholder="Search community..." value="{{ $search ?? '' }}">
+
+    <button type="submit">Search</button>
+
+    @if(!empty($search))
+        <a href="/community">Reset</a>
+    @endif
+</form>
+
+<hr>
 
 <form method="POST" action="/community">
     @csrf
@@ -36,6 +52,10 @@
 @endif
 
 <hr>
+
+@if($communities->isEmpty())
+    <p>No communities found.</p>
+@endif
 
 @foreach($communities as $community)
 

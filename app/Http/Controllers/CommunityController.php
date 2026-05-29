@@ -8,11 +8,19 @@ use Illuminate\Http\Request;
 class CommunityController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $communities = Community::with('creator')->latest()->get();
+        $search = $request->input('search');
 
-        return view('community.index', compact('communities'));
+        $communities = Community::with('creator', 'members')
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', '%' . $search . '%')
+                             ->orWhere('description', 'like', '%' . $search . '%');
+            })
+            ->latest()
+            ->get();
+
+        return view('community.index', compact('communities', 'search'));
     }
 
     public function show($id)
