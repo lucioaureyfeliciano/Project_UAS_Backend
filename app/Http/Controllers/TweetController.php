@@ -80,4 +80,18 @@ class TweetController extends Controller
 
         return back()->with('success', 'Tweet updated successfully');
     }
+
+    public function show_privacy()
+    {
+        $user_id = auth()->id();
+        $blockedUsers = Block::where('user_id', $user_id)
+            ->with('blockedUser')
+            ->get();
+
+        $mutedUsers = Mute::where('user_id', $user_id)
+            ->with('mutedUser')
+            ->get();
+
+        return view('privacy', compact('blockedUsers', 'mutedUsers'));
+    }
 }
