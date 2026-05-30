@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Profile</title>
 
     <style>
-
         body {
             font-family: Arial;
             background: #f3f3f3;
@@ -164,10 +164,72 @@
 
         .tweet-actions {
             display: flex;
-            justify-content: flex-end;
-            gap: 25px;
+            flex-wrap: wrap;
+            gap: 8px;
             color: black;
             font-size: 15px;
+        }
+
+        .reaction-btn {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+
+        .reaction-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .like-btn {
+            color: #3490dc;
+        }
+
+        .like-btn:hover {
+            background: #e8f5ff;
+            border-color: #3490dc;
+        }
+
+        .dislike-btn {
+            color: #e74c3c;
+        }
+
+        .dislike-btn:hover {
+            background: #ffe5e5;
+            border-color: #ff6b6b;
+        }
+
+        .repost-btn {
+            color: #6c5ce7;
+        }
+
+        .repost-btn:hover {
+            background: #f0e6ff;
+            border-color: #9b59b6;
+        }
+
+        .comment-btn {
+            color: #2dce89;
+        }
+
+        .comment-btn:hover {
+            background: #e8f8f1;
+            border-color: #2dce89;
+        }
+
+        .bookmark-btn {
+            color: #ff9f43;
+        }
+
+        .bookmark-btn:hover {
+            background: #fff4e0;
+            border-color: #ff9f43;
         }
 
         .tweet-menu-container {
@@ -188,7 +250,7 @@
             background: white;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
             min-width: 120px;
         }
 
@@ -279,7 +341,7 @@
             color: white;
             font-size: 20px;
             cursor: pointer;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
             transition: 0.3s;
         }
 
@@ -293,333 +355,376 @@
             border-radius: 18px;
             padding: 50px 20px;
             text-align: center;
-            box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.05);
         }
-
     </style>
 
 </head>
+
 <body>
 
-<div class="navbar">
+    <div class="navbar">
 
-    <a href="/dashboard" class="back-btn">
-        ← Back
-    </a>
-
-</div>
-
-<div class="container">
-    @if(session('success'))
-
-        <div class="success-alert" id="successAlert">
-            {{ session('success') }}
-        </div>
-
-    @endif
-
-    <h1 class="section-title">Profile</h1>
-    <div class="profile-card">
-
-        <div class="profile-left">
-
-            <h1>{{ $user->username }}</h1>
-
-            <div class="profile-edit-row">
-                <button
-                    class="edit-description-btn"
-                    onclick="openDescriptionEdit()"
-                >
-                    [edit]
-                </button>
-            </div>
-
-            <div class="description-section">
-                <p class="description-text">
-                    {{ $user->description ?? '[Deskripsi]' }}
-                </p>
-            </div>
-
-        </div>
-
-        <div class="stats">
-
-            <div class="stat-box">
-                <div class="stat-title">Following</div>
-                <div class="stat-number">0</div>
-            </div>
-
-            <div class="stat-box">
-                <div class="stat-title">Followers</div>
-                <div class="stat-number">0</div>
-            </div>
-
-            <div class="stat-box">
-                <div class="stat-title">Likes</div>
-                <div class="stat-number">
-
-                    {{ $tweets->sum(function($tweet) {
-                        return $tweet->likes->count();
-                    }) }}
-
-                </div>
-            </div>
-
-            <div class="stat-box">
-                <div class="stat-title">Dislikes</div>
-                <div class="stat-number">
-
-                    {{ $tweets->sum(function($tweet) {
-                        return $tweet->dislikes->count();
-                    }) }}
-
-                </div>
-            </div>
-
-            <div class="stat-box">
-                <div class="stat-title">Tweets</div>
-                <div class="stat-number">
-                    {{ $tweets->count() }}
-                </div>
-            </div>
-
-            <div class="stat-box">
-                <div class="stat-title">Repost</div>
-                <div class="stat-number">
-
-                    {{ $tweets->sum(function($tweet) {
-                        return $tweet->reposts->count();
-                    }) }}
-
-                </div>
-            </div>
-
-        </div>
+        <a href="/dashboard" class="back-btn">
+            ← Back
+        </a>
 
     </div>
 
-    <div class="description-modal" id="descriptionModal">
+    <div class="container">
+        @if(session('success'))
 
-        <form action="/profile/update-description" method="POST">
+            <div class="success-alert" id="successAlert">
+                {{ session('success') }}
+            </div>
 
-            @csrf
+        @endif
 
-            <textarea
-                name="description"
-                rows="4"
-                placeholder="Write your description..."
-            >{{ $user->description }}</textarea>
+        <h1 class="section-title">Profile</h1>
+        <div class="profile-card">
 
-            <div class="description-actions">
+            <div class="profile-left">
 
-                <button type="submit" class="save-btn">
-                    Save
-                </button>
+                <h1>{{ $user->username }}</h1>
 
-                <button
-                    type="button"
-                    class="cancel-btn"
-                    onclick="closeDescriptionEdit()"
-                >
-                    Cancel
-                </button>
+                <div class="profile-edit-row">
+                    <button class="edit-description-btn" onclick="openDescriptionEdit()">
+                        [edit]
+                    </button>
+                </div>
+
+                <div class="description-section">
+                    <p class="description-text">
+                        {{ $user->description ?? '[Deskripsi]' }}
+                    </p>
+                </div>
 
             </div>
 
-        </form>
+            <div class="stats">
 
-    </div>
+                <div class="stat-box">
+                    <div class="stat-title">Following</div>
+                    <div class="stat-number">0</div>
+                </div>
 
-    @if($isLocked)
-        <div class="private-lock-box">
-            <h2 style="font-size: 48px; margin-bottom:10px;">🔒</h2>
-            <h3 style="margin: 0 0 10px 0; color: #333;">Akun Ini Bersifat Private</h3>
-            <p style="margin: 0; color: #777; font-size: 15px;">Ikuti akun ini untuk melihat postingan</p>
-        </div>
-    
-    @else
-        <h1 class="section-title">Your Tweets</h1>
+                <div class="stat-box">
+                    <div class="stat-title">Followers</div>
+                    <div class="stat-number">0</div>
+                </div>
 
-        @foreach ($tweets as $tweet)
+                <div class="stat-box">
+                    <div class="stat-title">Likes</div>
+                    <div class="stat-number">
 
-            <div class="tweet-card">
-
-                <div class="tweet-top">
-
-                    <div class="tweet-info">
-
-                        {{ $user->username }}
-                        •
-                        posted {{ $tweet->created_at->diffForHumans() }}
+                        {{ $tweets->sum(function ($tweet) {
+    return $tweet->likes->count();
+}) }}
 
                     </div>
+                </div>
 
-                    <div class="tweet-menu-container">
+                <div class="stat-box">
+                    <div class="stat-title">Dislikes</div>
+                    <div class="stat-number">
 
-                        <button class="tweet-menu-btn">
-                            •••
-                        </button>
+                        {{ $tweets->sum(function ($tweet) {
+    return $tweet->dislikes->count();
+}) }}
 
-                        <div class="tweet-dropdown">
+                    </div>
+                </div>
 
-                            <button onclick="openEdit({{ $tweet->id }})">
-                                Edit
+                <div class="stat-box">
+                    <div class="stat-title">Tweets</div>
+                    <div class="stat-number">
+                        {{ $tweets->count() }}
+                    </div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-title">Repost</div>
+                    <div class="stat-number">
+
+                        {{ $tweets->sum(function ($tweet) {
+    return $tweet->reposts->count();
+}) }}
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="description-modal" id="descriptionModal">
+
+            <form action="/profile/update-description" method="POST">
+
+                @csrf
+
+                <textarea name="description" rows="4"
+                    placeholder="Write your description...">{{ $user->description }}</textarea>
+
+                <div class="description-actions">
+
+                    <button type="submit" class="save-btn">
+                        Save
+                    </button>
+
+                    <button type="button" class="cancel-btn" onclick="closeDescriptionEdit()">
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        @if($isLocked)
+            <div class="private-lock-box">
+                <h2 style="font-size: 48px; margin-bottom:10px;">🔒</h2>
+                <h3 style="margin: 0 0 10px 0; color: #333;">Akun Ini Bersifat Private</h3>
+                <p style="margin: 0; color: #777; font-size: 15px;">Ikuti akun ini untuk melihat postingan</p>
+            </div>
+
+        @else
+            <h1 class="section-title">Your Tweets</h1>
+
+            @foreach ($tweets as $tweet)
+
+                <div class="tweet-card">
+
+                    <div class="tweet-top">
+
+                        <div class="tweet-info">
+
+                            {{ $user->username }}
+                            •
+                            posted {{ $tweet->created_at->diffForHumans() }}
+
+                        </div>
+
+                        <div class="tweet-menu-container">
+
+                            <button class="tweet-menu-btn">
+                                •••
                             </button>
 
-                            <form action="/tweets/{{ $tweet->id }}" method="POST">
+                            <div class="tweet-dropdown">
 
-                                @csrf
-                                @method('DELETE')
-
-                                <button
-                                    type="submit"
-                                    style="color:red;"
-                                >
-                                    Delete
+                                <button onclick="openEdit({{ $tweet->id }})">
+                                    Edit
                                 </button>
 
-                            </form>
+                                <form action="/tweets/{{ $tweet->id }}" method="POST">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit" style="color:red;">
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </div>
 
                         </div>
 
                     </div>
 
-                </div>
-
-                <div class="tweet-title">
-                    {{ $tweet->title }}
-                </div>
-
-                <div class="tweet-content">
-                    {{ $tweet->content }}
-                </div>
-
-                <div class="tweet-actions">
-
-                    <div>
-                        👍 {{ $tweet->likes->count() }}
+                    <div class="tweet-title">
+                        {{ $tweet->title }}
                     </div>
 
-                    <div>
-                        👎 {{ $tweet->dislikes->count() }}
+                    <div class="tweet-content">
+                        {{ $tweet->content }}
                     </div>
 
-                    <div>
-                        🔁 {{ $tweet->reposts->count() }}
-                    </div>
-
-                </div>
-
-                <div class="edit-modal" id="edit-{{ $tweet->id }}">
-
-                    <form action="/tweets/{{ $tweet->id }}" method="POST">
-
-                        @csrf
-                        @method('PUT')
-
-                        <input
-                            type="text"
-                            name="title"
-                            value="{{ $tweet->title }}"
-                        >
-
-                        <textarea
-                            name="content"
-                            rows="4"
-                        >{{ $tweet->content }}</textarea>
-
-                        <div class="description-actions">
-
-                            <button type="submit" class="save-btn">
-                                Save
+                    <div class="tweet-actions">
+                        <button type="button" class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
+                            👍 <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
+                        </button>
+                        <button type="button" class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
+                            👎 <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
+                        </button>
+                        <button type="button" class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
+                            🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
+                        </button>
+                        <a href="{{ route('comments.index', $tweet->id) }}" class="comment-btn reaction-btn"
+                            style="text-decoration:none; color:inherit;">
+                            💬 Comment
+                        </a>
+                        <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
+                            @csrf
+                            <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
+                            <button type="submit" class="reaction-btn" style="color:#3490dc; background:white; font-size:14px;">
+                                🔖 Bookmark
                             </button>
+                        </form>
+                    </div>
 
-                            <button
-                                type="button"
-                                class="cancel-btn"
-                                onclick="closeEdit({{ $tweet->id }})"
-                            >
-                                Cancel
-                            </button>
+                    <div class="edit-modal" id="edit-{{ $tweet->id }}">
 
-                        </div>
+                        <form action="/tweets/{{ $tweet->id }}" method="POST">
 
-                    </form>
+                            @csrf
+                            @method('PUT')
+
+                            <input type="text" name="title" value="{{ $tweet->title }}">
+
+                            <textarea name="content" rows="4">{{ $tweet->content }}</textarea>
+
+                            <div class="description-actions">
+
+                                <button type="submit" class="save-btn">
+                                    Save
+                                </button>
+
+                                <button type="button" class="cancel-btn" onclick="closeEdit({{ $tweet->id }})">
+                                    Cancel
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
 
                 </div>
 
-            </div>
+            @endforeach
+        @endif
 
-        @endforeach
-    @endif
+    </div>
 
-</div>
+    <button id="scrollTopBtn" onclick="scrollToTop()">
+        ↑
+    </button>
 
-<button id="scrollTopBtn" onclick="scrollToTop()">
-    ↑
-</button>
+    <script>
 
-<script>
+        function openDescriptionEdit() {
+            document.getElementById('descriptionModal').style.display = 'block';
+        }
 
-function openDescriptionEdit() {
-    document.getElementById('descriptionModal').style.display = 'block';
-}
+        function closeDescriptionEdit() {
+            document.getElementById('descriptionModal').style.display = 'none';
+        }
 
-function closeDescriptionEdit() {
-    document.getElementById('descriptionModal').style.display = 'none';
-}
+        function openEdit(id) {
+            document.getElementById(`edit-${id}`).style.display = 'block';
+        }
 
-function openEdit(id) {
-    document.getElementById(`edit-${id}`).style.display = 'block';
-}
-
-function closeEdit(id) {
-    document.getElementById(`edit-${id}`).style.display = 'none';
-}
-
-setTimeout(() => {
-
-    const alertBox = document.getElementById('successAlert');
-
-    if (alertBox) {
-
-        alertBox.style.transition = '0.5s';
-        alertBox.style.opacity = '0';
+        function closeEdit(id) {
+            document.getElementById(`edit-${id}`).style.display = 'none';
+        }
 
         setTimeout(() => {
-            alertBox.style.display = 'none';
-        }, 500);
 
-    }
+            const alertBox = document.getElementById('successAlert');
 
-}, 5000);
+            if (alertBox) {
 
-window.onscroll = function () {
+                alertBox.style.transition = '0.5s';
+                alertBox.style.opacity = '0';
 
-    const button = document.getElementById("scrollTopBtn");
+                setTimeout(() => {
+                    alertBox.style.display = 'none';
+                }, 500);
 
-    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            }
 
-        button.style.display = "block";
+        }, 5000);
 
-    } else {
+        window.onscroll = function () {
 
-        button.style.display = "none";
+            const button = document.getElementById("scrollTopBtn");
 
-    }
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
 
-};
+                button.style.display = "block";
 
-function scrollToTop() {
+            } else {
 
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
+                button.style.display = "none";
 
-}
+            }
 
-</script>
+        };
+
+        function scrollToTop() {
+
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+
+        }
+
+        // AJAX Dislike
+        document.querySelectorAll('.dislike-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const tweetId = this.dataset.id;
+                fetch(`/tweets/${tweetId}/dislike`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
+                })
+                .catch(err => console.log(err));
+            });
+        });
+
+        // AJAX Like
+        document.querySelectorAll('.like-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const tweetId = this.dataset.id;
+                fetch(`/tweets/${tweetId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById(`like-count-${tweetId}`).innerText = data.count;
+                })
+                .catch(err => console.log(err));
+            });
+        });
+
+        // AJAX Repost
+        document.querySelectorAll('.repost-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const tweetId = this.dataset.id;
+                fetch(`/tweets/${tweetId}/repost`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById(`repost-count-${tweetId}`).innerText = data.count;
+                });
+            });
+        });
+
+    </script>
 
 </body>
+
 </html>
