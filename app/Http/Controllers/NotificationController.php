@@ -37,4 +37,12 @@ class NotificationController extends Controller
         return view('notifications.show', compact('notification'));
     }
     
+    public function markAllAsRead()
+    {
+        \App\Models\Notification::where('user_id', auth()->id())
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return back()->with('success', 'All notifications marked as read.');
+    }
 }
