@@ -77,7 +77,13 @@
 
     <br>
 
-    @if($community->is_private)
+    @if(auth()->id() === $community->user_id)
+
+        <small style="color: gray;">
+            You are the creator of this community.
+        </small>
+
+    @elseif($community->is_private)
 
         <button disabled>
             Private Community
