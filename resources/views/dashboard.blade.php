@@ -575,7 +575,7 @@ function closeEdit(id) {
     document.getElementById(`edit-${id}`).style.display = 'none';
 }
 
-{{-- FITUR TEMAN: Menghilangkan Alert Sukses Otomatis --}}
+// {{-- FITUR TEMAN: Menghilangkan Alert Sukses Otomatis --}}
 setTimeout(() => {
     const alertBox = document.getElementById('successAlert');
     if (alertBox) {
@@ -645,59 +645,21 @@ document.querySelectorAll('.repost-btn').forEach(button => {
         });
     });
 });
-</script>
-
-
-<script>
-
-function openEdit(id) {
-    document.getElementById(`edit-${id}`).style.display = 'block';
-}
-
-function closeEdit(id) {
-    document.getElementById(`edit-${id}`).style.display = 'none';
-}
-
-setTimeout(() => {
-
-    const alertBox = document.getElementById('successAlert');
-
-    if (alertBox) {
-
-        alertBox.style.transition = '0.5s';
-        alertBox.style.opacity = '0';
-
-        setTimeout(() => {
-            alertBox.style.display = 'none';
-        }, 500);
-
-    }
-
-}, 5000);
 
 window.onscroll = function () {
-
     const button = document.getElementById("scrollTopBtn");
-
     if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-
         button.style.display = "block";
-
     } else {
-
         button.style.display = "none";
-
     }
-
 };
 
 function scrollToTop() {
-
     window.scrollTo({
         top: 0,
         behavior: 'smooth'
     });
-
 }
 
 </script>
