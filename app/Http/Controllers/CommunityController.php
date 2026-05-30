@@ -33,23 +33,23 @@ class CommunityController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'name'        => 'required|string|max:255|unique:communities,name',
+            'name' => 'required|string|max:255|unique:communities,name',
             'description' => 'required|string',
-            'is_private'  => 'boolean',
+            'is_private' => 'boolean',
         ]);
 
         $community = Community::create([
-            'name'        => $request->input('name'),
+            'name' => $request->input('name'),
             'description' => $request->input('description'),
-            'is_private'  => $request->input('is_private', false),
-            'user_id'     => auth()->id(),
+            'is_private' => $request->input('is_private', false),
+            'user_id' => auth()->id(),
         ]);
 
         $community->members()->attach(auth()->id());
 
         if ($request->wantsJson()) {
             return response()->json([
-                'message'   => 'Community created successfully',
+                'message' => 'Community created successfully',
                 'community' => $community,
             ], 201);
         }
@@ -61,6 +61,11 @@ class CommunityController extends Controller
     {
         $community = Community::findOrFail($id);
 
+        if ($community->is_private) {
+            return redirect()->back()
+                ->with('error', 'Private community cannot be joined directly');
+        }
+        
         if ($community->members()->where('user_id', auth()->id())->exists()) {
             return redirect()->back()->with('error', 'Already a member');
         }
@@ -92,9 +97,9 @@ class CommunityController extends Controller
         }
 
         $request->validate([
-            'name'        => 'sometimes|string|max:255|unique:communities,name,' . $id,
+            'name' => 'sometimes|string|max:255|unique:communities,name,' . $id,
             'description' => 'sometimes|string',
-            'is_private'  => 'nullable|boolean',
+            'is_private' => 'nullable|boolean',
         ]);
 
         $community->update([
