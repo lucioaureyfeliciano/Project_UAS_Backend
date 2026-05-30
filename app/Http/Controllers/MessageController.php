@@ -11,12 +11,29 @@ class MessageController extends Controller
 {
     public function inbox()
     {
-        $messages = Message::where('receiver_id', auth()->id())
-            ->with('sender')
+        $userId = auth()->id();
+
+        $messages = Message::with(['sender', 'receiver'])
+            ->where('sender_id', $userId)
+            ->orWhere('receiver_id', $userId)
             ->latest()
             ->get();
 
-        return view('message.inbox', compact('messages'));
+        $conversations = $messages
+            ->groupBy(function ($message) use ($userId) {
+
+                return $message->sender_id == $userId
+                    ? $message->receiver_id
+                    : $message->sender_id;
+
+            })
+            ->map(function ($group) {
+
+                return $group->first(); // pesan terbaru
+
+            });
+
+        return view('message.inbox', compact('conversations'));
     }
 
     public function chat($userId)
@@ -89,14 +106,29 @@ class MessageController extends Controller
             ->where('id', '!=', auth()->id())
             ->get();
 
-        $messages = Message::where('receiver_id', auth()->id())
-            ->with('sender')
+        $messages = Message::where('sender_id', auth()->id())
+            ->orWhere('receiver_id', auth()->id())
+            ->with(['sender', 'receiver'])
             ->latest()
             ->get();
 
+        $conversations = $messages
+            ->groupBy(function ($message) {
+
+                return $message->sender_id == auth()->id()
+                    ? $message->receiver_id
+                    : $message->sender_id;
+
+            })
+            ->map(function ($conversation) {
+
+                return $conversation->first();
+
+            });
+
         return view('message.inbox', compact(
             'users',
-            'messages',
+            'conversations',
             'keyword'
         ));
     }
