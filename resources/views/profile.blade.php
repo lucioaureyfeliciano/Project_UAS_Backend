@@ -42,13 +42,13 @@
         }
 
         .profile-card {
-            background: white;
+            background: #b4cde5;
             border-radius: 18px;
             padding: 28px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             gap: 40px;
             flex-wrap: nowrap;
         }
@@ -79,26 +79,37 @@
             margin: 0;
         }
 
-        .profile-edit-row {
-            margin-top: 10px;
-            font-size: 13px;
-            color: #555;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .edit-description-btn {
+        .edit-description-card {
+            width: 100%;
+            background: #b4cde5;
+            color: white;
             border: none;
-            background: transparent;
+            border-radius: 18px;
+            padding: 10px;
+            margin-bottom: 30px;
+            text-align: left;
             cursor: pointer;
-            font-size: 13px;
-            color: #555;
-            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-sizing: border-box;
+            transition: 0.2s;
         }
 
-        .edit-description-btn:hover {
-            text-decoration: underline;
+        .edit-description-card:hover {
+            background: #2f7cc2;
+            transform: translateY(-2px);
+        }
+
+        .edit-description-card:active {
+            transform: translateY(0);
+        }
+
+        .edit-description-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #444;
+            text-align: center;
         }
 
         .stats {
@@ -387,15 +398,9 @@
 
                 <h1>{{ $user->username }}</h1>
 
-                <div class="profile-edit-row">
-                    <button class="edit-description-btn" onclick="openDescriptionEdit()">
-                        [edit]
-                    </button>
-                </div>
-
                 <div class="description-section">
                     <p class="description-text">
-                        {{ $user->description ?? '[Deskripsi]' }}
+                        {{ $user->description ?? '[Add your description]' }}
                     </p>
                 </div>
 
@@ -457,30 +462,36 @@
 
         </div>
 
-        <div class="description-modal" id="descriptionModal">
+        @if(auth()->id() === $user->id)
+            <button type="button" class="edit-description-card" onclick="openDescriptionEdit()">
+                <span class="edit-description-title">Edit Profile</span>
+            </button>
 
-            <form action="/profile/update-description" method="POST">
+            <div class="description-modal" id="descriptionModal">
 
-                @csrf
+                <form action="/profile/update-description" method="POST">
 
-                <textarea name="description" rows="4"
-                    placeholder="Write your description...">{{ $user->description }}</textarea>
+                    @csrf
 
-                <div class="description-actions">
+                    <textarea name="description" rows="4"
+                        placeholder="Write your description...">{{ $user->description }}</textarea>
 
-                    <button type="submit" class="save-btn">
-                        Save
-                    </button>
+                    <div class="description-actions">
 
-                    <button type="button" class="cancel-btn" onclick="closeDescriptionEdit()">
-                        Cancel
-                    </button>
+                        <button type="submit" class="save-btn">
+                            Save
+                        </button>
 
-                </div>
+                        <button type="button" class="cancel-btn" onclick="closeDescriptionEdit()">
+                            Cancel
+                        </button>
 
-            </form>
+                    </div>
 
-        </div>
+                </form>
+
+            </div>
+        @endif
 
         @if($isLocked)
             <div class="private-lock-box">
