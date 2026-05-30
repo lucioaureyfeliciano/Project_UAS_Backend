@@ -236,6 +236,29 @@
         .menu-container:hover .menu-dropdown {
             display: block;
         }
+
+        #scrollTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            background: #3b8edb;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+            transition: 0.3s;
+            z-index: 99;
+        }
+
+        #scrollTopBtn:hover {
+            background: #2f7cc2;
+            transform: translateY(-3px);
+        }
     </style>
 </head>
 <body>
@@ -243,10 +266,9 @@
 <div class="navbar">
     <div>Social Media</div>
     <div style="display:flex; gap:10px; align-items:center;">
-        {{-- Tombol Inbox / DM --}}
+        <a class="menu-button" href="{{ route('notifications.index') }}">🔔</a>
+        <a class="menu-button" href="{{ route('bookmarks.index') }}">🔖</a>
         <a class="menu-button" href="/messages/inbox">💬</a>
-
-        {{-- Tombol Menu --}}
         <div class="menu-container">
             <button class="menu-button">☰</button>
             <div class="menu-dropdown">
@@ -288,7 +310,7 @@
             @csrf
             <div style="margin-bottom: 12px;">
                 <label for="title">Title</label><br>
-                <input id="title" name="title" type="text" value="{{ old('title') }}" style="width:100%; padding:8px; margin-top:4px;" />
+                <input id="title" name="title" type="text" value="{{ old('title') }}" style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;" />
                 @error('title')
                     <div style="color:red; margin-top:4px;">{{ $message }}</div>
                 @enderror
@@ -296,7 +318,7 @@
 
             <div style="margin-bottom: 12px;">
                 <label for="content">Content</label><br>
-                <textarea id="content" name="content" rows="4" style="width:100%; padding:8px; margin-top:4px;">{{ old('content') }}</textarea>
+                <textarea id="content" name="content" rows="4" style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;">{{ old('content') }}</textarea>
                 @error('content')
                     <div style="color:red; margin-top:4px;">{{ $message }}</div>
                 @enderror
@@ -317,10 +339,11 @@
                         <div class="tweet-content">
                             <h4>{{ $tweet->title }}</h4>
                             <p>{{ $tweet->content }}</p>
-                            <small>By {{ $tweet->user?->username ?? 'Unknown' }} · {{ $tweet->created_at->diffForHumans() }}</small>
+                            <small>{{ $tweet->user?->username ?? 'Unknown' }} • {{ $tweet->created_at->diffForHumans() }}</small>
                         </div>
 
                         <div style="display: flex; gap: 8px; align-items: center;">
+                            {{-- Dropdown Tweet Sendiri --}}
                             @if($tweet->user_id === auth()->id())
                                 <div class="tweet-menu-container">
                                     <button class="tweet-menu-btn">•••</button>
@@ -334,7 +357,7 @@
                                     </div>
                                 </div>
                             @endif
-
+                            
                             @if($tweet->user_id !== auth()->id())
                                 @php
                                     $isBlocked = \App\Models\Block::where('user_id', auth()->id())
@@ -393,6 +416,18 @@
                         <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
                             🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
                         </button>
+
+                        <a href="{{ route('comments.index', $tweet->id) }}" class="reaction-btn" style="text-decoration:none; color:#3490dc;">
+                            💬 Comment
+                        </a>
+
+                        <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
+                            @csrf
+                            <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
+                            <button type="submit" class="reaction-btn" style="color:#3490dc; background:white; font-size:14px;">
+                                🔖 Bookmark
+                            </button>
+                        </form>
                     </div>
 
                 </div>
@@ -401,6 +436,8 @@
     </div>
 
 </div>
+
+<button id="scrollTopBtn" onclick="scrollToTop()">↑</button>
 
 <script>
 function openEdit(id) {
@@ -421,6 +458,22 @@ setTimeout(() => {
         }, 500);
     }
 }, 5000);
+
+window.onscroll = function () {
+    const button = document.getElementById("scrollTopBtn");
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        button.style.display = "block";
+    } else {
+        button.style.display = "none";
+    }
+};
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
 
 // AJAX Dislike
 document.querySelectorAll('.dislike-btn').forEach(button => {
