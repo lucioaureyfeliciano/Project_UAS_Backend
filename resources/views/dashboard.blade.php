@@ -237,31 +237,7 @@
             display: block;
         }
 
-        .block-btn {
-            background: #95a5a6;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .block-btn:hover {
-            background: #7f8c8d;
-        }
-
-        .mute-btn {
-            background: #f39c12;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-                #scrollTopBtn {
+        #scrollTopBtn {
             display: none;
             position: fixed;
             bottom: 30px;
@@ -276,6 +252,7 @@
             cursor: pointer;
             box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
             transition: 0.3s;
+            z-index: 99;
         }
 
         #scrollTopBtn:hover {
@@ -330,17 +307,14 @@
 
         {{-- Bookmarks --}}
         <a class="menu-button" href="{{ route('bookmarks.index') }}">🔖</a>
-
-        {{-- Tombol Inbox / DM --}}
         <a class="menu-button" href="/messages/inbox">💬</a>
-
-        {{-- Tombol Menu --}}
         <div class="menu-container">
             <button class="menu-button">☰</button>
             <div class="menu-dropdown">
                 <a href="/profile">Profile</a>
                 <a href="/community">Community</a>
                 <a href="/usage">Usage Statistics</a>
+                <a href="/privacy">Privacy Settings</a>
                 <form method="POST" action="/logout">
                     @csrf
                     <button type="submit">Logout</button>
@@ -375,7 +349,7 @@
             @csrf
             <div style="margin-bottom: 12px;">
                 <label for="title">Title</label><br>
-                <input id="title" name="title" type="text" value="{{ old('title') }}" style="width:95.5%; padding:8px; margin-top:4px;" />
+                <input id="title" name="title" type="text" value="{{ old('title') }}" style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;" />
                 @error('title')
                     <div style="color:red; margin-top:4px;">{{ $message }}</div>
                 @enderror
@@ -383,7 +357,7 @@
 
             <div style="margin-bottom: 12px;">
                 <label for="content">Content</label><br>
-                <textarea id="content" name="content" rows="4" style="width:96%; padding:8px; margin-top:4px;">{{ old('content') }}</textarea>
+                <textarea id="content" name="content" rows="4" style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;">{{ old('content') }}</textarea>
                 @error('content')
                     <div style="color:red; margin-top:4px;">{{ $message }}</div>
                 @enderror
@@ -404,16 +378,11 @@
                         <div class="tweet-content">
                             <h4>{{ $tweet->title }}</h4>
                             <p>{{ $tweet->content }}</p>
-                            <small>
-                                {{ $tweet->user?->username ?? 'Unknown' }}
-                                •
-                                {{ $tweet->created_at->diffForHumans() }}
-                            </small>
+                            <small>{{ $tweet->user?->username ?? 'Unknown' }} • {{ $tweet->created_at->diffForHumans() }}</small>
                         </div>
 
-                        {{-- AKSI SISI KANAN TWEET CARD --}}
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            {{-- FITUR TEMAN: Tombol Titik Tiga Dropdown (Hanya muncul jika Tweet milik sendiri) --}}
+                            {{-- Dropdown Tweet Sendiri --}}
                             @if($tweet->user_id === auth()->id())
                                 <div class="tweet-menu-container">
                                     <button class="tweet-menu-btn">•••</button>
@@ -427,8 +396,7 @@
                                     </div>
                                 </div>
                             @endif
-
-                            {{-- FITUR KAMU: Tombol Block & Mute (Hanya muncul jika Tweet milik orang lain) --}}
+                            
                             @if($tweet->user_id !== auth()->id())
                                 @php
                                     $isBlocked = \App\Models\Block::where('user_id', auth()->id())
@@ -440,24 +408,28 @@
                                         ->exists();
                                 @endphp
 
-                                @if(!$isBlocked)
-                                    <form method="POST" action="{{ route('block', $tweet->user_id) }}" onsubmit="return confirm('Yakin ingin memblokir akun ini?')">
-                                        @csrf
-                                        <button type="submit" class="block-btn">Block</button>
-                                    </form>
-                                @endif
+                                <div class="tweet-menu-container">
+                                    <button class="tweet-menu-btn">•••</button>
+                                    <div class="tweet-dropdown">
+                                        @if(!$isBlocked)
+                                            <form method="POST" action="{{ route('block', $tweet->user_id) }}" onsubmit="return confirm('Yakin ingin memblokir akun ini?')">
+                                                @csrf
+                                                <button type="submit" style="color: #7f8c8d;">Block</button>
+                                            </form>
+                                        @endif
 
-                                @if(!$isBlocked && !$isMuted)
-                                    <form method="POST" action="{{ route('mute', $tweet->user_id) }}" onsubmit="return confirm('Yakin ingin membisukan akun ini?')">
-                                        @csrf
-                                        <button type="submit" class="mute-btn">Mute</button>
-                                    </form>
-                                @endif
+                                        @if(!$isBlocked && !$isMuted)
+                                            <form method="POST" action="{{ route('mute', $tweet->user_id) }}" onsubmit="return confirm('Yakin ingin membisukan akun ini?')">
+                                                @csrf
+                                                <button type="submit" style="color: #d35400;">Mute</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
                             @endif
                         </div>
                     </div>
 
-                    {{-- FITUR TEMAN: Modal Box Pop-up untuk Edit Tweet --}}
                     @if($tweet->user_id === auth()->id())
                         <div class="edit-modal" id="edit-{{ $tweet->id }}">
                             <form action="/tweets/{{ $tweet->id }}" method="POST">
@@ -473,7 +445,6 @@
                         </div>
                     @endif
 
-                    {{-- TOMBOL REAKSI: Like, Dislike, Repost --}}
                     <div class="tweet-actions">
                         <button class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
                             👍 <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
@@ -485,22 +456,14 @@
                             🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
                         </button>
 
-                        {{-- COMMENT --}}
-                        <a href="{{ route('comments.index', $tweet->id) }}"
-                            class="reaction-btn"
-                            style="text-decoration:none; color:#3490dc;">
+                        <a href="{{ route('comments.index', $tweet->id) }}" class="reaction-btn" style="text-decoration:none; color:#3490dc;">
                             💬 Comment
                         </a>
 
-                        {{-- BOOKMARK --}}
                         <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
                             @csrf
-
                             <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
-
-                            <button type="submit"
-                                class="reaction-btn"
-                                style="color:#3490dc; background:white; font-size:14px;">
+                            <button type="submit" class="reaction-btn" style="color:#3490dc; background:white; font-size:14px;">
                                 🔖 Bookmark
                             </button>
                         </form>
@@ -511,61 +474,10 @@
         @endif
     </div>
 
-    {{-- FITUR KAMU: Daftar Akun Terblokir --}}
-    <div class="card" style="margin-top: 30px; border-top: 3px solid #e74c3c;">
-        <h3>Daftar Akun Terblokir</h3>
-        @php
-            $blocked_users = \App\Models\Block::where('user_id', auth()->id())->with('blockedUser')->get();
-        @endphp
-
-        @if($blocked_users->isEmpty())
-            <p style="color: #666; font-style: italic;">Tidak ada akun yang sedang diblokir.</p>
-        @else
-            <ul style="list-style: none; padding: 0;">
-                @foreach($blocked_users as $blockData)
-                    <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
-                        <span><strong>{{ $blockData->blockedUser?->username ?? 'Unknown User' }}</strong></span>
-                        <form method="POST" action="{{ route('block', $blockData->blocked_user_id) }}" onsubmit="return confirm('Yakin ingin membuka blokir akun ini?')">
-                            @csrf
-                            <button type="submit" class="block-btn" style="background: #3490dc;">Unblock</button>
-                        </form>
-                    </li>
-                @endforeach
-            </ul>
-        @endif
-    </div>
-
-    {{-- FITUR KAMU: Daftar Akun Terbisukan --}}
-    <div class="card" style="margin-top: 20px; border-top: 3px solid #f39c12;">
-        <h3>Daftar Akun Terbisukan</h3>
-        @php
-            $muted_users = \App\Models\Mute::where('user_id', auth()->id())->with('mutedUser')->get();
-        @endphp
-
-        @if($muted_users->isEmpty())
-            <p style="color: #666; font-style: italic;">Tidak ada akun yang sedang dibisukan.</p>
-        @else
-            <ul style="list-style: none; padding: 0;">
-                @foreach($muted_users as $muteData)
-                    <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee;">
-                        <span><strong>{{ $muteData->mutedUser?->username ?? 'Unknown User' }}</strong></span>
-                        <form method="POST" action="{{ route('mute', $muteData->muted_user_id) }}" onsubmit="return confirm('Yakin ingin membunyikan kembali akun ini?')">
-                            @csrf
-                            <button type="submit" class="mute-btn" style="background: #3490dc;">Unmute</button>
-                        </form>
-                    </li>
-                @endforeach
-            </ul>
-        @endif
-    </div>
-
 </div>
 
-<button id="scrollTopBtn" onclick="scrollToTop()">
-    ↑
-</button>
+<button id="scrollTopBtn" onclick="scrollToTop()">↑</button>
 
-{{-- JAVASCRIPT: Pengendali Utama Gabungan Fungsi Aplikasi --}}
 <script>
 function openEdit(id) {
     document.getElementById(`edit-${id}`).style.display = 'block';
@@ -575,7 +487,6 @@ function closeEdit(id) {
     document.getElementById(`edit-${id}`).style.display = 'none';
 }
 
-// {{-- FITUR TEMAN: Menghilangkan Alert Sukses Otomatis --}}
 setTimeout(() => {
     const alertBox = document.getElementById('successAlert');
     if (alertBox) {
@@ -586,6 +497,22 @@ setTimeout(() => {
         }, 500);
     }
 }, 5000);
+
+window.onscroll = function () {
+    const button = document.getElementById("scrollTopBtn");
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        button.style.display = "block";
+    } else {
+        button.style.display = "none";
+    }
+};
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
 
 // AJAX Dislike
 document.querySelectorAll('.dislike-btn').forEach(button => {
@@ -663,5 +590,7 @@ function scrollToTop() {
 }
 
 </script>
+</script>
+
 </body>
 </html>

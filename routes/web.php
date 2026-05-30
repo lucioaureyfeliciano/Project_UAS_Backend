@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/tweets/{id}', [TweetController::class, 'edit_tweet']);
     Route::post('/block/{blocked_user_id}', [BlockController::class, 'toggle'])->name('block');
     Route::post('/mute/{muted_user_id}', [MuteController::class, 'toggle'])->name('mute');
+    Route::get('/privacy', [TweetController::class, 'show_privacy'])->name('privacy');
 });
 
 Route::middleware('auth')->group(function () {
