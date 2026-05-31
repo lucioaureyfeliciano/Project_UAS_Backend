@@ -14,17 +14,15 @@ class UsageController extends Controller
         $totalUsers = User::count();
         $totalTweets = Tweet::count();
         $totalCommunities = Community::count();
-        $privateCommunities = Community::where('is_private', true)->count();
-        $publicCommunities = Community::where('is_private', false)->count();
         $totalMemberships = DB::table('community_user')->count();
+        $lastUpdated = now();
 
         return view('usage.index', compact(
             'totalUsers',
             'totalTweets',
             'totalCommunities',
-            'privateCommunities',
-            'publicCommunities',
-            'totalMemberships'
+            'totalMemberships',
+            'lastUpdated'
         ));
     }
 }
