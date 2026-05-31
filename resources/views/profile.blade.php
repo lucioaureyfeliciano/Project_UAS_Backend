@@ -675,7 +675,6 @@
 
         }
 
-        // AJAX Dislike
         document.querySelectorAll('.dislike-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const tweetId = this.dataset.id;
@@ -695,7 +694,6 @@
             });
         });
 
-        // AJAX Like
         document.querySelectorAll('.like-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const tweetId = this.dataset.id;
@@ -715,7 +713,6 @@
             });
         });
 
-        // AJAX Repost
         document.querySelectorAll('.repost-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const tweetId = this.dataset.id;
