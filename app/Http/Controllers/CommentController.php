@@ -24,8 +24,7 @@ class CommentController extends Controller
 
     public function create($tweet_id)
     {
-        $tweet = Tweet::findOrFail($tweet_id);
-        return view('comments.create', compact('tweet'));
+        return redirect()->route('tweets.show', $tweet_id);
     }
 
     public function store(Request $request, $tweet_id)
@@ -50,7 +49,7 @@ class CommentController extends Controller
             ]);
 
         }
-        return redirect()->route('comments.index', $tweet_id)->with('success', 'Comment added!');
+        return redirect()->route('tweets.show', $tweet_id)->with('success', 'Comment posted!');
     }
 
     public function edit($id)

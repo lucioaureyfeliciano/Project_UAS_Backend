@@ -81,6 +81,18 @@ class TweetController extends Controller
         return back()->with('success', 'Tweet updated successfully');
     }
 
+    public function show($id)
+    {
+        $tweet = Tweet::with([
+            'user', 'likes', 'dislikes', 'reposts',
+            'comments' => function($q) {
+                $q->whereNull('parent_id')->with(['user', 'replies.user'])->latest();
+            }
+        ])->findOrFail($id);
+
+        return view('tweets.show', compact('tweet'));
+    }
+
     public function show_privacy()
     {
         $user_id = auth()->id();

@@ -35,6 +35,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::post('/tweets', [TweetController::class, 'post_tweet']);
     Route::get('/tweets', [TweetController::class, 'show_tweets']);
+    Route::get('/tweets/{id}', [TweetController::class, 'show'])->name('tweets.show');
     Route::delete('/tweets/{id}', [TweetController::class, 'delete_tweet']);
     Route::put('/tweets/{id}', [TweetController::class, 'edit_tweet']);
     Route::post('/block/{blocked_user_id}', [BlockController::class, 'toggle'])->name('block');
