@@ -62,12 +62,11 @@ class CommunityController extends Controller
         $community = Community::findOrFail($id);
 
         if ($community->is_private) {
-            return redirect()->back()
-                ->with('error', 'Private community cannot be joined directly');
+            return redirect()->back()->with('error', 'Anda tidak dapat bergabung ke community private');
         }
         
         if ($community->members()->where('user_id', auth()->id())->exists()) {
-            return redirect()->back()->with('error', 'Already a member');
+            return redirect()->back()->with('error', 'Anda sudah menjadi anggota community ini');
         }
 
         $community->members()->attach(auth()->id());

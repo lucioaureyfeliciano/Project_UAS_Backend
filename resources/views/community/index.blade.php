@@ -140,7 +140,7 @@
 
     @if($communities->isEmpty())
         <div class="card">
-            <p>No communities found.</p>
+            <p>Community tidak ditemukan.</p>
         </div>
     @endif
 
@@ -163,9 +163,7 @@
             <p>{{ $community->description }}</p>
 
             <p class="meta">
-                Created by {{ $community->creator->username }}
-                •
-                {{ $community->created_at->diffForHumans() }}
+                Created by {{ $community->creator->username }} • {{ $community->created_at->diffForHumans() }}
             </p>
 
             @if(auth()->id() === $community->user_id)

@@ -125,9 +125,7 @@
         <p>{{ $community->description }}</p>
 
         <p class="meta">
-            Created by {{ $community->creator->username }}
-            •
-            {{ $community->created_at->diffForHumans() }}
+            Created by {{ $community->creator->username }} • {{ $community->created_at->diffForHumans() }}
         </p>
 
     </div>
@@ -196,25 +194,12 @@
                 @csrf
                 @method('PUT')
 
-                <input
-                    type="text"
-                    name="name"
-                    value="{{ $community->name }}"
-                    required
-                >
+                <input type="text" name="name" value="{{ $community->name }}" required>
 
-                <textarea
-                    name="description"
-                    required
-                >{{ $community->description }}</textarea>
+                <textarea name="description" required>{{ $community->description }}</textarea>
 
                 <label>
-                    <input
-                        type="checkbox"
-                        name="is_private"
-                        value="1"
-                        {{ $community->is_private ? 'checked' : '' }}
-                    >
+                    <input type="checkbox" name="is_private" value="1" {{ $community->is_private ? 'checked' : '' }}>
                     Private Community
                 </label>
 
@@ -234,11 +219,7 @@
                 @csrf
                 @method('DELETE')
 
-                <button
-                    type="submit"
-                    class="danger-btn"
-                    onclick="return confirm('Yakin mau hapus community ini?')"
-                >
+                <button type="submit" class="danger-btn" onclick="return confirm('Yakin mau hapus community ini?')">
                     Delete Community
                 </button>
 
