@@ -15,6 +15,7 @@ use App\Http\Controllers\RepostController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\MuteController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\FollowController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -99,6 +100,12 @@ Route::post('/profile/update-description', [ProfileController::class, 'updateDes
 
 # Repost Routes
 Route::post('/tweets/{tweet}/repost', [RepostController::class, 'toggle'])->middleware('auth');
+
+# Follow Routes
+Route::post(
+    '/follow/{following_id}',
+    [FollowController::class, 'toggle']
+)->middleware('auth')->name('follow');
 
 #Message Routes
 Route::middleware('auth')->group(function () {
