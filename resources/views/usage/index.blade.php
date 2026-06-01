@@ -67,13 +67,7 @@
 
     <div class="header-card">
         <h1>Usage Statistics</h1>
-
         <p>Summary of application usage data.</p>
-
-        <small style="color: #666;">
-            Last Updated:
-            {{ $lastUpdated->format('d M Y H:i') }}
-        </small>
     </div>
 
     <div class="stats-grid">

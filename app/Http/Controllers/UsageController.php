@@ -15,14 +15,12 @@ class UsageController extends Controller
         $totalTweets = Tweet::count();
         $totalCommunities = Community::count();
         $totalMemberships = DB::table('community_user')->count();
-        $lastUpdated = now();
 
         return view('usage.index', compact(
             'totalUsers',
             'totalTweets',
             'totalCommunities',
-            'totalMemberships',
-            'lastUpdated'
+            'totalMemberships'
         ));
     }
 }
