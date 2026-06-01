@@ -111,6 +111,7 @@
             overflow: hidden;
             box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
             min-width: 120px;
+            z-index: 10;
         }
 
         .tweet-dropdown button {
@@ -136,6 +137,7 @@
             background: #fafafa;
             padding: 20px;
             border-radius: 15px;
+            border: 1px solid #ddd;
         }
 
         .edit-modal input,
@@ -185,17 +187,10 @@
             gap: 8px;
         }
 
-        .like-btn span,
-        .dislike-btn span,
-        .repost-btn span {
-            font-weight: bold;
-        }
-
         .menu-container {
             position: relative;
             display: inline-block;
         }
-
 
         .menu-button {
             background: #3490dc;
@@ -205,6 +200,7 @@
             font-size: 20px;
             cursor: pointer;
             border-radius: 5px;
+            text-decoration: none;
         }
 
         .menu-dropdown {
@@ -216,6 +212,7 @@
             box-shadow: 0px 2px 8px rgba(0,0,0,0.2);
             border-radius: 5px;
             overflow: hidden;
+            z-index: 10;
         }
 
         .menu-dropdown a,
@@ -240,73 +237,90 @@
             display: block;
         }
 
-        .edit-btn {
-            background: #f39c12;
-            color: white;
+        #scrollTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
             border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: 50%;
+            background: #3b8edb;
+            color: white;
+            font-size: 20px;
             cursor: pointer;
-            font-size: 12px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+            transition: 0.3s;
+            z-index: 99;
         }
 
-        .delete-btn {
-            background: #e74c3c;
+        #scrollTopBtn:hover {
+            background: #2f7cc2;
+            transform: translateY(-3px);
+        }
+
+        .mute-btn:hover {
+            background: #d35400;
+        }
+
+        .notification-btn {
+            position: relative;
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
             color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
+@php
+    $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
+        ->where('is_read', false)
+        ->count();
+@endphp
+
 <div class="navbar">
-
     <div>Social Media</div>
-
     <div style="display:flex; gap:10px; align-items:center;">
-
-        {{-- Tombol Inbox / DM --}}
-        <a class="menu-button" href="/messages/inbox">
-            💬
+        {{-- Notifications --}}
+        <a class="menu-button notification-btn" href="{{ route('notifications.index') }}"> 🔔
+            @if($unreadCount > 0)
+                <span class="notif-badge">
+                    {{ $unreadCount }}
+                </span>
+            @endif
         </a>
 
-        {{-- Tombol Menu --}}
+        {{-- Bookmarks --}}
+        <a class="menu-button" href="{{ route('bookmarks.index') }}">🔖</a>
+        <a class="menu-button" href="/messages/inbox">💬</a>
         <div class="menu-container">
-
-            <button class="menu-button">
-                ☰
-            </button>
-
+            <button class="menu-button">☰</button>
             <div class="menu-dropdown">
-
-                <a href="/profile">
-                    Profile
-                </a>
-
-                <a href="/community">
-                    Community
-                </a>
-
-                <a href="/usage">
-                    Usage Statistics
-                </a>
-
+                <a href="/profile">Profile</a>
+                <a href="/community">Community</a>
+                <a href="/usage">Usage Statistics</a>
+                <a href="/privacy">Privacy Settings</a>
                 <form method="POST" action="/logout">
                     @csrf
-
-                    <button type="submit">
-                        Logout
-                    </button>
+                    <button type="submit">Logout</button>
                 </form>
-
             </div>
-
         </div>
-
     </div>
 </div>
 
@@ -315,6 +329,12 @@
     @if(session('success'))
         <div class="card" id="successAlert" style="border: 1px solid #2ecc71; background: #ecf9f1; color: #155724;">
             {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="card" style="border: 1px solid #e74c3c; background: #fdf2f2; color: #721c24;">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -329,7 +349,7 @@
             @csrf
             <div style="margin-bottom: 12px;">
                 <label for="title">Title</label><br>
-                <input id="title" name="title" type="text" value="{{ old('title') }}" style="width:100%; padding:8px; margin-top:4px;" />
+                <input id="title" name="title" type="text" value="{{ old('title') }}" style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;" />
                 @error('title')
                     <div style="color:red; margin-top:4px;">{{ $message }}</div>
                 @enderror
@@ -337,7 +357,7 @@
 
             <div style="margin-bottom: 12px;">
                 <label for="content">Content</label><br>
-                <textarea id="content" name="content" rows="4" style="width:100%; padding:8px; margin-top:4px;">{{ old('content') }}</textarea>
+                <textarea id="content" name="content" rows="4" style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;">{{ old('content') }}</textarea>
                 @error('content')
                     <div style="color:red; margin-top:4px;">{{ $message }}</div>
                 @enderror
@@ -353,162 +373,151 @@
             <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
         @else
             @foreach($tweets as $tweet)
-                
                 <div class="tweet-card">
-
                     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-
                         <div class="tweet-content">
                             <h4>{{ $tweet->title }}</h4>
                             <p>{{ $tweet->content }}</p>
-                            <small>
-                                By {{ $tweet->user?->username ?? 'Unknown' }}
-                                ·
-                                {{ $tweet->created_at->diffForHumans() }}
-                            </small>
+                            <small>{{ $tweet->user?->username ?? 'Unknown' }} • {{ $tweet->created_at->diffForHumans() }}</small>
                         </div>
 
-                        @if($tweet->user_id === auth()->id())
-
-                            <div class="tweet-menu-container">
-
-                                <button class="tweet-menu-btn">
-                                    •••
-                                </button>
-
-                                <div class="tweet-dropdown">
-
-                                    <button onclick="openEdit({{ $tweet->id }})">
-                                        Edit
-                                    </button>
-
-                                    <form action="/tweets/{{ $tweet->id }}" method="POST">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button
-                                            type="submit"
-                                            style="color:red;"
-                                        >
-                                            Delete
-                                        </button>
-
-                                    </form>
-
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            {{-- Dropdown Tweet Sendiri --}}
+                            @if($tweet->user_id === auth()->id())
+                                <div class="tweet-menu-container">
+                                    <button class="tweet-menu-btn">•••</button>
+                                    <div class="tweet-dropdown">
+                                        <button onclick="openEdit({{ $tweet->id }})">Edit</button>
+                                        <form action="/tweets/{{ $tweet->id }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" style="color:red;">Delete</button>
+                                        </form>
+                                    </div>
                                 </div>
+                            @endif
+                            
+                            @if($tweet->user_id !== auth()->id())
+                                @php
+                                    $isBlocked = \App\Models\Block::where('user_id', auth()->id())
+                                        ->where('blocked_user_id', $tweet->user_id)
+                                        ->exists();
+                                    
+                                    $isMuted = \App\Models\Mute::where('user_id', auth()->id())
+                                        ->where('muted_user_id', $tweet->user_id)
+                                        ->exists();
+                                @endphp
 
-                            </div>
+                                <div class="tweet-menu-container">
+                                    <button class="tweet-menu-btn">•••</button>
+                                    <div class="tweet-dropdown">
+                                        @if(!$isBlocked)
+                                            <form method="POST" action="{{ route('block', $tweet->user_id) }}" onsubmit="return confirm('Yakin ingin memblokir akun ini?')">
+                                                @csrf
+                                                <button type="submit" style="color: #7f8c8d;">Block</button>
+                                            </form>
+                                        @endif
 
-                        @endif
-
+                                        @if(!$isBlocked && !$isMuted)
+                                            <form method="POST" action="{{ route('mute', $tweet->user_id) }}" onsubmit="return confirm('Yakin ingin membisukan akun ini?')">
+                                                @csrf
+                                                <button type="submit" style="color: #d35400;">Mute</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
                     </div>
+
+                    @if($tweet->user_id === auth()->id())
+                        <div class="edit-modal" id="edit-{{ $tweet->id }}">
+                            <form action="/tweets/{{ $tweet->id }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="text" name="title" value="{{ $tweet->title }}">
+                                <textarea name="content" rows="4">{{ $tweet->content }}</textarea>
+                                <div class="description-actions">
+                                    <button type="submit" class="save-btn">Save</button>
+                                    <button type="button" class="cancel-btn" onclick="closeEdit({{ $tweet->id }})">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    @endif
 
                     <div class="tweet-actions">
-
                         <button class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            👍
-                            <span id="like-count-{{ $tweet->id }}">
-                                {{ $tweet->likes ? $tweet->likes->count() : 0 }}
-                            </span>
+                            👍 <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
                         </button>
-
                         <button class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            👎
-                            <span id="dislike-count-{{ $tweet->id }}">
-                                {{ $tweet->dislikes->count() }}
-                            </span>
+                            👎 <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
                         </button>
-
                         <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            🔁
-                            <span id="repost-count-{{ $tweet->id }}">
-                                {{ $tweet->reposts->count() }}
-                            </span>
+                            🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
                         </button>
 
+                        <a href="{{ route('comments.index', $tweet->id) }}" class="reaction-btn" style="text-decoration:none; color:#3490dc;">
+                            💬 Comment
+                        </a>
+
+                        <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
+                            @csrf
+                            <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
+                            <button type="submit" class="reaction-btn" style="color:#3490dc; background:white; font-size:14px;">
+                                🔖 Bookmark
+                            </button>
+                        </form>
                     </div>
 
                 </div>
-
-                <div class="edit-modal" id="edit-{{ $tweet->id }}">
-
-                    <form action="/tweets/{{ $tweet->id }}" method="POST">
-
-                        @csrf
-                        @method('PUT')
-
-                        <input
-                            type="text"
-                            name="title"
-                            value="{{ $tweet->title }}"
-                        >
-
-                        <textarea
-                            name="content"
-                            rows="4"
-                        >{{ $tweet->content }}</textarea>
-
-                        <div class="description-actions">
-
-                            <button type="submit" class="save-btn">
-                                Save
-                            </button>
-
-                            <button
-                                type="button"
-                                class="cancel-btn"
-                                onclick="closeEdit({{ $tweet->id }})"
-                            >
-                                Cancel
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-
             @endforeach
         @endif
-
-
-
     </div>
 
 </div>
 
+<button id="scrollTopBtn" onclick="scrollToTop()">↑</button>
+
 <script>
+function openEdit(id) {
+    document.getElementById(`edit-${id}`).style.display = 'block';
+}
 
-    setTimeout(() => {
+function closeEdit(id) {
+    document.getElementById(`edit-${id}`).style.display = 'none';
+}
 
-        const alertBox = document.getElementById('successAlert');
+setTimeout(() => {
+    const alertBox = document.getElementById('successAlert');
+    if (alertBox) {
+        alertBox.style.transition = '0.5s';
+        alertBox.style.opacity = '0';
+        setTimeout(() => {
+            alertBox.style.display = 'none';
+        }, 500);
+    }
+}, 5000);
 
-        if (alertBox) {
+window.onscroll = function () {
+    const button = document.getElementById("scrollTopBtn");
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        button.style.display = "block";
+    } else {
+        button.style.display = "none";
+    }
+};
 
-            alertBox.style.transition = '0.5s';
-            alertBox.style.opacity = '0';
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
 
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 500);
-
-        }
-
-    }, 5000);
-
-</script>
-
-</body>
-</html>
-
-{{-- JavaScript agar saat dislike dipencet tidak reload page dan langsung update jumlah dislike-nya --}}
-<script>
+// AJAX Dislike
 document.querySelectorAll('.dislike-btn').forEach(button => {
     button.addEventListener('click', function () {
-
         const tweetId = this.dataset.id;
-
         fetch(`/tweets/${tweetId}/dislike`, {
             method: 'POST',
             headers: {
@@ -522,18 +531,13 @@ document.querySelectorAll('.dislike-btn').forEach(button => {
             document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
         })
         .catch(err => console.log(err));
-
     });
 });
-</script>
 
-{{-- JavaScript agar saat like dipencet tidak reload page dan langsung update jumlah like-nya --}}
-<script>
+// AJAX Like
 document.querySelectorAll('.like-btn').forEach(button => {
     button.addEventListener('click', function () {
-
         const tweetId = this.dataset.id;
-
         fetch(`/tweets/${tweetId}/like`, {
             method: 'POST',
             headers: {
@@ -547,72 +551,46 @@ document.querySelectorAll('.like-btn').forEach(button => {
             document.getElementById(`like-count-${tweetId}`).innerText = data.count;
         })
         .catch(err => console.log(err));
-
     });
 });
-</script>
 
-{{-- JavaScript agar saat repost dipencet tidak reload page dan langsung update jumlah like-nya --}}
-<script>
+// AJAX Repost
 document.querySelectorAll('.repost-btn').forEach(button => {
-
     button.addEventListener('click', function () {
-
         const tweetId = this.dataset.id;
-
         fetch(`/tweets/${tweetId}/repost`, {
-
             method: 'POST',
-
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
-
         })
-
         .then(res => res.json())
-
         .then(data => {
-
-            document.getElementById(
-                `repost-count-${tweetId}`
-            ).innerText = data.count;
-
+            document.getElementById(`repost-count-${tweetId}`).innerText = data.count;
         });
-
     });
-
 });
 
-</script>
-
-<script>
-
-function openEdit(id) {
-    document.getElementById(`edit-${id}`).style.display = 'block';
-}
-
-function closeEdit(id) {
-    document.getElementById(`edit-${id}`).style.display = 'none';
-}
-
-setTimeout(() => {
-
-    const alertBox = document.getElementById('successAlert');
-
-    if (alertBox) {
-
-        alertBox.style.transition = '0.5s';
-        alertBox.style.opacity = '0';
-
-        setTimeout(() => {
-            alertBox.style.display = 'none';
-        }, 500);
-
+window.onscroll = function () {
+    const button = document.getElementById("scrollTopBtn");
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        button.style.display = "block";
+    } else {
+        button.style.display = "none";
     }
+};
 
-}, 5000);
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
 
 </script>
+</script>
+
+</body>
+</html>

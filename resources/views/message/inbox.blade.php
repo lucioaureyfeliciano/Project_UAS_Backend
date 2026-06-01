@@ -192,20 +192,26 @@ use Illuminate\Support\Str;
         <h2>Your Conversations</h2>
     </div>
 
-    @forelse($messages as $message)
+    @forelse($conversations as $conversation)
+
+        @php
+            $otherUser = $conversation->sender_id == auth()->id()
+                ? $conversation->receiver
+                : $conversation->sender;
+        @endphp
 
         <div class="message-card">
 
             <div class="username">
-                {{ $message->sender->username }}
+                {{ $otherUser->username }}
             </div>
 
             <div class="preview">
-                {{ Str::limit($message->message, 80) }}
+                {{ Str::limit($conversation->message, 80) }}
             </div>
 
             <a
-                href="/messages/chat/{{ $message->sender_id }}"
+                href="/messages/chat/{{ $otherUser->id }}"
                 class="chat-btn"
             >
                 Open Chat
@@ -216,7 +222,7 @@ use Illuminate\Support\Str;
     @empty
 
         <div class="card">
-            No messages yet.
+            No conversations yet.
         </div>
 
     @endforelse

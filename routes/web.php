@@ -3,12 +3,17 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TweetController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\UsageController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\DislikeController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RepostController;
+use App\Http\Controllers\BlockController;
+use App\Http\Controllers\MuteController;
 use App\Http\Controllers\MessageController;
 
 Route::get('/', function () {
@@ -17,10 +22,8 @@ Route::get('/', function () {
 
 use App\Models\Tweet;
 
-Route::get('/dashboard', function () {
-    $tweets = Tweet::with('user', 'likes', 'dislikes')->latest()->get();
-    return view('dashboard', compact('tweets'));
-})->middleware('auth');
+# Dashboard Route
+Route::get('/dashboard', [TweetController::class, 'show_tweets'])->middleware('auth');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
@@ -28,11 +31,39 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+# Tweet, Block, Mute Route
 Route::middleware('auth')->group(function () {
     Route::post('/tweets', [TweetController::class, 'post_tweet']);
     Route::get('/tweets', [TweetController::class, 'show_tweets']);
     Route::delete('/tweets/{id}', [TweetController::class, 'delete_tweet']);
     Route::put('/tweets/{id}', [TweetController::class, 'edit_tweet']);
+    Route::post('/block/{blocked_user_id}', [BlockController::class, 'toggle'])->name('block');
+    Route::post('/mute/{muted_user_id}', [MuteController::class, 'toggle'])->name('mute');
+    Route::get('/privacy', [TweetController::class, 'show_privacy'])->name('privacy');
+});
+
+Route::middleware('auth')->group(function () {
+    // comments
+    Route::get('/tweets/{tweet_id}/comments', [CommentController::class, 'index'])->name('comments.index');
+    Route::get('/tweets/{tweet_id}/comments/create', [CommentController::class, 'create'])->name('comments.create');
+    Route::post('/tweets/{tweet_id}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::get('/comments/{id}/edit', [CommentController::class, 'edit'])->name('comments.edit');
+    Route::put('/comments/{id}', [CommentController::class, 'update'])->name('comments.update');
+    Route::get('/comments/{id}', [CommentController::class, 'show'])->name('comments.show');
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
+    // notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::get('/notifications/{id}', [NotificationController::class, 'show'])->name('notifications.show');
+    Route::put('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+
+    // bookmarks
+    Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks.index');
+    Route::post('/bookmarks', [BookmarkController::class, 'store'])->name('bookmarks.store');
+    Route::delete('/bookmarks/{tweet_id}', [BookmarkController::class, 'destroy'])->name('bookmarks.destroy');
+    Route::get('/bookmarks/{id}', [BookmarkController::class, 'show'])->name('bookmarks.show');
 });
 
 # Usage Routes
