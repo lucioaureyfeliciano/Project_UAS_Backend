@@ -31,7 +31,7 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-# Tweet, Block, Mute Route
+# Tweet, Block, Mute, privacy Route
 Route::middleware('auth')->group(function () {
     Route::post('/tweets', [TweetController::class, 'post_tweet']);
     Route::get('/tweets', [TweetController::class, 'show_tweets']);
@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/block/{blocked_user_id}', [BlockController::class, 'toggle'])->name('block');
     Route::post('/mute/{muted_user_id}', [MuteController::class, 'toggle'])->name('mute');
     Route::get('/privacy', [TweetController::class, 'show_privacy'])->name('privacy');
+    Route::post('/privacy/toggle', [BlockController::class, 'togglePrivacy'])->name('privacy.toggle');
 });
 
 Route::middleware('auth')->group(function () {
