@@ -8,11 +8,19 @@ use Illuminate\Http\Request;
 class CommunityController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $communities = Community::with('creator')->latest()->get();
+        $search = $request->input('search');
 
-        return view('community.index', compact('communities'));
+        $communities = Community::with('creator', 'members')
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', '%' . $search . '%')
+                             ->orWhere('description', 'like', '%' . $search . '%');
+            })
+            ->latest()
+            ->get();
+
+        return view('community.index', compact('communities', 'search'));
     }
 
     public function show($id)
@@ -25,23 +33,23 @@ class CommunityController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'name'        => 'required|string|max:255|unique:communities,name',
+            'name' => 'required|string|max:255|unique:communities,name',
             'description' => 'required|string',
-            'is_private'  => 'boolean',
+            'is_private' => 'boolean',
         ]);
 
         $community = Community::create([
-            'name'        => $request->input('name'),
+            'name' => $request->input('name'),
             'description' => $request->input('description'),
-            'is_private'  => $request->input('is_private', false),
-            'user_id'     => auth()->id(),
+            'is_private' => $request->input('is_private', false),
+            'user_id' => auth()->id(),
         ]);
 
         $community->members()->attach(auth()->id());
 
         if ($request->wantsJson()) {
             return response()->json([
-                'message'   => 'Community created successfully',
+                'message' => 'Community created successfully',
                 'community' => $community,
             ], 201);
         }
@@ -53,8 +61,12 @@ class CommunityController extends Controller
     {
         $community = Community::findOrFail($id);
 
+        if ($community->is_private) {
+            return redirect()->back()->with('error', 'Anda tidak dapat bergabung ke community private');
+        }
+        
         if ($community->members()->where('user_id', auth()->id())->exists()) {
-            return redirect()->back()->with('error', 'Already a member');
+            return redirect()->back()->with('error', 'Anda sudah menjadi anggota community ini');
         }
 
         $community->members()->attach(auth()->id());
@@ -84,9 +96,9 @@ class CommunityController extends Controller
         }
 
         $request->validate([
-            'name'        => 'sometimes|string|max:255|unique:communities,name,' . $id,
+            'name' => 'sometimes|string|max:255|unique:communities,name,' . $id,
             'description' => 'sometimes|string',
-            'is_private'  => 'nullable|boolean',
+            'is_private' => 'nullable|boolean',
         ]);
 
         $community->update([
