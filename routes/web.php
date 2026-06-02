@@ -91,6 +91,7 @@ Route::post('/tweets/{tweet}/like', [LikeController::class, 'toggle'])->middlewa
 
 # Profile Routes
 Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth');
+Route::get('/profile/{username}', [ProfileController::class, 'show'])->middleware('auth')->name('profile.show');
 
 # Update Description Profile
 Route::post('/profile/update-description', [ProfileController::class, 'updateDescription']);
