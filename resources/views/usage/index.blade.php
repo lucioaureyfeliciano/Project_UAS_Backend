@@ -88,8 +88,28 @@
         </div>
 
         <div class="stat-card">
-            <h3>Total Memberships</h3>
-            <p>{{ $totalMemberships }}</p>
+            <h3>Total Comments</h3>
+            <p>{{ $totalComments }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Likes</h3>
+            <p>{{ $totalLikes }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Dislikes</h3>
+            <p>{{ $totalDislikes }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Reposts</h3>
+            <p>{{ $totalReposts }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Messages</h3>
+            <p>{{ $totalMessages }}</p>
         </div>
 
     </div>
