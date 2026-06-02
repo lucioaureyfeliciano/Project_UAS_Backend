@@ -8,6 +8,6 @@ class Usage extends Model
 {
     protected $fillable = [
         'feature',
-        'total'
+        'total',
     ];
 }

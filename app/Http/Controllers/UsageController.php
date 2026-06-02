@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Tweet;
 use App\Models\Community;
+use App\Models\Comment;
+use App\Models\Like;
+use App\Models\Dislike;
+use App\Models\Repost;
+use App\Models\Message;
 use Illuminate\Support\Facades\DB;
 
 class UsageController extends Controller
@@ -14,17 +19,21 @@ class UsageController extends Controller
         $totalUsers = User::count();
         $totalTweets = Tweet::count();
         $totalCommunities = Community::count();
-        $privateCommunities = Community::where('is_private', true)->count();
-        $publicCommunities = Community::where('is_private', false)->count();
-        $totalMemberships = DB::table('community_user')->count();
+        $totalComments = Comment::count();
+        $totalLikes = Like::count();
+        $totalDislikes = Dislike::count();
+        $totalReposts = Repost::count();
+        $totalMessages = Message::count();
 
         return view('usage.index', compact(
             'totalUsers',
             'totalTweets',
             'totalCommunities',
-            'privateCommunities',
-            'publicCommunities',
-            'totalMemberships'
+            'totalComments',
+            'totalLikes',
+            'totalDislikes',
+            'totalReposts',
+            'totalMessages'
         ));
     }
 }
