@@ -24,7 +24,8 @@ class CommentController extends Controller
 
     public function create($tweet_id)
     {
-        return redirect()->route('tweets.show', $tweet_id);
+        $tweet = Tweet::findOrFail($tweet_id);
+        return view('comments.create', compact('tweet'));
     }
 
     public function store(Request $request, $tweet_id)

@@ -32,6 +32,12 @@
             border: 1px solid #ddd;
         }
 
+        .back-btn{
+            color:white;
+            text-decoration:none;
+            font-weight:bold;
+        }
+
         .comment-card {
             background: white;
             border: 1px solid #ddd;
@@ -100,21 +106,25 @@
     </style>
 </head>
 <body>
+
+<div class="navbar">
+    <a href="/dashboard" class="back-btn">← Dashboard</a>
+    <div>📄 Tweet Detail</div>
+    <div></div>
+</div>
+
 <div class="container">
 
     @if(session('success'))
         <div class="alert-success">{{ session('success') }}</div>
     @endif
 
-    {{-- Inline Comment Form --}}
     <div class="card">
-        <h3>Add a Comment</h3>
-        <form method="POST" action="{{ route('comments.store', $tweet->id) }}">
-            @csrf
-            <textarea name="content" rows="3" placeholder="Tulis komentarmu..." required></textarea>
-            @error('content') <div style="color:red; font-size:13px;">{{ $message }}</div> @enderror
-            <button type="submit" class="submit-btn">Post Comment</button>
-        </form>
+        <a href="{{ route('comments.create', $tweet->id) }}"
+        class="submit-btn"
+        style="text-decoration:none; display:inline-block;">
+            💬 Add Comment
+        </a>
     </div>
 
     {{-- Comment List --}}
