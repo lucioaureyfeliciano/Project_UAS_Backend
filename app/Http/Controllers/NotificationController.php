@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Web;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
 
-class NotificationWebController extends Controller
+class NotificationController extends Controller
 {
     public function index()
     {
@@ -30,4 +30,11 @@ class NotificationWebController extends Controller
         $notif->delete();
         return back()->with('success', 'Deleted!');
     }
+
+    public function show($id)
+    {
+        $notification = Notification::where('user_id', auth()->id())->findOrFail($id);
+        return view('notifications.show', compact('notification'));
+    }
+    
 }
