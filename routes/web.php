@@ -116,3 +116,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/messages/search', [MessageController::class, 'search']);
 });
 
+// Hashtag Route
+Route::get(
+    '/hashtags/{name}',
+    [TweetController::class, 'showHashtag']
+)->middleware('auth');
+
