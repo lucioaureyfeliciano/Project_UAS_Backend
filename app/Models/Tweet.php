@@ -50,4 +50,12 @@ class Tweet extends Model
     {
         return $this->hasMany(Notification::class);
     }
+
+    public function hashtags()
+    {
+        return $this->belongsToMany(
+            Hashtag::class,
+            'tweet_hashtags'
+        );
+    }
 }
