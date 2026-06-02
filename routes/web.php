@@ -107,6 +107,20 @@ Route::post(
     [FollowController::class, 'toggle']
 )->middleware('auth')->name('follow');
 
+# followers list
+Route::get(
+    '/profile/{username}/followers',
+    [ProfileController::class, 'followers']
+)->middleware('auth')
+    ->name('profile.followers');
+
+# following list
+Route::get(
+    '/profile/{username}/following',
+    [ProfileController::class, 'following']
+)->middleware('auth')
+    ->name('profile.following');
+
 #Message Routes
 Route::middleware('auth')->group(function () {
 

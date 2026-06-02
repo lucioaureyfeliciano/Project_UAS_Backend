@@ -409,17 +409,25 @@
             <div class="stats">
 
                 <div class="stat-box">
-                    <div class="stat-title">Following</div>
-                    <div class="stat-number">
-                        {{ $user->following->count() }}
-                    </div>
+                    <a href="{{ route('profile.following', $user->username) }}"
+                        style="text-decoration:none;color:black;">
+                        <div class="stat-title">Following</div>
+
+                        <div class="stat-number">
+                            {{ $user->following->count() }}
+                        </div>
+                    </a>
                 </div>
 
                 <div class="stat-box">
-                    <div class="stat-title">Followers</div>
-                    <div class="stat-number">
-                        {{ $user->followers->count() }}
-                    </div>
+                    <a href="{{ route('profile.followers', $user->username) }}"
+                        style="text-decoration:none;color:black;">
+                        <div class="stat-title">Followers</div>
+
+                        <div class="stat-number">
+                            {{ $user->followers->count() }}
+                        </div>
+                    </a>
                 </div>
 
                 <div class="stat-box">

@@ -63,4 +63,22 @@ class ProfileController extends Controller
         return view('profile', compact('user', 'tweets', 'isLocked'));
     }
 
+    public function followers($username)
+    {
+        $user = User::with('followers.follower')
+            ->where('username', $username)
+            ->firstOrFail();
+
+        return view('follows.followers', compact('user'));
+    }
+
+    public function following($username)
+    {
+        $user = User::with('following.following')
+            ->where('username', $username)
+            ->firstOrFail();
+
+        return view('follows.following', compact('user'));
+    }
+
 }
