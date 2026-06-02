@@ -10,7 +10,10 @@ class ProfileController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $user = User::with(
+            'followers',
+            'following'
+        )->find(auth()->id());
 
         $tweets = Tweet::with('likes', 'reposts')
             ->where('user_id', $user->id)
@@ -33,7 +36,15 @@ class ProfileController extends Controller
 
     public function show($username)
     {
-        $user = User::where('username', $username)->firstOrFail();
+        $user = User::with(
+            'followers',
+            'following'
+        )
+            ->where(
+                'username',
+                $username
+            )
+            ->firstOrFail();
 
         if ($user->is_private == 1 && auth()->id() != $user->id) {
             $tweets = collect();
@@ -51,5 +62,5 @@ class ProfileController extends Controller
 
         return view('profile', compact('user', 'tweets', 'isLocked'));
     }
-    
+
 }

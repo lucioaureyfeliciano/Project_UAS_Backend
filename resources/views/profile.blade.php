@@ -410,12 +410,16 @@
 
                 <div class="stat-box">
                     <div class="stat-title">Following</div>
-                    <div class="stat-number">0</div>
+                    <div class="stat-number">
+                        {{ $user->following->count() }}
+                    </div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-title">Followers</div>
-                    <div class="stat-number">0</div>
+                    <div class="stat-number">
+                        {{ $user->followers->count() }}
+                    </div>
                 </div>
 
                 <div class="stat-box">
@@ -686,11 +690,11 @@
                         'Accept': 'application/json'
                     }
                 })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
-                })
-                .catch(err => console.log(err));
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
+                    })
+                    .catch(err => console.log(err));
             });
         });
 
@@ -705,11 +709,11 @@
                         'Accept': 'application/json'
                     }
                 })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById(`like-count-${tweetId}`).innerText = data.count;
-                })
-                .catch(err => console.log(err));
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(`like-count-${tweetId}`).innerText = data.count;
+                    })
+                    .catch(err => console.log(err));
             });
         });
 
@@ -724,10 +728,10 @@
                         'Accept': 'application/json'
                     }
                 })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById(`repost-count-${tweetId}`).innerText = data.count;
-                });
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(`repost-count-${tweetId}`).innerText = data.count;
+                    });
             });
         });
 
