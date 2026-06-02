@@ -172,6 +172,43 @@
             text-align: center;
         }
 
+        .notif-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .notif-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .tweet-link {
+            background: #d5e5f4;
+            color: #3490dc;
+        }
+
+        .tweet-link:hover {
+            background: #96B3D2;
+        }
+
+        .user-link {
+            background: #f0e6ff;
+            color: #6c5ce7;
+        }
+
+        .user-link:hover {
+            background: #e4d5ff;
+        }
+
         .alert-success {
             background: #d4edda;
             color: #155724;
@@ -234,6 +271,27 @@
                 <div class="notif-body">
                     <span class="notif-badge badge-{{ $notification->type }}">{{ strtoupper($notification->type) }}</span>
                     <div class="notif-message">{{ $notification->message }}</div>
+                    
+                    @if($notification->tweet_id || $notification->relatedUser)
+                        <div class="notif-links">
+
+                            @if($notification->tweet_id)
+                                <a href="{{ route('tweets.show', $notification->tweet_id) }}"
+                                    class="notif-link tweet-link">
+                                    📄 View Tweet
+                                </a>
+                            @endif
+
+                            @if($notification->relatedUser)
+                                <a href="{{ route('profile.show', $notification->relatedUser->username) }}"
+                                    class="notif-link user-link">
+                                    👤 {{ $notification->relatedUser->username }}
+                                </a>
+                            @endif
+
+                        </div>
+                    @endif
+                    
                     <div class="notif-time">{{ $notification->created_at->diffForHumans() }}</div>
                 </div>
 

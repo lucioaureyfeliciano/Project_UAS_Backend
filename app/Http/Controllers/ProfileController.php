@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Tweet;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -29,4 +30,17 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Description updated successfully');
     }
+
+    public function show($username)
+    {
+        $user = User::where('username', $username)->firstOrFail();
+
+        $tweets = Tweet::where('user_id', $user->id)
+            ->with(['likes', 'dislikes', 'reposts'])
+            ->latest()
+            ->get();
+
+        return view('profile', compact('user', 'tweets'));
+    }
+    
 }

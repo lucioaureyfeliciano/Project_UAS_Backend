@@ -50,7 +50,7 @@ class CommentController extends Controller
             ]);
 
         }
-        return redirect()->route('comments.index', $tweet_id)->with('success', 'Comment added!');
+        return redirect()->route('tweets.show', $tweet_id)->with('success', 'Comment posted!');
     }
 
     public function edit($id)
