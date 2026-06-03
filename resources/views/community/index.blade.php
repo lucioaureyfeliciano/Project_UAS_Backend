@@ -5,30 +5,131 @@
 
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial;
             background: #f4f4f4;
             margin: 0;
-            padding: 30px;
+        }
+
+        .navbar {
+            background: #3490dc;
+            padding: 15px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
         }
 
         .container {
-            max-width: 800px;
-            margin: auto;
+            width: 650px;
+            margin: 25px auto;
         }
 
         .card {
             background: white;
             padding: 20px;
-            margin-bottom: 16px;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
         }
 
-        .top-link {
-            display: inline-block;
-            margin-bottom: 18px;
+        .community-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .community-card.private {
+            background: #fffaf0;
+            border-left: 4px solid #f39c12;
+        }
+
+        .community-card.public {
+            border-left: 4px solid #3490dc;
+        }
+
+        .community-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #eaf4ff;
             color: #3490dc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .community-body {
+            flex: 1;
+        }
+
+        .community-title {
+            margin: 0 0 5px 0;
+        }
+
+        .community-title a {
+            color: #333;
             text-decoration: none;
+        }
+
+        .community-title a:hover {
+            color: #3490dc;
+            text-decoration: underline;
+        }
+
+        .community-message {
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .community-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .community-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .badge-public {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-private {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-creator {
+            background: #cce5ff;
+            color: #004085;
         }
 
         input, textarea {
@@ -48,55 +149,73 @@
             padding: 8px 14px;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 13px;
+        }
+
+        button:hover {
+            background: #2779bd;
         }
 
         button:disabled {
-            background: #ccc;
+            background: #ddd;
+            color: #666;
             cursor: not-allowed;
         }
 
-        .badge {
-            background: #eee;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #a3cfbb;
         }
 
-        .private-badge {
-            background: #ffe5e5;
-            color: #c0392b;
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #f1aeb5;
         }
 
-        .meta {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .community-title a {
-            color: #222;
+        .reset-link {
+            color: #3490dc;
             text-decoration: none;
+            margin-left: 8px;
         }
 
-        .community-title a:hover {
-            text-decoration: underline;
+        .empty-state {
+            color: #888;
+            text-align: center;
+        }
+
+        h1, h2 {
+            margin-top: 0;
         }
     </style>
 </head>
 <body>
 
+<div class="navbar">
+    <a href="/dashboard" class="back-btn">Back</a>
+    <strong>Community List</strong>
+    <span></span>
+</div>
+
 <div class="container">
 
-    <a href="/dashboard" class="top-link">Back to Dashboard</a>
-
     <div class="card">
-        <h1>Community List</h1>
+        <h2>Search Community</h2>
 
         <form method="GET" action="/community">
             <input type="text" name="search" placeholder="Search community..." value="{{ $search ?? '' }}">
+
             <button type="submit">Search</button>
 
             @if(!empty($search))
-                <a href="/community">Reset</a>
+                <a href="/community" class="reset-link">Reset</a>
             @endif
         </form>
     </div>
@@ -123,7 +242,7 @@
     </div>
 
     @if ($errors->any())
-        <div class="card" style="color:red;">
+        <div class="alert-error">
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -133,62 +252,80 @@
     @endif
 
     @if (session('success'))
-        <div class="card" style="color:green;">
+        <div class="alert-success">
             {{ session('success') }}
         </div>
     @endif
 
     @if($communities->isEmpty())
-        <div class="card">
+        <div class="card empty-state">
             <p>Community tidak ditemukan.</p>
         </div>
     @endif
 
     @foreach($communities as $community)
 
-        <div class="card">
+        <div class="community-card {{ $community->is_private ? 'private' : 'public' }}">
 
-            <h3 class="community-title">
-                <a href="/community/{{ $community->id }}">{{ $community->name }}</a>
+            <div class="community-icon">
+                👥
+            </div>
 
-                <span class="badge">
-                    {{ $community->members->count() }} Members
-                </span>
+            <div class="community-body">
 
                 @if($community->is_private)
-                    <span class="badge private-badge">Private</span>
+                    <span class="badge badge-private">Private</span>
+                @else
+                    <span class="badge badge-public">Public</span>
                 @endif
-            </h3>
 
-            <p>{{ $community->description }}</p>
+                <h3 class="community-title">
+                    <a href="/community/{{ $community->id }}"> {{ $community->name }} </a>
+                </h3>
 
-            <p class="meta">
-                Created by {{ $community->creator->username }} • {{ $community->created_at->diffForHumans() }}
-            </p>
+                <div class="community-message">
+                    {{ $community->description }}
+                </div>
 
-            @if(auth()->id() === $community->user_id)
+                <div class="community-time">
+                    {{ $community->members->count() }} Members • Created by {{ $community->creator->username }} • {{ $community->created_at->diffForHumans() }}
+                </div>
 
-                <button disabled>Creator</button>
+            </div>
 
-            @elseif($community->is_private)
+            <div class="community-actions">
 
-                <button disabled>Private Community</button>
+                @if(auth()->id() === $community->user_id)
 
-            @elseif($community->members->contains(auth()->id()))
+                    <span class="badge badge-creator">Creator</span>
 
-                <form method="POST" action="/community/{{ $community->id }}/leave">
-                    @csrf
-                    <button type="submit">Leave</button>
-                </form>
+                @elseif($community->is_private)
 
-            @else
+                    <button disabled>
+                        Private
+                    </button>
 
-                <form method="POST" action="/community/{{ $community->id }}/join">
-                    @csrf
-                    <button type="submit">Join</button>
-                </form>
+                @elseif($community->members->contains(auth()->id()))
 
-            @endif
+                    <form method="POST" action="/community/{{ $community->id }}/leave">
+                        @csrf
+                        <button type="submit">
+                            Leave
+                        </button>
+                    </form>
+
+                @else
+
+                    <form method="POST" action="/community/{{ $community->id }}/join">
+                        @csrf
+                        <button type="submit">
+                            Join
+                        </button>
+                    </form>
+
+                @endif
+
+            </div>
 
         </div>
 

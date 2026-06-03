@@ -1,34 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>{{ $community->name }}</title>
 
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial;
             background: #f4f4f4;
             margin: 0;
-            padding: 30px;
+        }
+
+        .navbar {
+            background: #3490dc;
+            padding: 15px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
         }
 
         .container {
-            max-width: 800px;
-            margin: auto;
+            width: 650px;
+            margin: 25px auto;
         }
 
         .card {
             background: white;
             padding: 20px;
-            margin-bottom: 16px;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
         }
 
-        .back-link {
+        .community-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .community-info h2 {
+            margin: 0;
+        }
+
+        .community-total {
+            color: #888;
+        }
+
+        .badge {
             display: inline-block;
-            margin-bottom: 18px;
-            color: #3490dc;
-            text-decoration: none;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .badge-private {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-public {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .message {
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 5px;
+        }
+
+        .meta {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .member-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .creator-badge {
+            background: #cce5ff;
+            color: #004085;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
         }
 
         input[type="text"],
@@ -42,56 +114,78 @@
             box-sizing: border-box;
         }
 
-        button {
+        .btn-primary {
             background: #3490dc;
             color: white;
             border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
+            padding: 8px 18px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 13px;
         }
 
-        .danger-btn {
-            background: #dc3545;
+        .btn-primary:hover {
+            background: #2779bd;
         }
 
-        .badge {
-            background: #eee;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
         }
 
-        .private-badge {
-            background: #ffe5e5;
-            color: #c0392b;
+        .btn-danger:hover {
+            background: #c0392b;
         }
 
-        .member-item {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .creator-badge {
-            color: #3490dc;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .meta {
+        .btn-disabled {
+            background: #ddd;
             color: #666;
-            font-size: 14px;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #a3cfbb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #f1aeb5;
+        }
+
+        h2, h3 {
+            margin-top: 0;
         }
     </style>
 </head>
 <body>
 
+<div class="navbar">
+    <a href="/community" class="back-btn">Back</a>
+    <strong>Community Detail</strong>
+    <a href="/dashboard" class="back-btn">Dashboard</a>
+</div>
+
 <div class="container">
 
-    <a href="/community" class="back-link">Back to Community List</a>
-
     @if ($errors->any())
-        <div class="card" style="color:red;">
+        <div class="alert-error">
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -101,64 +195,44 @@
     @endif
 
     @if (session('success'))
-        <div class="card" style="color:green;">
+        <div class="alert-success">
             {{ session('success') }}
         </div>
     @endif
 
     @if (session('error'))
-        <div class="card" style="color:red;">
+        <div class="alert-error">
             {{ session('error') }}
         </div>
     @endif
 
     <div class="card">
-
-        <h1>{{ $community->name }}</h1>
-
-        @if($community->is_private)
-            <span class="badge private-badge">
-                Private Community
-            </span>
-        @endif
-
-        <p>{{ $community->description }}</p>
-
-        <p class="meta">
-            Created by {{ $community->creator->username }} • {{ $community->created_at->diffForHumans() }}
-        </p>
-
-    </div>
-
-    <div class="card">
-
-        <h3>
-            Members ({{ $community->members->count() }})
-        </h3>
-
-        @foreach($community->members as $member)
-
-            <div class="member-item">
-
-                {{ $member->username }}
-
-                @if($member->id === $community->user_id)
-                    <span class="creator-badge">
-                        (Creator)
-                    </span>
-                @endif
-
+        <div class="community-header">
+            <div class="community-info">
+                <h2>{{ $community->name }}</h2>
+                <div class="community-total">
+                    {{ $community->members->count() }} members
+                </div>
             </div>
 
-        @endforeach
+            @if($community->is_private)
+                <span class="badge badge-private">Private</span>
+            @else
+                <span class="badge badge-public">Public</span>
+            @endif
+        </div>
 
+        <p class="message">{{ $community->description }}</p>
+
+        <div class="meta">
+            Created by {{ $community->creator->username }} • {{ $community->created_at->diffForHumans() }}
+        </div>
     </div>
 
     <div class="card">
-
         @if(auth()->id() === $community->user_id)
 
-            <button disabled>
+            <button class="btn-disabled" disabled>
                 Creator
             </button>
 
@@ -166,7 +240,7 @@
 
             <form method="POST" action="/community/{{ $community->id }}/leave">
                 @csrf
-                <button type="submit">
+                <button type="submit" class="btn-danger">
                     Leave Community
                 </button>
             </form>
@@ -175,19 +249,31 @@
 
             <form method="POST" action="/community/{{ $community->id }}/join">
                 @csrf
-                <button type="submit">
+                <button type="submit" class="btn-primary">
                     Join Community
                 </button>
             </form>
 
         @endif
+    </div>
 
+    <div class="card">
+        <h3>Members</h3>
+
+        @foreach($community->members as $member)
+            <div class="member-card">
+                <span>{{ $member->username }}</span>
+
+                @if($member->id === $community->user_id)
+                    <span class="creator-badge">Creator</span>
+                @endif
+            </div>
+        @endforeach
     </div>
 
     @if(auth()->id() === $community->user_id)
 
         <div class="card">
-
             <h3>Edit Community</h3>
 
             <form method="POST" action="/community/{{ $community->id }}">
@@ -205,26 +291,21 @@
 
                 <br><br>
 
-                <button type="submit">
+                <button type="submit" class="btn-primary">
                     Update Community
                 </button>
-
             </form>
-
         </div>
 
         <div class="card">
-
             <form method="POST" action="/community/{{ $community->id }}">
                 @csrf
                 @method('DELETE')
 
-                <button type="submit" class="danger-btn" onclick="return confirm('Yakin mau hapus community ini?')">
+                <button type="submit" class="btn-danger" onclick="return confirm('Yakin mau hapus community ini?')">
                     Delete Community
                 </button>
-
             </form>
-
         </div>
 
     @endif
