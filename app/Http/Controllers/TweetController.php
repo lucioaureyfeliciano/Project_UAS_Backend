@@ -39,7 +39,7 @@ class TweetController extends Controller
 
         $blacklist_user_ids = array_merge($blocked_user_id, $muted_user_id);
 
-        $tweets = Tweet::with('user', 'likes', 'dislikes')
+        $tweets = Tweet::with('user', 'likes', 'dislikes', 'reposts', 'comments')
             ->whereNotIn('user_id', $blacklist_user_ids)
             ->latest()
             ->get();
