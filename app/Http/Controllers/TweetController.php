@@ -6,6 +6,8 @@ use App\Models\Tweet;
 use App\Models\Block;
 use Illuminate\Http\Request;
 use App\Models\Mute;
+use App\Models\Hashtag;
+
 
 class TweetController extends Controller
 {
@@ -16,11 +18,28 @@ class TweetController extends Controller
             'content' => 'required|string',
         ]);
 
-        Tweet::create([
+        $tweet =Tweet::create([
             'title' => $request->input('title'),
             'content' => $request->input('content'),
             'user_id' => auth()->id(),
         ]);
+
+        preg_match_all(
+            '/#([a-zA-Z0-9_]+)/',
+            $tweet->content,
+            $matches
+        );
+
+        foreach ($matches[1] as $tag) {
+
+            $hashtag = Hashtag::firstOrCreate([
+                'name' => strtolower($tag)
+            ]);
+
+            $tweet->hashtags()->syncWithoutDetaching([
+                $hashtag->id
+            ]);
+        }
 
         return redirect('/dashboard')->with('success', 'Tweet posted successfully.');
     }
@@ -39,12 +58,17 @@ class TweetController extends Controller
 
         $blacklist_user_ids = array_merge($blocked_user_id, $muted_user_id);
 
-        $tweets = Tweet::with('user', 'likes', 'dislikes')
+        $tweets = Tweet::with('user', 'likes', 'dislikes', 'reposts')
             ->whereNotIn('user_id', $blacklist_user_ids)
             ->latest()
             ->get();
 
-        return view('dashboard', compact('tweets'));
+        $hashtags = Hashtag::withCount('tweets')
+            ->orderByDesc('tweets_count')
+            ->take(5)
+            ->get();
+        
+        return view('dashboard', compact('tweets', 'hashtags'));
     }
 
     public function delete_tweet($id)
@@ -81,6 +105,18 @@ class TweetController extends Controller
         return back()->with('success', 'Tweet updated successfully');
     }
 
+    public function show($id)
+    {
+        $tweet = Tweet::with([
+            'user', 'likes', 'dislikes', 'reposts',
+            'comments' => function($q) {
+                $q->whereNull('parent_id')->with(['user', 'replies.user'])->latest();
+            }
+        ])->findOrFail($id);
+
+        return view('tweets.show', compact('tweet'));
+    }
+
     public function show_privacy()
     {
         $user_id = auth()->id();
@@ -93,5 +129,26 @@ class TweetController extends Controller
             ->get();
 
         return view('privacy', compact('blockedUsers', 'mutedUsers'));
+    }
+
+    public function showHashtag($name)
+    {
+        $hashtag = Hashtag::where(
+            'name',
+            strtolower($name)
+        )->firstOrFail();
+
+        $tweets = $hashtag->tweets()
+            ->with('user')
+            ->latest()
+            ->get();
+
+        return view(
+            'hashtags.show',
+            compact(
+                'hashtag',
+                'tweets'
+            )
+        );
     }
 }

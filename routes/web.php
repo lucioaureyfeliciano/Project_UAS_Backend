@@ -31,15 +31,17 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-# Tweet, Block, Mute Route
+# Tweet, Block, Mute, privacy Route
 Route::middleware('auth')->group(function () {
     Route::post('/tweets', [TweetController::class, 'post_tweet']);
     Route::get('/tweets', [TweetController::class, 'show_tweets']);
+    Route::get('/tweets/{id}', [TweetController::class, 'show'])->name('tweets.show');
     Route::delete('/tweets/{id}', [TweetController::class, 'delete_tweet']);
     Route::put('/tweets/{id}', [TweetController::class, 'edit_tweet']);
     Route::post('/block/{blocked_user_id}', [BlockController::class, 'toggle'])->name('block');
     Route::post('/mute/{muted_user_id}', [MuteController::class, 'toggle'])->name('mute');
     Route::get('/privacy', [TweetController::class, 'show_privacy'])->name('privacy');
+    Route::post('/privacy/toggle', [BlockController::class, 'togglePrivacy'])->name('privacy.toggle');
 });
 
 Route::middleware('auth')->group(function () {
@@ -90,6 +92,7 @@ Route::post('/tweets/{tweet}/like', [LikeController::class, 'toggle'])->middlewa
 
 # Profile Routes
 Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth');
+Route::get('/profile/{username}', [ProfileController::class, 'show'])->middleware('auth')->name('profile.show');
 
 # Update Description Profile
 Route::post('/profile/update-description', [ProfileController::class, 'updateDescription']);
@@ -112,4 +115,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/messages/search', [MessageController::class, 'search']);
 });
+
+// Hashtag Route
+Route::get(
+    '/hashtags/{name}',
+    [TweetController::class, 'showHashtag']
+)->middleware('auth');
 
