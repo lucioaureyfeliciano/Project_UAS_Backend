@@ -10,7 +10,7 @@ class BookmarkController extends Controller
     public function index()
     {
         $bookmarks = Bookmark::where('user_id', auth()->id())
-            ->with('tweet.user')
+            ->with(['tweet.user', 'tweet.likes', 'tweet.dislikes', 'tweet.reposts', 'tweet.comments'])
             ->latest()
             ->paginate(15);
 
