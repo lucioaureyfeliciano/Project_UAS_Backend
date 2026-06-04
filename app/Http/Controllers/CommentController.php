@@ -72,16 +72,16 @@ class CommentController extends Controller
     {
         $comment = Comment::findOrFail($id);
         if ($comment->user_id !== auth()->id()) abort(403);
-        return view('comments.edit', compact('comment'));
+        return redirect()->route('comments.index', $comment->tweet_id);
     }
 
-    public function update($id)
+    public function update(Request $request, $id)
     {
         $comment = Comment::findOrFail($id);
         if ($comment->user_id !== auth()->id()) abort(403);
 
         $comment->update(request()->validate(['content' => 'required|max:500']));
-        return redirect()->route('comments.index', $comment->tweet_id)->with('success', 'Updated!');
+        return redirect()->route('tweets.show', $comment->tweet_id)->with('success', 'Comment updated!');
     }
 
     public function destroy($id)
@@ -91,7 +91,7 @@ class CommentController extends Controller
 
         $tweet_id = $comment->tweet_id;
         $comment->delete();
-        return redirect()->route('comments.index', $tweet_id)->with('success', 'Deleted!');
+        return redirect()->route('tweets.show', $tweet_id)->with('success', 'Deleted!');
     }
 
     public function show($id)

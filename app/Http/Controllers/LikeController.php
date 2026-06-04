@@ -34,9 +34,8 @@ class LikeController extends Controller
             }
         }
 
-        return response()->json([
-            'count' => $tweet->likes()->count(),
-            'status' => $like ? 'removed' : 'added'
-        ]);
-    }
+        return request()->expectsJson()
+            ? response()->json(['count' => $tweet->likes()->count(), 'status' => $like ? 'removed' : 'added'])
+            : redirect()->back();
+        }
 }
