@@ -64,6 +64,42 @@
             color: #999;
         }
 
+        .comment-actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-edit:hover {
+            background: #d68910;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+
         .reply-card {
             background: #f9f9f9;
             border-left: 3px solid #3490dc;
@@ -71,6 +107,42 @@
             border-radius: 5px;
             margin-top: 8px;
             margin-left: 20px;
+        }
+
+        .reply-btn {
+            background: transparent;
+            border: 1px solid #3490dc;
+            color: #3490dc;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .reply-form {
+            display: none;
+            margin-top: 10px;
+            padding-left: 20px;
+            border-left: 3px solid #e0e0e0;
+        }
+
+        .reply-send-btn {
+            background: #3490dc;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        .reply-cancel-btn {
+            background: #f5c2c7;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 6px;
         }
 
         .alert-success {
@@ -135,19 +207,59 @@
                 <div class="comment-username">{{ $comment->user?->username ?? 'Unknown' }}</div>
                 <div class="comment-content">{{ $comment->content }}</div>
                 <div class="comment-meta">{{ $comment->created_at->diffForHumans() }}</div>
+
+                <div style="margin-top:8px;">
+                    <button onclick="toggleReply('reply-{{ $comment->id }}')" class="reply-btn">↩ Reply</button>
+                </div>
+
+                <div id="reply-{{ $comment->id }}" class="reply-form">
+                    <form method="POST" action="{{ route('comments.store', $tweet->id) }}">
+                        @csrf
+                            <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                            <textarea name="content" rows="2"  placeholder="Tulis balasan..." required ></textarea>
+                            <button type="submit" class="reply-send-btn">Send </button>
+                            <button type="button" onclick="toggleReply('reply-{{ $comment->id }}')" class="reply-cancel-btn">Cancel</button>
+                    </form>
+                </div>
+
                 @foreach($comment->replies as $reply)
                     <div class="reply-card">
                         <div class="comment-username" style="font-size:13px;">{{ $reply->user?->username ?? 'Unknown' }}</div>
                         <div style="font-size:13px; color:#333;">{{ $reply->content }}</div>
                         <div class="comment-meta">{{ $reply->created_at->diffForHumans() }}</div>
+         
+                        @if($reply->user_id === auth()->id())
+                            <div class="comment-actions">
+                                <a href="{{ route('comments.edit', $reply->id) }}" class="btn-edit">
+                                    Edit
+                                </a>
+
+                                <form action="{{ route('comments.destroy', $reply->id) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Delete this reply?')">
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit" class="btn-delete">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             </div>
         @empty
-            <p style="color:#888; text-align:center;">Belum ada komentar.</p>
+            <p style="color:#888; text-align:center;">No comments yet.</p>
         @endforelse
     </div>
 
 </div>
+<script>
+function toggleReply(id) {
+    const el = document.getElementById(id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
 </body>
 </html>

@@ -36,10 +36,26 @@ class CommentController extends Controller
             'content' => $validated['content'],
             'user_id' => auth()->id(),
             'tweet_id' => $tweet_id,
+            'parent_id' => request()->input('parent_id', null),
         ]);
 
         $tweet = Tweet::find($tweet_id);
-        if ($tweet && $tweet->user_id !== auth()->id()) {
+        if ($comment->parent_id) 
+        {
+            $parentComment = Comment::find($comment->parent_id);
+            if ($parentComment && $parentComment->user_id !== auth()->id()) {
+                Notification::create([
+                    'user_id'         => $parentComment->user_id,
+                    'type'            => 'comment',
+                    'message'         => auth()->user()->username . ' replied to your comment',
+                    'is_read'         => false,
+                    'related_user_id' => auth()->id(),
+                    'tweet_id'        => $tweet_id,
+                ]);
+            }
+
+        } elseif ($tweet && $tweet->user_id !== auth()->id()) 
+        {
             Notification::create([
                 'user_id'         => $tweet->user_id,
                 'type'            => 'comment',
@@ -48,7 +64,6 @@ class CommentController extends Controller
                 'related_user_id' => auth()->id(),
                 'tweet_id'        => $tweet_id,
             ]);
-
         }
         return redirect()->route('tweets.show', $tweet_id)->with('success', 'Comment posted!');
     }
