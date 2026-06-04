@@ -5,69 +5,108 @@
 
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial;
             background: #f4f4f4;
             margin: 0;
-            padding: 30px;
+        }
+
+        .navbar {
+            background: #3490dc;
+            padding: 15px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
         }
 
         .container {
-            max-width: 900px;
-            margin: auto;
+            width: 900px;
+            margin: 25px auto;
         }
 
-        .top-link {
-            display: inline-block;
-            margin-bottom: 18px;
-            color: #3490dc;
-            text-decoration: none;
-        }
-
-        .header-card {
+        .card {
             background: white;
             padding: 20px;
-            margin-bottom: 16px;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            gap: 15px;
         }
 
         .stat-card {
             background: white;
-            padding: 20px;
+            border: 1px solid #ddd;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 20px;
             text-align: center;
+            border-left: 4px solid #3490dc;
         }
 
         .stat-card h3 {
             margin: 0;
             color: #666;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .stat-card p {
+            margin: 12px 0 0;
             font-size: 32px;
             font-weight: bold;
-            margin: 12px 0 0;
             color: #3490dc;
+        }
+
+        .usage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .usage-info h2 {
+            margin: 0;
+        }
+
+        .usage-total {
+            color: #888;
+            font-size: 14px;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
+<div class="navbar">
+    <a href="/dashboard" class="back-btn">Back</a>
+    <strong>Usage Statistics</strong>
+    <span></span>
+</div>
+
 <div class="container">
 
-    <a href="/dashboard" class="top-link">Back to Dashboard</a>
+    <div class="card">
 
-    <div class="header-card">
-        <h1>Usage Statistics</h1>
-        <p>Summary of application usage data.</p>
+        <div class="usage-header">
+
+            <div class="usage-info">
+                <h2>Platform Statistics</h2>
+
+                <div class="usage-total">
+                    Summary of application usage data
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
     <div class="stats-grid">
@@ -110,6 +149,11 @@
         <div class="stat-card">
             <h3>Total Messages</h3>
             <p>{{ $totalMessages }}</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Bookmarks</h3>
+            <p>{{ $totalBookmarks }}</p>
         </div>
 
     </div>
