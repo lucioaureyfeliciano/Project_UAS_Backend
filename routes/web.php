@@ -143,3 +143,10 @@ Route::get(
     [TweetController::class, 'showHashtag']
 )->middleware('auth');
 
+// Search Route
+Route::get(
+    '/search/users',
+    [ProfileController::class, 'search']
+)->middleware('auth')
+ ->name('search.users');
+

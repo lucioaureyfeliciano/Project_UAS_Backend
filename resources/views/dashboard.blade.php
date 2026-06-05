@@ -323,6 +323,16 @@
                     </form>
                 </div>
             </div>
+            {{-- Search --}}
+            <form action="{{ route('search.users') }}" method="GET">
+
+                <input type="text" name="search" placeholder="Search user..." style="
+                padding:8px;
+                border:none;
+                border-radius:8px;
+            ">
+
+            </form>
         </div>
     </div>
 
@@ -431,64 +441,64 @@
                                 @endif
 
                                 @if($tweet->user_id !== auth()->id())
-                                                    @php
-                                                        $isBlocked = \App\Models\Block::where('user_id', auth()->id())
-                                                            ->where('blocked_user_id', $tweet->user_id)
-                                                            ->exists();
+                                    @php
+                                        $isBlocked = \App\Models\Block::where('user_id', auth()->id())
+                                            ->where('blocked_user_id', $tweet->user_id)
+                                            ->exists();
 
-                                                        $isMuted = \App\Models\Mute::where('user_id', auth()->id())
-                                                            ->where('muted_user_id', $tweet->user_id)
-                                                            ->exists();
-                                                    @endphp
+                                        $isMuted = \App\Models\Mute::where('user_id', auth()->id())
+                                            ->where('muted_user_id', $tweet->user_id)
+                                            ->exists();
+                                    @endphp
 
-                                                    @php
+                                    @php
 
-                                                        $isFollowing = \App\Models\Follow::where(
-                                                            'follower_id',
-                                                            auth()->id()
-                                                        )
-                                                            ->where(
-                                                                'following_id',
-                                                                $tweet->user_id
-                                                            )
-                                                            ->exists();
+                                        $isFollowing = \App\Models\Follow::where(
+                                            'follower_id',
+                                            auth()->id()
+                                        )
+                                            ->where(
+                                                'following_id',
+                                                $tweet->user_id
+                                            )
+                                            ->exists();
 
-                                                    @endphp
+                                    @endphp
 
-                                                    <form method="POST" action="{{ route('follow', $tweet->user_id) }}">
+                                    <form method="POST" action="{{ route('follow', $tweet->user_id) }}">
 
-                                                        @csrf
+                                        @csrf
 
-                                                        <button type="submit" class="reaction-btn" style="
-                                        color:white;
-                                        background:
-                                            {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
-                                    ">
-                                                            {{ $isFollowing ? 'Following' : 'Follow' }}
-                                                        </button>
+                                        <button type="submit" class="reaction-btn" style="
+                                                    color:white;
+                                                    background:
+                                                        {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
+                                                ">
+                                            {{ $isFollowing ? 'Following' : 'Follow' }}
+                                        </button>
 
-                                                    </form>
+                                    </form>
 
-                                                    <div class="tweet-menu-container">
-                                                        <button class="tweet-menu-btn">•••</button>
-                                                        <div class="tweet-dropdown">
-                                                            @if(!$isBlocked)
-                                                                <form method="POST" action="{{ route('block', $tweet->user_id) }}"
-                                                                    onsubmit="return confirm('Yakin ingin memblokir akun ini?')">
-                                                                    @csrf
-                                                                    <button type="submit" style="color: #7f8c8d;">Block</button>
-                                                                </form>
-                                                            @endif
+                                    <div class="tweet-menu-container">
+                                        <button class="tweet-menu-btn">•••</button>
+                                        <div class="tweet-dropdown">
+                                            @if(!$isBlocked)
+                                                <form method="POST" action="{{ route('block', $tweet->user_id) }}"
+                                                    onsubmit="return confirm('Yakin ingin memblokir akun ini?')">
+                                                    @csrf
+                                                    <button type="submit" style="color: #7f8c8d;">Block</button>
+                                                </form>
+                                            @endif
 
-                                                            @if(!$isBlocked && !$isMuted)
-                                                                <form method="POST" action="{{ route('mute', $tweet->user_id) }}"
-                                                                    onsubmit="return confirm('Yakin ingin membisukan akun ini?')">
-                                                                    @csrf
-                                                                    <button type="submit" style="color: #d35400;">Mute</button>
-                                                                </form>
-                                                            @endif
-                                                        </div>
-                                                    </div>
+                                            @if(!$isBlocked && !$isMuted)
+                                                <form method="POST" action="{{ route('mute', $tweet->user_id) }}"
+                                                    onsubmit="return confirm('Yakin ingin membisukan akun ini?')">
+                                                    @csrf
+                                                    <button type="submit" style="color: #d35400;">Mute</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </div>
                                 @endif
                             </div>
                         </div>

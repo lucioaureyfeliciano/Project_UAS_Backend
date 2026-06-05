@@ -94,4 +94,25 @@ class ProfileController extends Controller
         return view('follows.following', compact('user'));
     }
 
+    public function search(Request $request)
+    {
+        $keyword = $request->search;
+
+        $users = User::where(
+            'username',
+            'like',
+            '%' . $keyword . '%'
+        )
+            ->where('id', '!=', auth()->id())
+            ->get();
+
+        return view(
+            'search.search',
+            compact(
+                'users',
+                'keyword'
+            )
+        );
+    }
+
 }
