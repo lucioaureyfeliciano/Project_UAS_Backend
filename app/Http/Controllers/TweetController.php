@@ -80,6 +80,7 @@ class TweetController extends Controller
         }
 
         $tweet->delete();
+        Hashtag::doesntHave('tweets')->delete();
 
         return back()->with('success', 'Tweet deleted successfully');
     }
@@ -143,11 +144,17 @@ class TweetController extends Controller
             ->latest()
             ->get();
 
+        $hashtags = Hashtag::has('tweets')
+            ->withCount('tweets')
+            ->orderByDesc('tweets_count')
+            ->get();
+
         return view(
             'hashtags.show',
             compact(
                 'hashtag',
-                'tweets'
+                'tweets',
+                'hashtags'
             )
         );
     }
