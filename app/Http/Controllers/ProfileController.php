@@ -17,7 +17,7 @@ class ProfileController extends Controller
             ->latest()
             ->get();
 
-        return view('profile', compact('user', 'tweets'));
+        return view('profile', compact('user', 'tweets'))->with('isLocked', false);
     }
 
     public function updateDescription(Request $request)
@@ -35,12 +35,21 @@ class ProfileController extends Controller
     {
         $user = User::where('username', $username)->firstOrFail();
 
+        if ($user->is_private == 1 && auth()->id() != $user->id) {
+            $tweets = collect();
+            $isLocked = true;
+
+            return view('profile', compact('user', 'tweets', 'isLocked'));
+        }
+
         $tweets = Tweet::where('user_id', $user->id)
             ->with(['likes', 'dislikes', 'reposts'])
             ->latest()
             ->get();
 
-        return view('profile', compact('user', 'tweets'));
+        $isLocked = false;
+
+        return view('profile', compact('user', 'tweets', 'isLocked'));
     }
     
 }

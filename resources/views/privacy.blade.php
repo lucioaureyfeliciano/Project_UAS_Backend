@@ -88,6 +88,24 @@
         </div>
     @endif
 
+    <div class="card" style="border-top: 3px solid #3490dc;">
+        <h3>Pengaturan Privasi Akun</h3>
+        
+        <form method="POST" action="{{ route('privacy.toggle') }}" style="margin-top: 15px;">
+            @csrf
+            
+            @if(auth()->user()->is_private == 1)
+                <button type="submit" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; background-color: #2c3e50; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;">
+                    <span>🔒</span> PRIVATE (Klik untuk Ubah ke Public)
+                </button>
+            @else
+                <button type="submit" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;">
+                    <span>🔓</span> PUBLIC (Klik untuk Ubah ke Private)
+                </button>
+            @endif
+        </form>
+    </div>
+
     <div class="card" style="border-top: 3px solid #e74c3c;">
         <h3>Daftar Akun Terblokir</h3>
         

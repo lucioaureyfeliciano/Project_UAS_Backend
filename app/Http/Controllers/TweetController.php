@@ -6,6 +6,8 @@ use App\Models\Tweet;
 use App\Models\Block;
 use Illuminate\Http\Request;
 use App\Models\Mute;
+use App\Models\Hashtag;
+
 
 class TweetController extends Controller
 {
@@ -16,11 +18,28 @@ class TweetController extends Controller
             'content' => 'required|string',
         ]);
 
-        Tweet::create([
+        $tweet =Tweet::create([
             'title' => $request->input('title'),
             'content' => $request->input('content'),
             'user_id' => auth()->id(),
         ]);
+
+        preg_match_all(
+            '/#([a-zA-Z0-9_]+)/',
+            $tweet->content,
+            $matches
+        );
+
+        foreach ($matches[1] as $tag) {
+
+            $hashtag = Hashtag::firstOrCreate([
+                'name' => strtolower($tag)
+            ]);
+
+            $tweet->hashtags()->syncWithoutDetaching([
+                $hashtag->id
+            ]);
+        }
 
         return redirect('/dashboard')->with('success', 'Tweet posted successfully.');
     }
@@ -44,7 +63,12 @@ class TweetController extends Controller
             ->latest()
             ->get();
 
-        return view('dashboard', compact('tweets'));
+        $hashtags = Hashtag::withCount('tweets')
+            ->orderByDesc('tweets_count')
+            ->take(5)
+            ->get();
+        
+        return view('dashboard', compact('tweets', 'hashtags'));
     }
 
     public function delete_tweet($id)
@@ -56,6 +80,7 @@ class TweetController extends Controller
         }
 
         $tweet->delete();
+        Hashtag::doesntHave('tweets')->delete();
 
         return back()->with('success', 'Tweet deleted successfully');
     }
@@ -105,5 +130,32 @@ class TweetController extends Controller
             ->get();
 
         return view('privacy', compact('blockedUsers', 'mutedUsers'));
+    }
+
+    public function showHashtag($name)
+    {
+        $hashtag = Hashtag::where(
+            'name',
+            strtolower($name)
+        )->firstOrFail();
+
+        $tweets = $hashtag->tweets()
+            ->with('user')
+            ->latest()
+            ->get();
+
+        $hashtags = Hashtag::has('tweets')
+            ->withCount('tweets')
+            ->orderByDesc('tweets_count')
+            ->get();
+
+        return view(
+            'hashtags.show',
+            compact(
+                'hashtag',
+                'tweets',
+                'hashtags'
+            )
+        );
     }
 }
