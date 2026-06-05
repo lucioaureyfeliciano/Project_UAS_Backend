@@ -42,10 +42,9 @@ class RepostController extends Controller
 
             $status = 'added';
         }
-
-        return response()->json([
-            'count' => $tweet->reposts()->count(),
-            'status' => $status
-        ]);
-    }
+        
+        return request()->expectsJson()
+            ? response()->json(['count' => $tweet->reposts()->count(), 'status' => $status])
+            : redirect()->back();
+        }
 }
