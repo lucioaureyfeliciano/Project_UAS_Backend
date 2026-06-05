@@ -84,7 +84,7 @@ class TweetController extends Controller
     public function show($id)
     {
         $tweet = Tweet::with([
-            'user', 'likes', 'dislikes', 'reposts',
+            'user', 'likes', 'dislikes', 'reposts', 'bookmarks',
             'comments' => function($q) {
                 $q->whereNull('parent_id')->with(['user', 'replies.user'])->latest();
             }
