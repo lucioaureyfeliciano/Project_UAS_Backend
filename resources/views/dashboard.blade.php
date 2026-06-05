@@ -353,6 +353,34 @@
     </div>
 
     <div class="card">
+
+        <h3>Trending Hashtags</h3>
+
+        @forelse($hashtags as $hashtag)
+
+            <div style="padding:8px 0; border-bottom:1px solid #eee;">
+
+                <strong>
+                    <a href="/hashtags/{{ $hashtag->name }}">
+                        #{{ $hashtag->name }}
+                    </a>
+                </strong>
+
+                <span style="float:right;">
+                    {{ $hashtag->tweets_count }}
+                </span>
+
+            </div>
+
+        @empty
+
+            <p>No hashtags yet.</p>
+
+        @endforelse
+
+    </div>
+
+    <div class="card">
         <h3>Post a Tweet</h3>
         <form method="POST" action="/tweets">
             @csrf
