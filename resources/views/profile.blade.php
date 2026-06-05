@@ -368,6 +368,21 @@
             text-align: center;
             box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.05);
         }
+
+        .follow-btn {
+            border: none;
+            padding: 10px 22px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: 0.2s;
+        }
+
+        .follow-btn:hover {
+            transform: scale(1.05);
+        }
     </style>
 
 </head>
@@ -397,7 +412,21 @@
             <div class="profile-left">
 
                 <h1>{{ $user->username }}</h1>
+                @if(auth()->id() !== $user->id)
 
+                        <form method="POST" action="{{ route('follow', $user->id) }}">
+                            @csrf
+
+                            <button type="submit" class="follow-btn" style="
+                        background:
+                        {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
+                    ">
+                                {{ $isFollowing ? 'Following' : 'Follow' }}
+                            </button>
+
+                        </form>
+
+                @endif
                 <div class="description-section">
                     <p class="description-text">
                         {{ $user->description ?? '[Add your description]' }}

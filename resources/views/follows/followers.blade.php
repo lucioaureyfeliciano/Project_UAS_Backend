@@ -273,7 +273,7 @@
                                         @csrf
 
                                         <button type="submit" style="color:red;">
-                                            Unfollow
+                                            Unfriend
                                         </button>
 
                                     </form>

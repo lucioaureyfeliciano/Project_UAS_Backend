@@ -60,7 +60,20 @@ class ProfileController extends Controller
 
         $isLocked = false;
 
-        return view('profile', compact('user', 'tweets', 'isLocked'));
+        $isFollowing = false;
+
+        if (auth()->id() != $user->id) {
+
+            $isFollowing = \App\Models\Follow::where(
+                'follower_id',
+                auth()->id()
+            )->where(
+                    'following_id',
+                    $user->id
+                )->exists();
+
+        }
+        return view('profile', compact('user', 'tweets', 'isLocked', 'isFollowing'));
     }
 
     public function followers($username)
