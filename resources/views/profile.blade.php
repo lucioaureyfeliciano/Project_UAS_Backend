@@ -325,14 +325,15 @@
 
             <h1>{{ $user->username }}</h1>
 
+        @if(auth()->id() == $user->id)
             <div class="profile-edit-row">
                 <button
                     class="edit-description-btn"
-                    onclick="openDescriptionEdit()"
-                >
+                    onclick="openDescriptionEdit()">
                     [edit]
                 </button>
             </div>
+        @endif
 
             <div class="description-section">
                 <p class="description-text">
@@ -454,35 +455,37 @@
 
                     </div>
 
-                    <div class="tweet-menu-container">
+                    @if(auth()->id() == $user->id)
+                        <div class="tweet-menu-container">
 
-                        <button class="tweet-menu-btn">
-                            •••
-                        </button>
-
-                        <div class="tweet-dropdown">
-
-                            <button onclick="openEdit({{ $tweet->id }})">
-                                Edit
+                            <button class="tweet-menu-btn">
+                                •••
                             </button>
 
-                            <form action="/tweets/{{ $tweet->id }}" method="POST">
+                            <div class="tweet-dropdown">
 
-                                @csrf
-                                @method('DELETE')
-
-                                <button
-                                    type="submit"
-                                    style="color:red;"
-                                >
-                                    Delete
+                                <button onclick="openEdit({{ $tweet->id }})">
+                                    Edit
                                 </button>
 
-                            </form>
+                                <form action="/tweets/{{ $tweet->id }}" method="POST">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button
+                                        type="submit"
+                                        style="color:red;"
+                                    >
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </div>
 
                         </div>
-
-                    </div>
+                    @endif
 
                 </div>
 

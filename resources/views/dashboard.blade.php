@@ -415,11 +415,22 @@
                         <div class="tweet-content">
                             <h4>{{ $tweet->title }}</h4>
                             <p>{{ $tweet->content }}</p>
-                            <small>{{ $tweet->user?->username ?? 'Unknown' }} • {{ $tweet->created_at->diffForHumans() }}</small>
+
+                            <small>
+                                @if($tweet->user_id === auth()->id())
+                                    <a href="/profile" style="text-decoration: none; color: #3490dc; font-weight: bold;">
+                                        {{ $tweet->user?->username ?? 'Unknown' }}
+                                    </a>
+                                @else
+                                    <a href="{{ route('user.profile', $tweet->user?->username) }}" style="text-decoration: none; color: #3490dc; font-weight: bold;">
+                                        {{ $tweet->user?->username ?? 'Unknown' }}
+                                    </a>
+                                @endif
+                                • {{ $tweet->created_at->diffForHumans() }}
+                            </small>
                         </div>
 
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            {{-- Dropdown Tweet Sendiri --}}
                             @if($tweet->user_id === auth()->id())
                                 <div class="tweet-menu-container">
                                     <button class="tweet-menu-btn">•••</button>
