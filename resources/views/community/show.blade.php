@@ -51,6 +51,7 @@
 
         .community-total {
             color: #888;
+            margin-top: 4px;
         }
 
         .badge {
@@ -59,7 +60,6 @@
             border-radius: 12px;
             font-size: 11px;
             font-weight: bold;
-            margin-bottom: 6px;
         }
 
         .badge-private {
@@ -177,7 +177,7 @@
 <body>
 
 <div class="navbar">
-    <a href="/community" class="back-btn">Back</a>
+    <a href="/community" class="back-btn">← Back</a>
     <strong>Community Detail</strong>
     <a href="/dashboard" class="back-btn">Dashboard</a>
 </div>
@@ -195,24 +195,19 @@
     @endif
 
     @if (session('success'))
-        <div class="alert-success">
-            {{ session('success') }}
-        </div>
+        <div class="alert-success"> {{ session('success') }} </div>
     @endif
 
     @if (session('error'))
-        <div class="alert-error">
-            {{ session('error') }}
-        </div>
+        <div class="alert-error"> {{ session('error') }} </div>
     @endif
 
     <div class="card">
         <div class="community-header">
             <div class="community-info">
                 <h2>{{ $community->name }}</h2>
-                <div class="community-total">
-                    {{ $community->members->count() }} members
-                </div>
+                <div class="community-total">{{ $community->members->count() }} members</div>
+
             </div>
 
             @if($community->is_private)
@@ -222,36 +217,33 @@
             @endif
         </div>
 
-        <p class="message">{{ $community->description }}</p>
+        <p class="message"> {{ $community->description }} </p>
+        <div class="meta">Created by {{ $community->creator->username }} • {{ $community->created_at->diffForHumans() }}</div>
 
-        <div class="meta">
-            Created by {{ $community->creator->username }} • {{ $community->created_at->diffForHumans() }}
-        </div>
     </div>
 
     <div class="card">
         @if(auth()->id() === $community->user_id)
-
-            <button class="btn-disabled" disabled>
-                Creator
-            </button>
-
+            <button class="btn-disabled" disabled>Creator</button>
         @elseif($community->members->contains(auth()->id()))
 
             <form method="POST" action="/community/{{ $community->id }}/leave">
                 @csrf
-                <button type="submit" class="btn-danger">
-                    Leave Community
-                </button>
+                <button type="submit" class="btn-danger">Leave Community</button>
+            </form>
+
+        @elseif($community->is_private)
+
+            <form method="POST" action="/community/{{ $community->id }}/request-join">
+                @csrf
+                <button type="submit" class="btn-primary">Request Join</button>
             </form>
 
         @else
 
             <form method="POST" action="/community/{{ $community->id }}/join">
                 @csrf
-                <button type="submit" class="btn-primary">
-                    Join Community
-                </button>
+                <button type="submit" class="btn-primary">Join Community</button>
             </form>
 
         @endif
@@ -261,6 +253,7 @@
         <h3>Members</h3>
 
         @foreach($community->members as $member)
+
             <div class="member-card">
                 <span>{{ $member->username }}</span>
 
@@ -268,10 +261,44 @@
                     <span class="creator-badge">Creator</span>
                 @endif
             </div>
+
         @endforeach
     </div>
 
     @if(auth()->id() === $community->user_id)
+
+        <div class="card">
+            <h3>Pending Join Requests</h3>
+
+            @php
+                $pendingRequests = $community->joinRequests()->with('user')->where('status', 'pending')->get();
+            @endphp
+
+            @if($pendingRequests->isEmpty())
+                <p>No pending requests.</p>
+            @endif
+
+            @foreach($pendingRequests as $request)
+
+                <div class="member-card">
+                    <span>{{ $request->user->username }}</span>
+
+                    <div>
+                        <form method="POST" action="/community/{{ $community->id }}/requests/{{ $request->id }}/approve" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn-primary">Approve</button>
+                        </form>
+
+                        <form method="POST" action="/community/{{ $community->id }}/requests/{{ $request->id }}/reject" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="btn-danger">Reject</button>
+                        </form>
+                    </div>
+
+                </div>
+
+            @endforeach
+        </div>
 
         <div class="card">
             <h3>Edit Community</h3>
@@ -281,7 +308,6 @@
                 @method('PUT')
 
                 <input type="text" name="name" value="{{ $community->name }}" required>
-
                 <textarea name="description" required>{{ $community->description }}</textarea>
 
                 <label>
@@ -291,9 +317,7 @@
 
                 <br><br>
 
-                <button type="submit" class="btn-primary">
-                    Update Community
-                </button>
+                <button type="submit" class="btn-primary">Update Community</button>
             </form>
         </div>
 
@@ -309,7 +333,6 @@
         </div>
 
     @endif
-
 </div>
 
 </body>

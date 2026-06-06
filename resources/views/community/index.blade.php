@@ -199,19 +199,17 @@
 <body>
 
 <div class="navbar">
-    <a href="/dashboard" class="back-btn">Back</a>
+    <a href="/dashboard" class="back-btn">← Back</a>
     <strong>Community List</strong>
     <span></span>
 </div>
 
 <div class="container">
-
     <div class="card">
         <h2>Search Community</h2>
 
         <form method="GET" action="/community">
             <input type="text" name="search" placeholder="Search community..." value="{{ $search ?? '' }}">
-
             <button type="submit">Search</button>
 
             @if(!empty($search))
@@ -225,20 +223,16 @@
 
         <form method="POST" action="/community">
             @csrf
-
             <input type="text" name="name" placeholder="Community Name" required>
-
             <textarea name="description" placeholder="Description" required></textarea>
-
             <label>
                 <input type="checkbox" name="is_private" value="1" style="width:auto;">
                 Private Community
             </label>
-
             <br><br>
-
             <button type="submit">Create Community</button>
         </form>
+
     </div>
 
     @if ($errors->any())
@@ -252,9 +246,11 @@
     @endif
 
     @if (session('success'))
-        <div class="alert-success">
-            {{ session('success') }}
-        </div>
+        <div class="alert-success"> {{ session('success') }} </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert-error"> {{ session('error') }} </div>
     @endif
 
     @if($communities->isEmpty())
@@ -264,12 +260,9 @@
     @endif
 
     @foreach($communities as $community)
-
         <div class="community-card {{ $community->is_private ? 'private' : 'public' }}">
 
-            <div class="community-icon">
-                👥
-            </div>
+            <div class="community-icon"> 👥 </div>
 
             <div class="community-body">
 
@@ -280,57 +273,48 @@
                 @endif
 
                 <h3 class="community-title">
-                    <a href="/community/{{ $community->id }}"> {{ $community->name }} </a>
+                    <a href="/community/{{ $community->id }}">{{ $community->name }}</a>
                 </h3>
-
-                <div class="community-message">
-                    {{ $community->description }}
-                </div>
+                <div class="community-message"> {{ $community->description }} </div>
 
                 <div class="community-time">
-                    {{ $community->members->count() }} Members • Created by {{ $community->creator->username }} • {{ $community->created_at->diffForHumans() }}
+                    {{ $community->members->count() }} Members 
+                    • Created by {{ $community->creator->username }} 
+                    • {{ $community->created_at->diffForHumans() }}
                 </div>
 
             </div>
 
             <div class="community-actions">
-
                 @if(auth()->id() === $community->user_id)
-
                     <span class="badge badge-creator">Creator</span>
-
                 @elseif($community->is_private)
 
-                    <button disabled>
-                        Private
-                    </button>
+                    <form method="POST" action="/community/{{ $community->id }}/request-join">
+                        @csrf
+                        <button type="submit">Request Join</button>
+                    </form>
 
                 @elseif($community->members->contains(auth()->id()))
 
                     <form method="POST" action="/community/{{ $community->id }}/leave">
                         @csrf
-                        <button type="submit">
-                            Leave
-                        </button>
+                        <button type="submit">Leave</button>
                     </form>
 
                 @else
 
                     <form method="POST" action="/community/{{ $community->id }}/join">
                         @csrf
-                        <button type="submit">
-                            Join
-                        </button>
+                        <button type="submit">Join</button>
                     </form>
 
                 @endif
-
             </div>
 
         </div>
 
     @endforeach
-
 </div>
 
 </body>
