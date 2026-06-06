@@ -9,12 +9,21 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = Notification::where('user_id', auth()->id())
-            ->with(['relatedUser', 'tweet'])
-            ->latest()
-            ->paginate(15);
+        $filter = request('filter', 'all');
 
-        return view('notifications.index', compact('notifications'));
+        $query = Notification::where('user_id', auth()->id())
+            ->with(['relatedUser', 'tweet'])
+            ->latest();
+
+        if ($filter === 'unread') {
+            $query->where('is_read', false);
+        } elseif ($filter === 'read') {
+            $query->where('is_read', true);
+        }
+
+        $notifications = $query->paginate(15);
+
+        return view('notifications.index', compact('notifications', 'filter'));
     }
 
     public function markAsRead($id)
@@ -44,5 +53,14 @@ class NotificationController extends Controller
             ->update(['is_read' => true]);
 
         return back()->with('success', 'All notifications marked as read.');
+    }
+
+    public function destroyAll()
+    {
+        \App\Models\Notification::where('user_id', auth()->id())->delete();
+
+        return redirect()
+            ->route('notifications.index')
+            ->with('success', 'All notifications deleted!');
     }
 }
