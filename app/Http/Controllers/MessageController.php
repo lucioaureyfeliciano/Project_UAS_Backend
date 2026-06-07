@@ -38,20 +38,40 @@ class MessageController extends Controller
 
     public function chat($userId)
     {
+        Message::where('sender_id', $userId)
+            ->where('receiver_id', auth()->id())
+            ->whereNull('read_at')
+            ->update([
+                'read_at' => now()
+            ]);
+
         $messages = Message::where(function ($query) use ($userId) {
-            $query->where('sender_id', auth()->id())
-                ->where('receiver_id', $userId);
-        })->orWhere(function ($query) use ($userId) {
-            $query->where('sender_id', $userId)
-                ->where('receiver_id', auth()->id());
-        })
-        ->with(['sender', 'receiver'])
-        ->orderBy('created_at')
-        ->get();
 
-        $user = User::findOrFail($userId);
+                $query->where('sender_id', auth()->id())
+                    ->where('receiver_id', $userId);
 
-        return view('message.chat', compact('messages', 'user'));
+            })
+
+            ->orWhere(function ($query) use ($userId) {
+
+                $query->where('sender_id', $userId)
+                    ->where('receiver_id', auth()->id());
+
+            })
+
+            ->with('sender')
+            ->orderBy('created_at')
+            ->get();
+
+        $receiver = User::findOrFail($userId);
+
+        return view(
+            'message.chat',
+            compact(
+                'messages',
+                'receiver'
+            )
+        );
     }
 
     public function store(Request $request)
