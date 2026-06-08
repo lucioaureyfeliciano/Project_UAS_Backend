@@ -67,13 +67,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookmarks/{id}', [BookmarkController::class, 'show'])->name('bookmarks.show');
 });
 
-# Usage Routes
 Route::middleware('auth')->group(function () {
+    # Usage Routes
     Route::get('/usage', [UsageController::class, 'index']);
-});
 
-# Community Routes
-Route::middleware('auth')->group(function () {
+    # Community Routes
     Route::get('/community', [CommunityController::class, 'index']);
     Route::post('/community', [CommunityController::class, 'create']);
     Route::get('/community/{id}', [CommunityController::class, 'show']);
@@ -81,6 +79,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/community/{id}', [CommunityController::class, 'destroy']);
     Route::post('/community/{id}/join', [CommunityController::class, 'join']);
     Route::post('/community/{id}/leave', [CommunityController::class, 'leave']);
+    Route::post('/community/{id}/request-join', [CommunityController::class, 'requestToJoin']);
+    Route::post('/community/{id}/requests/{requestId}/reject', [CommunityController::class, 'rejectRequest']);
+    Route::post('/community/{id}/requests/{requestId}/approve', [CommunityController::class, 'approveRequest']);
 });
 
 # Dislike Routes
