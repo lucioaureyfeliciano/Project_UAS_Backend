@@ -427,6 +427,11 @@
                                     </a>
                                 @endif
                                 • {{ $tweet->created_at->diffForHumans() }}
+                                @if($tweet->updated_at != $tweet->created_at)
+                                    <span style="color: #999; font-size: 0.85rem; font-style: italic;">
+                                        (Edited {{ $tweet->updated_at->diffForHumans() }})
+                                    </span>
+                                @endif
                             </small>
                         </div>
 
