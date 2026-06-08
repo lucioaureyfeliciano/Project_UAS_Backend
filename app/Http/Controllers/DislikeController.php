@@ -21,9 +21,8 @@ class DislikeController extends Controller
             ]);
         }
 
-        return response()->json([
-            'count' => $tweet->dislikes()->count(),
-            'status' => $dislike ? 'removed' : 'added'
-        ]);
-    }
+        return request()->expectsJson()
+            ? response()->json(['count' => $tweet->dislikes()->count(), 'status' => $dislike ? 'removed' : 'added'])
+            : redirect()->back();
+        }
 }

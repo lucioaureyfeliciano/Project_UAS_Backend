@@ -288,6 +288,14 @@
             transform: translateY(-3px);
         }
 
+        .private-lock-box {
+            background: white;
+            border-radius: 18px;
+            padding: 50px 20px;
+            text-align: center;
+            box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
+        }
+
     </style>
 
 </head>
@@ -317,14 +325,15 @@
 
             <h1>{{ $user->username }}</h1>
 
+        @if(auth()->id() == $user->id)
             <div class="profile-edit-row">
                 <button
                     class="edit-description-btn"
-                    onclick="openDescriptionEdit()"
-                >
+                    onclick="openDescriptionEdit()">
                     [edit]
                 </button>
             </div>
+        @endif
 
             <div class="description-section">
                 <p class="description-text">
@@ -422,119 +431,130 @@
 
     </div>
 
-    <h1 class="section-title">Your Tweets</h1>
+    @if($isLocked)
+        <div class="private-lock-box">
+            <h2 style="font-size: 48px; margin-bottom:10px;">🔒</h2>
+            <h3 style="margin: 0 0 10px 0; color: #333;">Akun Ini Bersifat Private</h3>
+            <p style="margin: 0; color: #777; font-size: 15px;">Ikuti akun ini untuk melihat postingan</p>
+        </div>
+    
+    @else
+        <h1 class="section-title">Your Tweets</h1>
 
-    @foreach ($tweets as $tweet)
+        @foreach ($tweets as $tweet)
 
-        <div class="tweet-card">
+            <div class="tweet-card">
 
-            <div class="tweet-top">
+                <div class="tweet-top">
 
-                <div class="tweet-info">
+                    <div class="tweet-info">
 
-                    {{ $user->username }}
-                    •
-                    posted {{ $tweet->created_at->diffForHumans() }}
+                        {{ $user->username }}
+                        •
+                        posted {{ $tweet->created_at->diffForHumans() }}
 
-                </div>
+                    </div>
 
-                <div class="tweet-menu-container">
+                    @if(auth()->id() == $user->id)
+                        <div class="tweet-menu-container">
 
-                    <button class="tweet-menu-btn">
-                        •••
-                    </button>
-
-                    <div class="tweet-dropdown">
-
-                        <button onclick="openEdit({{ $tweet->id }})">
-                            Edit
-                        </button>
-
-                        <form action="/tweets/{{ $tweet->id }}" method="POST">
-
-                            @csrf
-                            @method('DELETE')
-
-                            <button
-                                type="submit"
-                                style="color:red;"
-                            >
-                                Delete
+                            <button class="tweet-menu-btn">
+                                •••
                             </button>
 
-                        </form>
+                            <div class="tweet-dropdown">
 
+                                <button onclick="openEdit({{ $tweet->id }})">
+                                    Edit
+                                </button>
+
+                                <form action="/tweets/{{ $tweet->id }}" method="POST">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button
+                                        type="submit"
+                                        style="color:red;"
+                                    >
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+                    @endif
+
+                </div>
+
+                <div class="tweet-title">
+                    {{ $tweet->title }}
+                </div>
+
+                <div class="tweet-content">
+                    {{ $tweet->content }}
+                </div>
+
+                <div class="tweet-actions">
+
+                    <div>
+                        👍 {{ $tweet->likes->count() }}
+                    </div>
+
+                    <div>
+                        👎 {{ $tweet->dislikes->count() }}
+                    </div>
+
+                    <div>
+                        🔁 {{ $tweet->reposts->count() }}
                     </div>
 
                 </div>
 
-            </div>
+                <div class="edit-modal" id="edit-{{ $tweet->id }}">
 
-            <div class="tweet-title">
-                {{ $tweet->title }}
-            </div>
+                    <form action="/tweets/{{ $tweet->id }}" method="POST">
 
-            <div class="tweet-content">
-                {{ $tweet->content }}
-            </div>
+                        @csrf
+                        @method('PUT')
 
-            <div class="tweet-actions">
-
-                <div>
-                    👍 {{ $tweet->likes->count() }}
-                </div>
-
-                <div>
-                    👎 {{ $tweet->dislikes->count() }}
-                </div>
-
-                <div>
-                    🔁 {{ $tweet->reposts->count() }}
-                </div>
-
-            </div>
-
-            <div class="edit-modal" id="edit-{{ $tweet->id }}">
-
-                <form action="/tweets/{{ $tweet->id }}" method="POST">
-
-                    @csrf
-                    @method('PUT')
-
-                    <input
-                        type="text"
-                        name="title"
-                        value="{{ $tweet->title }}"
-                    >
-
-                    <textarea
-                        name="content"
-                        rows="4"
-                    >{{ $tweet->content }}</textarea>
-
-                    <div class="description-actions">
-
-                        <button type="submit" class="save-btn">
-                            Save
-                        </button>
-
-                        <button
-                            type="button"
-                            class="cancel-btn"
-                            onclick="closeEdit({{ $tweet->id }})"
+                        <input
+                            type="text"
+                            name="title"
+                            value="{{ $tweet->title }}"
                         >
-                            Cancel
-                        </button>
 
-                    </div>
+                        <textarea
+                            name="content"
+                            rows="4"
+                        >{{ $tweet->content }}</textarea>
 
-                </form>
+                        <div class="description-actions">
+
+                            <button type="submit" class="save-btn">
+                                Save
+                            </button>
+
+                            <button
+                                type="button"
+                                class="cancel-btn"
+                                onclick="closeEdit({{ $tweet->id }})"
+                            >
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
 
             </div>
 
-        </div>
-
-    @endforeach
+        @endforeach
+    @endif
 
 </div>
 

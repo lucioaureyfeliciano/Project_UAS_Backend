@@ -283,6 +283,15 @@
             justify-content: center;
             font-weight: bold;
         }
+
+        .comment-btn {
+            color: #27ae60;
+        }
+
+        .comment-btn:hover {
+            background: #eafaf1;
+            border-color: #27ae60;
+        }
     </style>
 </head>
 <body>
@@ -406,11 +415,22 @@
                         <div class="tweet-content">
                             <h4>{{ $tweet->title }}</h4>
                             <p>{{ $tweet->content }}</p>
-                            <small>{{ $tweet->user?->username ?? 'Unknown' }} • {{ $tweet->created_at->diffForHumans() }}</small>
+
+                            <small>
+                                @if($tweet->user_id === auth()->id())
+                                    <a href="/profile" style="text-decoration: none; color: #3490dc; font-weight: bold;">
+                                        {{ $tweet->user?->username ?? 'Unknown' }}
+                                    </a>
+                                @else
+                                    <a href="{{ route('user.profile', $tweet->user?->username) }}" style="text-decoration: none; color: #3490dc; font-weight: bold;">
+                                        {{ $tweet->user?->username ?? 'Unknown' }}
+                                    </a>
+                                @endif
+                                • {{ $tweet->created_at->diffForHumans() }}
+                            </small>
                         </div>
 
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            {{-- Dropdown Tweet Sendiri --}}
                             @if($tweet->user_id === auth()->id())
                                 <div class="tweet-menu-container">
                                     <button class="tweet-menu-btn">•••</button>
@@ -484,8 +504,8 @@
                             🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
                         </button>
 
-                        <a href="{{ route('comments.index', $tweet->id) }}" class="reaction-btn" style="text-decoration:none; color:#3490dc;">
-                            💬 Comment
+                        <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn" style="text-decoration:none;">
+                            💬 {{ $tweet->comments->count() }}
                         </a>
 
                         <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">

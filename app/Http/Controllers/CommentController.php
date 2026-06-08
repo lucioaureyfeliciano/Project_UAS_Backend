@@ -36,10 +36,26 @@ class CommentController extends Controller
             'content' => $validated['content'],
             'user_id' => auth()->id(),
             'tweet_id' => $tweet_id,
+            'parent_id' => request()->input('parent_id', null),
         ]);
 
         $tweet = Tweet::find($tweet_id);
-        if ($tweet && $tweet->user_id !== auth()->id()) {
+        if ($comment->parent_id) 
+        {
+            $parentComment = Comment::find($comment->parent_id);
+            if ($parentComment && $parentComment->user_id !== auth()->id()) {
+                Notification::create([
+                    'user_id'         => $parentComment->user_id,
+                    'type'            => 'comment',
+                    'message'         => auth()->user()->username . ' replied to your comment',
+                    'is_read'         => false,
+                    'related_user_id' => auth()->id(),
+                    'tweet_id'        => $tweet_id,
+                ]);
+            }
+
+        } elseif ($tweet && $tweet->user_id !== auth()->id()) 
+        {
             Notification::create([
                 'user_id'         => $tweet->user_id,
                 'type'            => 'comment',
@@ -48,7 +64,6 @@ class CommentController extends Controller
                 'related_user_id' => auth()->id(),
                 'tweet_id'        => $tweet_id,
             ]);
-
         }
         return redirect()->route('tweets.show', $tweet_id)->with('success', 'Comment posted!');
     }
@@ -57,16 +72,16 @@ class CommentController extends Controller
     {
         $comment = Comment::findOrFail($id);
         if ($comment->user_id !== auth()->id()) abort(403);
-        return view('comments.edit', compact('comment'));
+        return redirect()->route('comments.index', $comment->tweet_id);
     }
 
-    public function update($id)
+    public function update(Request $request, $id)
     {
         $comment = Comment::findOrFail($id);
         if ($comment->user_id !== auth()->id()) abort(403);
 
         $comment->update(request()->validate(['content' => 'required|max:500']));
-        return redirect()->route('comments.index', $comment->tweet_id)->with('success', 'Updated!');
+        return redirect()->route('tweets.show', $comment->tweet_id)->with('success', 'Comment updated!');
     }
 
     public function destroy($id)
@@ -76,7 +91,7 @@ class CommentController extends Controller
 
         $tweet_id = $comment->tweet_id;
         $comment->delete();
-        return redirect()->route('comments.index', $tweet_id)->with('success', 'Deleted!');
+        return redirect()->route('tweets.show', $tweet_id)->with('success', 'Deleted!');
     }
 
     public function show($id)
