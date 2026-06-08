@@ -292,6 +292,16 @@
             background: #eafaf1;
             border-color: #27ae60;
         }
+
+        .author-link {
+            color: #3490dc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .author-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -415,7 +425,12 @@
                         <div class="tweet-content">
                             <h4>{{ $tweet->title }}</h4>
                             <p>{{ $tweet->content }}</p>
-                            <small>{{ $tweet->user?->username ?? 'Unknown' }} • {{ $tweet->created_at->diffForHumans() }}</small>
+                            <small>
+                                <a href="{{ route('profile.show', $tweet->user?->username) }}" class="author-link">
+                                    {{ $tweet->user?->username ?? 'Unknown' }}
+                                </a>
+                                • {{ $tweet->created_at->diffForHumans() }}
+                            </small>
                         </div>
 
                         <div style="display: flex; gap: 8px; align-items: center;">
