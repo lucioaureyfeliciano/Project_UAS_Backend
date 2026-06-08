@@ -86,17 +86,14 @@
 <body>
 
 <div class="navbar">
-    <a href="/dashboard" class="back-btn">Back</a>
+    <a href="/dashboard" class="back-btn">← Back</a>
     <strong>Usage Statistics</strong>
     <span></span>
 </div>
 
 <div class="container">
-
     <div class="card">
-
         <div class="usage-header">
-
             <div class="usage-info">
                 <h2>Platform Statistics</h2>
 
@@ -110,7 +107,6 @@
     </div>
 
     <div class="stats-grid">
-
         <div class="stat-card">
             <h3>Total Users</h3>
             <p>{{ $totalUsers }}</p>
