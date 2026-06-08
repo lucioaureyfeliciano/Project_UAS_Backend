@@ -66,6 +66,28 @@
             text-align: left;
         }
 
+        .username-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .follow-btn-small {
+            border: none;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .follow-btn-small:hover {
+            transform: scale(1.05);
+        }
+
         .description-section {
             width: 100%;
             margin-top: 10px;
@@ -411,22 +433,32 @@
 
             <div class="profile-left">
 
-                <h1>{{ $user->username }}</h1>
-                @if(auth()->id() !== $user->id)
+                <div class="username-row">
 
-                        <form method="POST" action="{{ route('follow', $user->id) }}">
+                    <h1 style="margin:0;">
+                        {{ $user->username }}
+                    </h1>
+
+                    @if(auth()->id() !== $user->id)
+
+                        <form method="POST" action="{{ route('follow', $user->id) }}" style="margin:0;">
+
                             @csrf
 
-                            <button type="submit" class="follow-btn" style="
-                        background:
-                        {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
-                    ">
+                            <button type="submit" class="follow-btn-small" style="
+                                            background:
+                                            {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
+                                        ">
+
                                 {{ $isFollowing ? 'Following' : 'Follow' }}
+
                             </button>
 
                         </form>
 
-                @endif
+                    @endif
+
+                </div>
                 <div class="description-section">
                     <p class="description-text">
                         {{ $user->description ?? '[Add your description]' }}
@@ -551,39 +583,41 @@
                     <div class="tweet-top">
 
                         <div class="tweet-info">
-
                             {{ $user->username }}
                             •
                             posted {{ $tweet->created_at->diffForHumans() }}
-
                         </div>
 
-                        <div class="tweet-menu-container">
+                        @if(auth()->id() == $user->id)
 
-                            <button class="tweet-menu-btn">
-                                •••
-                            </button>
+                            <div class="tweet-menu-container">
 
-                            <div class="tweet-dropdown">
-
-                                <button onclick="openEdit({{ $tweet->id }})">
-                                    Edit
+                                <button class="tweet-menu-btn">
+                                    •••
                                 </button>
 
-                                <form action="/tweets/{{ $tweet->id }}" method="POST">
+                                <div class="tweet-dropdown">
 
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button type="submit" style="color:red;">
-                                        Delete
+                                    <button onclick="openEdit({{ $tweet->id }})">
+                                        Edit
                                     </button>
 
-                                </form>
+                                    <form action="/tweets/{{ $tweet->id }}" method="POST">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit" style="color:red;">
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </div>
 
                             </div>
 
-                        </div>
+                        @endif
 
                     </div>
 
@@ -605,10 +639,12 @@
                         <button type="button" class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
                             🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
                         </button>
-                        <a href="{{ route('comments.index', $tweet->id) }}" class="comment-btn reaction-btn"
-                            style="text-decoration:none; color:inherit;">
-                            💬 Comment
+
+                        <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
+                            style="text-decoration:none;">
+                            💬 {{ $tweet->comments->count() }}
                         </a>
+
                         <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
                             @csrf
                             <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">

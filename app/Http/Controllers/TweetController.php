@@ -58,7 +58,7 @@ class TweetController extends Controller
 
         $blacklist_user_ids = array_merge($blocked_user_id, $muted_user_id);
 
-        $tweets = Tweet::with('user', 'likes', 'dislikes', 'reposts')
+        $tweets = Tweet::with('user', 'likes', 'dislikes', 'reposts', 'comments')
             ->whereNotIn('user_id', $blacklist_user_ids)
             ->latest()
             ->get();
@@ -80,6 +80,7 @@ class TweetController extends Controller
         }
 
         $tweet->delete();
+        Hashtag::doesntHave('tweets')->delete();
 
         return back()->with('success', 'Tweet deleted successfully');
     }
@@ -108,7 +109,7 @@ class TweetController extends Controller
     public function show($id)
     {
         $tweet = Tweet::with([
-            'user', 'likes', 'dislikes', 'reposts',
+            'user', 'likes', 'dislikes', 'reposts', 'bookmarks',
             'comments' => function($q) {
                 $q->whereNull('parent_id')->with(['user', 'replies.user'])->latest();
             }
@@ -143,11 +144,17 @@ class TweetController extends Controller
             ->latest()
             ->get();
 
+        $hashtags = Hashtag::has('tweets')
+            ->withCount('tweets')
+            ->orderByDesc('tweets_count')
+            ->get();
+
         return view(
             'hashtags.show',
             compact(
                 'hashtag',
-                'tweets'
+                'tweets',
+                'hashtags'
             )
         );
     }

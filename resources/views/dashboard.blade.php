@@ -284,6 +284,25 @@
             justify-content: center;
             font-weight: bold;
         }
+
+        .comment-btn {
+            color: #27ae60;
+        }
+
+        .comment-btn:hover {
+            background: #eafaf1;
+            border-color: #27ae60;
+        }
+
+        .author-link {
+            color: #3490dc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .author-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -420,13 +439,29 @@
                             <div class="tweet-content">
                                 <h4>{{ $tweet->title }}</h4>
                                 <p>{{ $tweet->content }}</p>
-                                <small>{{ $tweet->user?->username ?? 'Unknown' }} •
-                                    {{ $tweet->created_at->diffForHumans() }}</small>
+    
+                            <small>
+                                @if($tweet->user_id === auth()->id())
+                                    <a href="/profile" style="text-decoration: none; color: #3490dc; font-weight: bold;">
+                                        {{ $tweet->user?->username ?? 'Unknown' }}
+                                    </a>
+                                @else
+                                    <a href="{{ route('profile.show', $tweet->user?->username) }}" style="text-decoration: none; color: #3490dc; font-weight: bold;">
+                                        {{ $tweet->user?->username ?? 'Unknown' }}
+                                    </a>
+                                @endif
+                                •
+                                    {{ $tweet->created_at->diffForHumans() }}
+                                @if($tweet->updated_at != $tweet->created_at)
+                                    <span style="color: #999; font-size: 0.85rem; font-style: italic;">
+                                        (Edited {{ $tweet->updated_at->diffForHumans() }})
+                                    </span>
+                                @endif
+                            </small>
                             </div>
 
                             <div style="display: flex; gap: 8px; align-items: center;">
-                                {{-- Dropdown Tweet Sendiri --}}
-                                @if($tweet->user_id === auth()->id())
+                                    @if($tweet->user_id === auth()->id())
                                     <div class="tweet-menu-container">
                                         <button class="tweet-menu-btn">•••</button>
                                         <div class="tweet-dropdown">
@@ -531,9 +566,9 @@
                                 🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
                             </button>
 
-                            <a href="{{ route('comments.index', $tweet->id) }}" class="reaction-btn"
-                                style="text-decoration:none; color:#3490dc;">
-                                💬 Comment
+                            <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
+                                style="text-decoration:none;">
+                                💬 {{ $tweet->comments->count() }}
                             </a>
 
                             <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">

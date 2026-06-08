@@ -207,7 +207,7 @@
 
     <div class="navbar">
 
-        <a href="/profile/{{ $user->username }}" class="back-btn">
+        <a href="{{ route('profile.show', $user->username) }}" class="back-btn">
             ← Back
         </a>
 
@@ -244,7 +244,7 @@
 
                                 <div>
 
-                                    <a href="/profile/{{ $follow->following->username }}" class="user-link">
+                                    <a href="{{ route('profile.show', $follow->following->username) }}" class="user-link">
                                         {{ $follow->following->username }}
                                     </a>
 
