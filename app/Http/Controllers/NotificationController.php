@@ -10,6 +10,7 @@ class NotificationController extends Controller
     public function index()
     {
         $filter = request('filter', 'all');
+        $type   = request('type');
 
         $query = Notification::where('user_id', auth()->id())
             ->with(['relatedUser', 'tweet'])
@@ -21,9 +22,13 @@ class NotificationController extends Controller
             $query->where('is_read', true);
         }
 
+        if ($type && in_array($type, ['like', 'comment', 'repost'])) {
+            $query->where('type', $type);
+        } 
+
         $notifications = $query->paginate(15);
 
-        return view('notifications.index', compact('notifications', 'filter'));
+        return view('notifications.index', compact('notifications', 'filter', 'type'));
     }
 
     public function markAsRead($id)

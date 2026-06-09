@@ -254,6 +254,34 @@
             margin-bottom: 15px;
         }
 
+        .notification-type-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .type-filter-tab {
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            background: white;
+            color: #555;
+            border: 1px solid #ddd;
+            transition: 0.2s;
+        }
+
+        .type-filter-tab:hover {
+            background: #f5f5f5;
+        }
+
+        .type-filter-tab.active {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+
         .filter-tab {
             padding: 6px 16px;
             border-radius: 20px;
@@ -364,8 +392,21 @@
 
     <div class="notification-filters">
         @foreach(['all' => 'All', 'unread' => 'Unread', 'read' => 'Read'] as $key => $label)
-            <a href="?filter={{ $key }}"
+            <a href="?filter={{ $key }}&type={{ $type ?? '' }}"
                 class="filter-tab {{ $filter === $key ? 'active' : '' }}">
+                {{ $label }}
+            </a>
+        @endforeach
+
+        {{-- Type --}}
+        @foreach([
+            'like' => '👍 Like',
+            'comment' => '💬 Comment',
+            'repost' => '🔁 Repost'
+        ] as $key => $label)
+
+            <a href="?filter={{ $filter }}&type={{ $key }}"
+                class="type-filter-tab {{ ($type ?? '') === $key ? 'active' : '' }}">
                 {{ $label }}
             </a>
         @endforeach
