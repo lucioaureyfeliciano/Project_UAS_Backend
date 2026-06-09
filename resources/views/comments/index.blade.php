@@ -319,6 +319,16 @@
             border-radius: 10px;
             border: 1px solid #eee;
         }
+        .comment-username a,
+        .reply-username a {
+            color: #3490dc;
+            text-decoration: none;
+        }
+
+        .comment-username a:hover,
+        .reply-username a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -352,7 +362,11 @@
     @forelse($comments as $comment)
         <div class="comment-card">
  
-            <div class="comment-username">{{ $comment->user?->username ?? 'Unknown' }}</div>
+            <div class="comment-username">
+                <a href="{{ route('profile.show', $comment->user?->username) }}">
+                    {{ $comment->user?->username ?? 'Unknown' }}
+                </a>
+            </div>
             <div class="comment-content">{{ $comment->content }}</div>
             <div class="comment-meta">{{ $comment->created_at->diffForHumans() }}</div>
  
@@ -403,7 +417,11 @@
                     @foreach($comment->replies as $reply)
                         <div class="reply-card">
  
-                            <div class="reply-username">{{ $reply->user?->username ?? 'Unknown' }}</div>
+                            <div class="reply-username">
+                                <a href="{{ route('profile.show', $reply->user?->username) }}">
+                                    {{ $reply->user?->username ?? 'Unknown' }}
+                                </a>
+                            </div>
                             <div class="reply-content">{{ $reply->content }}</div>
                             <div class="reply-meta">{{ $reply->created_at->diffForHumans() }}</div>
  

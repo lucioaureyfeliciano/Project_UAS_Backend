@@ -285,6 +285,20 @@
             padding: 20px;
             margin-bottom: 16px;
         }
+
+        .comment-username a,
+        .reply-username a,
+        .username a {
+            color: #3490dc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .comment-username a:hover,
+        .reply-username a:hover,
+        .username a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -307,7 +321,11 @@
                 {{ strtoupper(substr($tweet->user?->username ?? 'U', 0, 1)) }}
             </div>
             <div class="tweet-author-info">
-                <div class="username">{{ $tweet->user?->username ?? 'Unknown' }}</div>
+                <div class="username">
+                    <a href="{{ route('profile.show', $tweet->user?->username) }}">
+                        {{ $tweet->user?->username ?? 'Unknown' }}
+                    </a>
+                </div>
                 <div class="time">{{ $tweet->created_at->diffForHumans() }}</div>
             </div>
         </div>
@@ -373,13 +391,21 @@
 
         @forelse($tweet->comments->whereNull('parent_id')->take(3) as $comment)
             <div class="comment-card">
-                <div class="comment-username">{{ $comment->user?->username ?? 'Unknown' }}</div>
+                <div class="comment-username">
+                    <a href="{{ route('profile.show', $comment->user?->username) }}">
+                        {{ $comment->user?->username ?? 'Unknown' }}
+                    </a>
+                </div>
                 <div class="comment-content">{{ $comment->content }}</div>
                 <div class="comment-meta">{{ $comment->created_at->diffForHumans() }}</div>
  
                 @if($comment->replies->count() > 0)
                     <div class="reply-preview">
-                        <div class="reply-username">{{ $comment->replies->first()->user?->username ?? 'Unknown' }}</div>
+                        <div class="reply-username">
+                            <a href="{{ route('profile.show', $comment->replies->first()->user?->username) }}">
+                                {{ $comment->replies->first()->user?->username ?? 'Unknown' }}
+                            </a>
+                        </div>
                         <div class="reply-content">{{ $comment->replies->first()->content }}</div>
                     </div>
                     @if($comment->replies->count() > 1)

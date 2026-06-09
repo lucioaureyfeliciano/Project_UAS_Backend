@@ -292,6 +292,16 @@
             background: #eafaf1;
             border-color: #27ae60;
         }
+
+        .author-link {
+            color: #3490dc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .author-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
