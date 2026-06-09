@@ -425,16 +425,27 @@
                         <div class="tweet-content">
                             <h4>{{ $tweet->title }}</h4>
                             <p>{{ $tweet->content }}</p>
+
                             <small>
-                                <a href="{{ route('profile.show', $tweet->user?->username) }}" class="author-link">
-                                    {{ $tweet->user?->username ?? 'Unknown' }}
-                                </a>
+                                @if($tweet->user_id === auth()->id())
+                                    <a href="/profile" style="text-decoration: none; color: #3490dc; font-weight: bold;">
+                                        {{ $tweet->user?->username ?? 'Unknown' }}
+                                    </a>
+                                @else
+                                    <a href="{{ route('user.profile', $tweet->user?->username) }}" style="text-decoration: none; color: #3490dc; font-weight: bold;">
+                                        {{ $tweet->user?->username ?? 'Unknown' }}
+                                    </a>
+                                @endif
                                 • {{ $tweet->created_at->diffForHumans() }}
+                                @if($tweet->updated_at != $tweet->created_at)
+                                    <span style="color: #999; font-size: 0.85rem; font-style: italic;">
+                                        (Edited {{ $tweet->updated_at->diffForHumans() }})
+                                    </span>
+                                @endif
                             </small>
                         </div>
 
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            {{-- Dropdown Tweet Sendiri --}}
                             @if($tweet->user_id === auth()->id())
                                 <div class="tweet-menu-container">
                                     <button class="tweet-menu-btn">•••</button>

@@ -22,10 +22,12 @@ class ProfileController extends Controller
 
     public function updateDescription(Request $request)
     {
+        $request->validate([
+            'description' => 'nullable|string|max:500',
+        ]);
+
         $user = auth()->user();
-
         $user->description = $request->description;
-
         $user->save();
 
         return back()->with('success', 'Description updated successfully');

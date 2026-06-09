@@ -3,19 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Community;
+use App\Models\CommunityJoinRequest;
 use Illuminate\Http\Request;
 
 class CommunityController extends Controller
 {
-
     public function index(Request $request)
     {
         $search = $request->input('search');
-
         $communities = Community::with('creator', 'members')
             ->when($search, function ($query, $search) {
-                return $query->where('name', 'like', '%' . $search . '%')
-                             ->orWhere('description', 'like', '%' . $search . '%');
+                return $query->where('name', 'like', '%' . $search . '%')->orWhere('description', 'like', '%' . $search . '%');
             })
             ->latest()
             ->get();
@@ -26,7 +24,6 @@ class CommunityController extends Controller
     public function show($id)
     {
         $community = Community::with('creator', 'members')->findOrFail($id);
-
         return view('community.show', compact('community'));
     }
 
@@ -44,15 +41,7 @@ class CommunityController extends Controller
             'is_private' => $request->input('is_private', false),
             'user_id' => auth()->id(),
         ]);
-
         $community->members()->attach(auth()->id());
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => 'Community created successfully',
-                'community' => $community,
-            ], 201);
-        }
 
         return redirect('/community')->with('success', 'Community created successfully');
     }
@@ -62,16 +51,15 @@ class CommunityController extends Controller
         $community = Community::findOrFail($id);
 
         if ($community->is_private) {
-            return redirect()->back()->with('error', 'Anda tidak dapat bergabung ke community private');
-        }
-        
-        if ($community->members()->where('user_id', auth()->id())->exists()) {
-            return redirect()->back()->with('error', 'Anda sudah menjadi anggota community ini');
+            return redirect()->back()->with('error', 'Private community cannot be joined directly. Please send a join request.');
         }
 
+        if ($community->members()->where('user_id', auth()->id())->exists()) {
+            return redirect()->back()->with('error', 'You are already a member of this community.');
+        }
         $community->members()->attach(auth()->id());
 
-        return redirect()->back()->with('success', 'Successfully joined community');
+        return redirect()->back()->with('success', 'Successfully joined community.');
     }
 
     public function leave($id)
@@ -79,12 +67,11 @@ class CommunityController extends Controller
         $community = Community::findOrFail($id);
 
         if ($community->user_id === auth()->id()) {
-            return redirect()->back()->with('error', 'Creator cannot leave the community');
+            return redirect()->back()->with('error', 'Creator cannot leave the community.');
         }
-
         $community->members()->detach(auth()->id());
 
-        return redirect()->back()->with('success', 'Successfully left community');
+        return redirect()->back()->with('success', 'Successfully left community.');
     }
 
     public function edit(Request $request, $id)
@@ -92,7 +79,7 @@ class CommunityController extends Controller
         $community = Community::findOrFail($id);
 
         if ($community->user_id !== auth()->id()) {
-            return redirect()->back()->with('error', 'Unauthorized');
+            return redirect()->back()->with('error', 'Unauthorized.');
         }
 
         $request->validate([
@@ -102,12 +89,12 @@ class CommunityController extends Controller
         ]);
 
         $community->update([
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
+            'name' => $request->input('name', $community->name),
+            'description' => $request->input('description', $community->description),
             'is_private' => $request->has('is_private'),
         ]);
 
-        return redirect('/community/' . $community->id)->with('success', 'Community updated successfully');
+        return redirect('/community/' . $community->id)->with('success', 'Community updated successfully.');
     }
 
     public function destroy($id)
@@ -115,11 +102,97 @@ class CommunityController extends Controller
         $community = Community::findOrFail($id);
 
         if ($community->user_id !== auth()->id()) {
-            return redirect()->back()->with('error', 'Unauthorized');
+            return redirect()->back()->with('error', 'Unauthorized.');
         }
-
         $community->delete();
 
-        return redirect('/community')->with('success', 'Community deleted successfully');
+        return redirect('/community')->with('success', 'Community deleted successfully.');
+    }
+
+    public function requestToJoin($id)
+    {
+        $community = Community::findOrFail($id);
+
+        if (!$community->is_private) {
+            return redirect()->back()->with('error', 'This community is public. You can join directly.');
+        }
+
+        if ($community->members()->where('user_id', auth()->id())->exists()) {
+            return redirect()->back()->with('error', 'You are already a member of this community.');
+        }
+
+        $joinRequest = CommunityJoinRequest::where('community_id', $community->id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if ($joinRequest) {
+            if ($joinRequest->status === 'pending') {
+                return redirect()->back()->with('error', 'You already have a pending join request.');
+            }
+
+            if ($joinRequest->status === 'approved') {
+                return redirect()->back()->with('error', 'Your join request has already been approved.');
+            }
+
+            if ($joinRequest->status === 'rejected') {
+                $joinRequest->update([
+                    'status' => 'pending',
+                ]);
+
+                return redirect()->back()->with('success', 'Join request submitted again.');
+            }
+        }
+
+        CommunityJoinRequest::create([
+            'community_id' => $community->id,
+            'user_id' => auth()->id(),
+            'status' => 'pending',
+        ]);
+
+        return redirect()->back()->with('success', 'Join request sent successfully.');
+    }
+
+    public function approveRequest($id, $requestId)
+    {
+        $community = Community::findOrFail($id);
+
+        if ($community->user_id !== auth()->id()) {
+            return redirect()->back()->with('error', 'Unauthorized.');
+        }
+
+        $joinRequest = CommunityJoinRequest::where('community_id', $community->id)
+            ->where('id', $requestId)
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        if (!$community->members()->where('user_id', $joinRequest->user_id)->exists()) {
+            $community->members()->attach($joinRequest->user_id);
+        }
+
+        $joinRequest->update([
+            'status' => 'approved',
+        ]);
+
+        return redirect()->back()->with('success', 'Join request approved.');
+    }
+
+    public function rejectRequest($id, $requestId)
+    {
+        $community = Community::findOrFail($id);
+
+        if ($community->user_id !== auth()->id()) {
+            return redirect()->back()->with('error', 'Unauthorized.');
+        }
+
+        $joinRequest = CommunityJoinRequest::where('community_id', $community->id)
+            ->where('id', $requestId)
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        $joinRequest->update([
+            'status' => 'rejected',
+        ]);
+
+        return redirect()->back()->with('success', 'Join request rejected.');
     }
 }

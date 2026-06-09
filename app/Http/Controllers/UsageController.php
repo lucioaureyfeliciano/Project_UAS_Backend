@@ -10,6 +10,7 @@ use App\Models\Like;
 use App\Models\Dislike;
 use App\Models\Repost;
 use App\Models\Message;
+use App\Models\Bookmark;
 use Illuminate\Support\Facades\DB;
 
 class UsageController extends Controller
@@ -24,7 +25,8 @@ class UsageController extends Controller
         $totalDislikes = Dislike::count();
         $totalReposts = Repost::count();
         $totalMessages = Message::count();
-
+        $totalBookmarks = Bookmark::count();
+        
         return view('usage.index', compact(
             'totalUsers',
             'totalTweets',
@@ -33,7 +35,8 @@ class UsageController extends Controller
             'totalLikes',
             'totalDislikes',
             'totalReposts',
-            'totalMessages'
+            'totalMessages',
+            'totalBookmarks'
         ));
     }
 }
