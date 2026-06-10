@@ -10,7 +10,10 @@ class ProfileController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $user = User::with(
+            'followers',
+            'following'
+        )->find(auth()->id());
 
         $tweets = Tweet::with('likes', 'reposts')
             ->where('user_id', $user->id)
@@ -35,7 +38,15 @@ class ProfileController extends Controller
 
     public function show($username)
     {
-        $user = User::where('username', $username)->firstOrFail();
+        $user = User::with(
+            'followers',
+            'following'
+        )
+            ->where(
+                'username',
+                $username
+            )
+            ->firstOrFail();
 
         if ($user->is_private == 1 && auth()->id() != $user->id) {
             $tweets = collect();
@@ -51,7 +62,59 @@ class ProfileController extends Controller
 
         $isLocked = false;
 
-        return view('profile', compact('user', 'tweets', 'isLocked'));
+        $isFollowing = false;
+
+        if (auth()->id() != $user->id) {
+
+            $isFollowing = \App\Models\Follow::where(
+                'follower_id',
+                auth()->id()
+            )->where(
+                    'following_id',
+                    $user->id
+                )->exists();
+
+        }
+        return view('profile', compact('user', 'tweets', 'isLocked', 'isFollowing'));
     }
-    
+
+    public function followers($username)
+    {
+        $user = User::with('followers.follower')
+            ->where('username', $username)
+            ->firstOrFail();
+
+        return view('follows.followers', compact('user'));
+    }
+
+    public function following($username)
+    {
+        $user = User::with('following.following')
+            ->where('username', $username)
+            ->firstOrFail();
+
+        return view('follows.following', compact('user'));
+    }
+
+    public function search(Request $request)
+    {
+        $keyword = $request->search;
+
+        $users = User::where(
+            'username',
+            'like',
+            '%' . $keyword . '%'
+        )
+            ->where('id', '!=', auth()->id())
+            ->get();
+
+        return view(
+            'search.search',
+            compact(
+                'users',
+                'keyword'
+            )
+        );
+    }
+
 }

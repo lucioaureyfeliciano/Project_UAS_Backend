@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\Tweet;
 use App\Models\Community;
+use App\Models\Follow;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
@@ -75,7 +76,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class, 'receiver_id');
     }
-    
+
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
@@ -89,5 +90,15 @@ class User extends Authenticatable
     public function bookmarks(): HasMany
     {
         return $this->hasMany(Bookmark::class);
+    }
+
+    public function followers()
+    {
+        return $this->hasMany(Follow::class, 'following_id');
+    }
+
+    public function following()
+    {
+        return $this->hasMany(Follow::class, 'follower_id');
     }
 }
