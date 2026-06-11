@@ -66,6 +66,54 @@
             text-align: left;
         }
 
+        .profile-user-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .profile-avatar {
+            width: 95px;
+            height: 95px;
+
+            border-radius: 50%;
+
+            background: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 42px;
+
+            border: 2px solid rgba(255, 255, 255, .8);
+
+            flex-shrink: 0;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .username-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .description-section {
+            margin-top: 5px;
+        }
+
+        .description-text {
+            font-size: 16px;
+            color: #444;
+            line-height: 1.7;
+            word-break: break-word;
+        }
+
         .username-row {
             display: flex;
             align-items: center;
@@ -433,36 +481,53 @@
 
             <div class="profile-left">
 
-                <div class="username-row">
+                <div class="profile-user-info">
 
-                    <h1 style="margin:0;">
-                        {{ $user->username }}
-                    </h1>
+                    <div class="profile-avatar">
+                        👤
+                    </div>
 
-                    @if(auth()->id() !== $user->id)
+                    <div class="profile-details">
 
-                        <form method="POST" action="{{ route('follow', $user->id) }}" style="margin:0;">
+                        <div class="username-row">
 
-                            @csrf
+                            <h1 style="margin:0;">
+                                {{ $user->username }}
+                            </h1>
 
-                            <button type="submit" class="follow-btn-small" style="
-                                            background:
-                                            {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
-                                        ">
+                            @if(auth()->id() !== $user->id)
 
-                                {{ $isFollowing ? 'Following' : 'Follow' }}
+                                <form method="POST" action="{{ route('follow', $user->id) }}" style="margin:0;">
 
-                            </button>
+                                    @csrf
 
-                        </form>
+                                    <button type="submit" class="follow-btn-small" style="
+                                    background:
+                                    {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
+                                ">
 
-                    @endif
+                                        {{ $isFollowing ? 'Following' : 'Follow' }}
 
-                </div>
-                <div class="description-section">
-                    <p class="description-text">
-                        {{ $user->description ?? '[Add your description]' }}
-                    </p>
+                                    </button>
+
+                                </form>
+
+                            @endif
+
+                        </div>
+
+                        <div class="description-section">
+
+                            <p class="description-text">
+
+                                {{ $user->description ?: 'No description yet.' }}
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
             </div>
