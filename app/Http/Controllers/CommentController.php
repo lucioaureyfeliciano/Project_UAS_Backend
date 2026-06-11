@@ -13,13 +13,19 @@ class CommentController extends Controller
     public function index($tweet_id)
     {
         $tweet = Tweet::with('user')->findOrFail($tweet_id);
-        $comments = Comment::where('tweet_id', $tweet_id)
-            ->whereNull('parent_id')
-            ->with(['user', 'replies.user'])
-            ->latest()
-            ->get();
+        $sort  = request('sort', 'newest');
 
-        return view('comments.index', compact('tweet', 'comments'));
+        $query = Comment::where('tweet_id', $tweet_id)
+            ->whereNull('parent_id')
+            ->with(['user', 'replies.user']);
+
+        if ($sort === 'oldest') {$query->oldest();} 
+        elseif ($sort === 'popular') {$query->withCount('replies')->orderByDesc('replies_count');} 
+        else {$query->latest();}
+
+        $comments = $query->get();
+
+        return view('comments.index', compact('tweet', 'comments', 'sort'));
     }
 
     public function create($tweet_id)

@@ -329,6 +329,39 @@
         .reply-username a:hover {
             text-decoration: underline;
         }
+
+        .comment-sort {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .comment-sort-label {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .sort-tab {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            text-decoration: none;
+            background: white;
+            color: #555;
+            border: 1px solid #ddd;
+            transition: 0.2s;
+        }
+
+        .sort-tab:hover {
+            background: #f5f5f5;
+        }
+
+        .sort-tab.active {
+            background: #3490dc;
+            color: white;
+            border-color: #3490dc;
+        }
     </style>
 </head>
 <body>
@@ -354,6 +387,17 @@
         </div>
     </div>
  
+    <div class="comment-sort">
+        <span class="comment-sort-label">Sort:</span>
+
+        @foreach(['newest'=>'Newest','oldest'=>'Oldest','popular'=>'Most Popular'] as $key => $label)
+            <a href="?sort={{ $key }}"
+            class="sort-tab {{ ($sort ?? 'newest') === $key ? 'active' : '' }}">
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
+
     <div class="section-header">
         <h2>Comments ({{ $comments->count() }})</h2>
         <a href="{{ route('comments.create', $tweet->id) }}" class="btn-primary">+ Add Comment</a>
