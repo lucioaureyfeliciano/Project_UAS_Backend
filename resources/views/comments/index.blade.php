@@ -363,7 +363,7 @@
         <div class="comment-card">
  
             <div class="comment-username">
-                <a href="{{ route('profile.show', $comment->user?->username) }}">
+                <a href="{{ route('user.profile', $comment->user?->username) }}">
                     {{ $comment->user?->username ?? 'Unknown' }}
                 </a>
             </div>
@@ -418,7 +418,7 @@
                         <div class="reply-card">
  
                             <div class="reply-username">
-                                <a href="{{ route('profile.show', $reply->user?->username) }}">
+                                <a href="{{ route('user.profile', $reply->user?->username) }}">
                                     {{ $reply->user?->username ?? 'Unknown' }}
                                 </a>
                             </div>
