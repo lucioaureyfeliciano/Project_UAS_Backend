@@ -116,6 +116,28 @@
             font-size: 48px;
             margin-bottom: 15px;
         }
+
+        .bookmark-stats {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-view {
+            background: #3490dc;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .btn-view:hover {
+            background: #2779bd;
+        }
     </style>
 </head>
 <body>
@@ -149,10 +171,25 @@
                 By <strong>{{ $bookmark->tweet?->user?->username ?? 'Unknown' }}</strong>
                 · Bookmarked {{ $bookmark->created_at->diffForHumans() }}
             </div>
- 
+
+            @if($bookmark->tweet)
+                <div class="bookmark-stats">
+                    <span>👍 {{ $bookmark->tweet->likes->count() }}</span>
+                    <span>👎 {{ $bookmark->tweet->dislikes->count() }}</span>
+                    <span>🔁 {{ $bookmark->tweet->reposts->count() }}</span>
+                    <span>💬 {{ $bookmark->tweet->comments->count() }}</span>
+                </div>
+            @endif
+
             <div class="bookmark-actions">
+                @if($bookmark->tweet)
+                    <a href="{{ route('tweets.show', $bookmark->tweet_id) }}"
+                        style="background:#3490dc; color:white; padding:6px 14px; border-radius:6px; text-decoration:none; font-size:13px;">
+                        📄 View Tweet
+                    </a>
+                @endif
                 <form action="{{ route('bookmarks.destroy', $bookmark->tweet_id) }}" method="POST"
-                    onsubmit="return confirm('Hapus bookmark ini?')">
+                    onsubmit="return confirm('Delete this bookmark?')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn-remove">🗑 Remove</button>
@@ -164,7 +201,7 @@
         <div class="card">
             <div class="empty-state">
                 <div class="icon">🔖</div>
-                <p>Belum ada bookmark. Simpan tweet favoritmu!</p>
+                <p>No bookmarks yet. Save your favorite tweets!</p>
             </div>
         </div>
     @endforelse

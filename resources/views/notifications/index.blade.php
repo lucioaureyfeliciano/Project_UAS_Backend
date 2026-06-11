@@ -209,6 +209,114 @@
             background: #e4d5ff;
         }
 
+        svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        nav {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        nav p {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 8px;
+        }
+
+        nav a,
+        nav span {
+            display: inline-block;
+            padding: 6px 10px;
+            font-size: 13px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: #333;
+            background: white;
+            margin: 0 2px;
+        }
+
+        nav a:hover {
+            background: #f0f0f0;
+        }
+
+        nav span[aria-current="page"] span {
+            background: #3490dc;
+            color: white;
+            border-color: #3490dc;
+        }
+
+        .notification-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .notification-type-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .type-filter-tab {
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            background: white;
+            color: #555;
+            border: 1px solid #ddd;
+            transition: 0.2s;
+        }
+
+        .type-filter-tab:hover {
+            background: #f5f5f5;
+        }
+
+        .type-filter-tab.active {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+
+        .filter-tab {
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            background: white;
+            color: #555;
+            border: 1px solid #ddd;
+            transition: 0.2s;
+        }
+
+        .filter-tab:hover {
+            background: #f5f5f5;
+        }
+
+        .filter-tab.active {
+            background: #3490dc;
+            color: white;
+            border-color: #3490dc;
+        }
+
+        .delete-all-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .delete-all-btn:hover {
+            background: #c0392b;
+        }
+
         .alert-success {
             background: #d4edda;
             color: #155724;
@@ -253,14 +361,55 @@
                     ->exists();
             @endphp
 
-            @if($hasUnread)
-                <form method="POST" action="{{ route('notifications.markAllAsRead') }}">
-                    @csrf
-                    @method('PUT')
-                    <button type="submit" class="mark-all-btn">Mark All as Read </button>
-                </form>
-            @endif
+            <div style="display:flex; gap:8px;">
+                
+                @if($hasUnread)
+                    <form method="POST" action="{{ route('notifications.markAllAsRead') }}">
+                        @csrf
+                        @method('PUT')
+                        <button type="submit" class="mark-all-btn">
+                            Mark All as Read
+                        </button>
+                    </form>
+                @endif
+
+                @if($notifications->total() > 0)
+                    <form method="POST"
+                        action="{{ route('notifications.destroyAll') }}"
+                        onsubmit="return confirm('Delete all notifications?')">
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="submit" class="delete-all-btn">
+                            Delete All
+                        </button>
+                    </form>
+                @endif
+
+            </div>
         </div>
+    </div>
+
+    <div class="notification-filters">
+        @foreach(['all' => 'All', 'unread' => 'Unread', 'read' => 'Read'] as $key => $label)
+            <a href="?filter={{ $key }}&type={{ $type ?? '' }}"
+                class="filter-tab {{ $filter === $key ? 'active' : '' }}">
+                {{ $label }}
+            </a>
+        @endforeach
+
+        {{-- Type --}}
+        @foreach([
+            'like' => '👍 Like',
+            'comment' => '💬 Comment',
+            'repost' => '🔁 Repost'
+        ] as $key => $label)
+
+            <a href="?filter={{ $filter }}&type={{ $key }}"
+                class="type-filter-tab {{ ($type ?? '') === $key ? 'active' : '' }}">
+                {{ $label }}
+            </a>
+        @endforeach
     </div>
 
     {{-- Notification List --}}

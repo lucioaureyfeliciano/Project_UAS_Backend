@@ -15,12 +15,12 @@ use App\Http\Controllers\RepostController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\MuteController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\FollowController;
+use App\Models\Tweet;
 
 Route::get('/', function () {
     return redirect('/login');
 });
-
-use App\Models\Tweet;
 
 # Dashboard Route
 Route::get('/dashboard', [TweetController::class, 'show_tweets'])->middleware('auth');
@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
 
     // notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::delete('/notifications/delete-all', [NotificationController::class, 'destroyAll'])->name('notifications.destroyAll');
     Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::get('/notifications/{id}', [NotificationController::class, 'show'])->name('notifications.show');
@@ -68,13 +69,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookmarks/{id}', [BookmarkController::class, 'show'])->name('bookmarks.show');
 });
 
-# Usage Routes
 Route::middleware('auth')->group(function () {
+    # Usage Routes
     Route::get('/usage', [UsageController::class, 'index']);
-});
 
-# Community Routes
-Route::middleware('auth')->group(function () {
+    # Community Routes
     Route::get('/community', [CommunityController::class, 'index']);
     Route::post('/community', [CommunityController::class, 'create']);
     Route::get('/community/{id}', [CommunityController::class, 'show']);
@@ -82,6 +81,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/community/{id}', [CommunityController::class, 'destroy']);
     Route::post('/community/{id}/join', [CommunityController::class, 'join']);
     Route::post('/community/{id}/leave', [CommunityController::class, 'leave']);
+    Route::post('/community/{id}/request-join', [CommunityController::class, 'requestToJoin']);
+    Route::post('/community/{id}/requests/{requestId}/reject', [CommunityController::class, 'rejectRequest']);
+    Route::post('/community/{id}/requests/{requestId}/approve', [CommunityController::class, 'approveRequest']);
 });
 
 # Dislike Routes
@@ -92,7 +94,7 @@ Route::post('/tweets/{tweet}/like', [LikeController::class, 'toggle'])->middlewa
 
 # Profile Routes
 Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth');
-Route::get('/profile/{username}', [ProfileController::class, 'show'])->middleware('auth')->name('profile.show');
+Route::get('user/{username}', [ProfileController::class, 'show'])->middleware('auth')->name('profile.show');
 
 # Update Description Profile
 Route::post('/profile/update-description', [ProfileController::class, 'updateDescription']);
@@ -100,25 +102,41 @@ Route::post('/profile/update-description', [ProfileController::class, 'updateDes
 # Repost Routes
 Route::post('/tweets/{tweet}/repost', [RepostController::class, 'toggle'])->middleware('auth');
 
-#Message Routes
+# Follow Routes
+Route::post(
+    '/follow/{following_id}',
+    [FollowController::class, 'toggle']
+)->middleware('auth')->name('follow');
+
+# followers list
+Route::get(
+    '/profile/{username}/followers',
+    [ProfileController::class, 'followers']
+)->middleware('auth')
+    ->name('profile.followers');
+
+# following list
+Route::get(
+    '/profile/{username}/following',
+    [ProfileController::class, 'following']
+)->middleware('auth')
+    ->name('profile.following');
+
+# Message Routes
 Route::middleware('auth')->group(function () {
-
     Route::get('/messages/inbox', [MessageController::class, 'inbox']);
-
     Route::get('/messages/chat/{userId}', [MessageController::class, 'chat']);
-
     Route::post('/messages', [MessageController::class, 'store']);
-
     Route::put('/messages/{messageId}', [MessageController::class, 'update']);
-
     Route::delete('/messages/{messageId}', [MessageController::class, 'destroy']);
-
     Route::get('/messages/search', [MessageController::class, 'search']);
 });
 
 // Hashtag Route
+Route::get('/hashtags/{name}', [TweetController::class, 'showHashtag'])->middleware('auth');// Search Route
 Route::get(
-    '/hashtags/{name}',
-    [TweetController::class, 'showHashtag']
-)->middleware('auth');
+    '/search/users',
+    [ProfileController::class, 'search']
+)->middleware('auth')
+ ->name('search.users');
 
