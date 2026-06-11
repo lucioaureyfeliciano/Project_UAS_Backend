@@ -38,6 +38,9 @@ class MessageController extends Controller
 
     public function chat($userId)
     {
+
+        $user = User::findOrFail($userId);
+
         Message::where('sender_id', $userId)
             ->where('receiver_id', auth()->id())
             ->whereNull('read_at')
@@ -69,7 +72,8 @@ class MessageController extends Controller
             'message.chat',
             compact(
                 'messages',
-                'receiver'
+                'receiver',
+                'user'
             )
         );
     }
