@@ -362,6 +362,32 @@
             color: white;
             border-color: #3490dc;
         }
+
+        .pinned-label {
+            font-size: 11px;
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .pin-btn {
+            border: 1px solid #f39c12;
+            color: #f39c12;
+            background: transparent;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        .pin-btn:hover {
+            background: #fff4e6;
+        }
+
+        .pin-btn.active {
+            background: #f39c12;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -416,6 +442,19 @@
  
             <div class="comment-actions">
  
+                @if($comment->is_pinned)
+                        <span class="pinned-label">📌 Pinned</span>
+                @endif
+
+                @if(auth()->id() === $tweet->user_id && is_null($comment->parent_id))
+                    <form method="POST" action="{{ route('comments.pin', [$tweet->id, $comment->id]) }}">
+                        @csrf
+                        <button type="submit" class="pin-btn {{ $comment->is_pinned ? 'active' : '' }}">
+                            {{ $comment->is_pinned ? '📌 Unpin' : '📌 Pin' }}
+                        </button>
+                    </form>
+                @endif
+
                 <button onclick="toggleEl('reply-{{ $comment->id }}')" class="reply-btn">↩ Reply</button>
  
                 @if($comment->user_id === auth()->id())

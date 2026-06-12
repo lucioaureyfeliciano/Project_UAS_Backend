@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/tweets/{tweet_id}/comments', [CommentController::class, 'index'])->name('comments.index');
     Route::get('/tweets/{tweet_id}/comments/create', [CommentController::class, 'create'])->name('comments.create');
     Route::post('/tweets/{tweet_id}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::post('/tweets/{tweet_id}/comments/{comment_id}/pin', [CommentController::class, 'pin'])->name('comments.pin');
     Route::get('/comments/{id}/edit', [CommentController::class, 'edit'])->name('comments.edit');
     Route::put('/comments/{id}', [CommentController::class, 'update'])->name('comments.update');
     Route::get('/comments/{id}', [CommentController::class, 'show'])->name('comments.show');

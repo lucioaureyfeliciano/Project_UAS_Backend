@@ -23,7 +23,7 @@ class CommentController extends Controller
         elseif ($sort === 'popular') {$query->withCount('replies')->orderByDesc('replies_count');} 
         else {$query->latest();}
 
-        $comments = $query->get();
+        $comments = $query->orderByDesc('is_pinned')->get();
 
         return view('comments.index', compact('tweet', 'comments', 'sort'));
     }
@@ -106,4 +106,21 @@ class CommentController extends Controller
         return view('comments.show', compact('comment'));
     }
 
+    public function pin($tweet_id, $comment_id)
+    {
+        $tweet = Tweet::findOrFail($tweet_id);
+        if ($tweet->user_id !== auth()->id()) abort(403);
+
+        $comment = Comment::findOrFail($comment_id);
+        if ($comment->is_pinned) 
+        {
+            $comment->update(['is_pinned' => false]);
+            return back()->with('success', 'Pin removed.');
+        }
+
+        Comment::where('tweet_id', $tweet_id)->update(['is_pinned' => false]);
+
+        $comment->update(['is_pinned' => true]);
+        return back()->with('success', 'Comment pinned!');
+    }
 }

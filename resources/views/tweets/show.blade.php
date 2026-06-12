@@ -200,7 +200,19 @@
             background: #3490dc;
             color: white;
         }
- 
+        
+        .pinned-comment-card {
+            border-left: 4px solid #f39c12;
+            background: #fffdf8;
+        }
+
+        .pinned-label {
+            font-size: 11px;
+            color: #f39c12;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
         .comment-card {
             background: white;
             border: 1px solid #ddd;
@@ -390,8 +402,11 @@
         </div>
 
         @forelse($tweet->comments->whereNull('parent_id')->take(3) as $comment)
-            <div class="comment-card">
+            <div class="comment-card" {{ $comment->is_pinned ? 'pinned-comment-card' : '' }}">
                 <div class="comment-username">
+                    @if($comment->is_pinned)
+                        <div class="pinned-label">📌 Pinned by {{ $tweet->user?->username }}</div>
+                    @endif
                     <a href="{{ route('user.profile', $comment->user?->username) }}">
                         {{ $comment->user?->username ?? 'Unknown' }}
                     </a>
