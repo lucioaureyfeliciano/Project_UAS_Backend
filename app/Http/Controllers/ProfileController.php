@@ -100,19 +100,62 @@ class ProfileController extends Controller
     {
         $keyword = $request->search;
 
-        $users = User::where(
-            'username',
-            'like',
-            '%' . $keyword . '%'
-        )
-            ->where('id', '!=', auth()->id())
-            ->get();
+        $type = $request->type ?? 'all';
+
+        $users = collect();
+        $tweets = collect();
+
+        if ($type == 'all' || $type == 'users') {
+
+            $users = User::where(
+                'username',
+                'like',
+                '%' . $keyword . '%'
+            )
+                ->where(
+                    'id',
+                    '!=',
+                    auth()->id()
+                )
+                ->get();
+
+        }
+
+        if ($type == 'all' || $type == 'tweets') {
+
+            $tweets = Tweet::with([
+                'user',
+                'likes',
+                'dislikes',
+                'reposts',
+                'comments'
+            ])
+                ->where(function ($query) use ($keyword) {
+
+                    $query->where(
+                        'title',
+                        'like',
+                        '%' . $keyword . '%'
+                    )
+                        ->orWhere(
+                            'content',
+                            'like',
+                            '%' . $keyword . '%'
+                        );
+
+                })
+                ->latest()
+                ->get();
+
+        }
 
         return view(
             'search.search',
             compact(
                 'users',
-                'keyword'
+                'tweets',
+                'keyword',
+                'type'
             )
         );
     }

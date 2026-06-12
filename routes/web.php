@@ -134,7 +134,9 @@ Route::middleware('auth')->group(function () {
 });
 
 // Hashtag Route
-Route::get('/hashtags/{name}', [TweetController::class, 'showHashtag'])->middleware('auth');// Search Route
+Route::get('/hashtags/{name}', [TweetController::class, 'showHashtag'])->middleware('auth');
+
+// Search Route
 Route::get(
     '/search/users',
     [ProfileController::class, 'search']
