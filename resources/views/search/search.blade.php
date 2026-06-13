@@ -169,6 +169,67 @@
         #scrollTopBtn:hover {
             background: #2779bd;
         }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .filter-tab {
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            background: white;
+            color: black;
+            font-weight: bold;
+        }
+
+        .filter-tab.active {
+            background: #3490dc;
+            color: white;
+        }
+
+        .tweet-card {
+            background: white;
+            padding: 18px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        .tweet-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .tweet-content {
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .tweet-info {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .tweet-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .reaction-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: black;
+        }
+        
     </style>
 
 </head>
