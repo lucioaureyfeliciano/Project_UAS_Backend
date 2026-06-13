@@ -229,7 +229,6 @@
             text-decoration: none;
             color: black;
         }
-        
     </style>
 
 </head>
@@ -250,7 +249,7 @@
 
             <form method="GET">
 
-                <input type="text" name="search" class="search-input" placeholder="Search username..."
+                <input type="text" name="search" class="search-input" placeholder="Search username or tweets"
                     value="{{ $keyword }}">
 
                 <button type="submit" class="search-btn">
@@ -260,6 +259,26 @@
             </form>
 
         </div>
+
+        @if($keyword)
+
+            <div class="filter-tabs">
+
+                <a href="?search={{ $keyword }}&type=all" class="filter-tab {{ $type == 'all' ? 'active' : '' }}">
+                    All
+                </a>
+
+                <a href="?search={{ $keyword }}&type=users" class="filter-tab {{ $type == 'users' ? 'active' : '' }}">
+                    Users
+                </a>
+
+                <a href="?search={{ $keyword }}&type=tweets" class="filter-tab {{ $type == 'tweets' ? 'active' : '' }}">
+                    Tweets
+                </a>
+
+            </div>
+
+        @endif
 
         @if($keyword)
 
@@ -336,6 +355,71 @@
             </div>
 
         @empty
+
+            @if(
+                    ($type == 'all' || $type == 'tweets')
+                    &&
+                    $tweets->count()
+                )
+
+                <h2 class="section-title">
+                    Tweets
+                </h2>
+
+                @foreach($tweets as $tweet)
+
+                    <div class="tweet-card">
+
+                        <div class="tweet-info">
+
+                            <a href="{{ route('profile.show', $tweet->user->username) }}"
+                                style="text-decoration:none;color:#3490dc;font-weight:bold;">
+
+                                {{ $tweet->user->username }}
+
+                            </a>
+
+                            •
+
+                            {{ $tweet->created_at->diffForHumans() }}
+
+                        </div>
+
+                        <div class="tweet-title">
+                            {{ $tweet->title }}
+                        </div>
+
+                        <div class="tweet-content">
+                            {{ $tweet->content }}
+                        </div>
+
+                        <div class="tweet-actions">
+
+                            <span class="reaction-btn">
+                                👍 {{ $tweet->likes->count() }}
+                            </span>
+
+                            <span class="reaction-btn">
+                                👎 {{ $tweet->dislikes->count() }}
+                            </span>
+
+                            <span class="reaction-btn">
+                                🔁 {{ $tweet->reposts->count() }}
+                            </span>
+
+                            <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn">
+
+                                💬 {{ $tweet->comments->count() }}
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                @endforeach
+
+            @endif
 
             @if($keyword)
 
