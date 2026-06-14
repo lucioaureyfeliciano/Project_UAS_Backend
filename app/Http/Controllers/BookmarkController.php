@@ -4,12 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bookmark;
+use Illuminate\Http\Request;
 
 class BookmarkController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->search;
         $bookmarks = Bookmark::where('user_id', auth()->id())
+            ->when($search, function ($query) use ($search) {
+                $query->whereHas('tweet', function ($tweet) use ($search) {
+                    $tweet->where('title', 'like', "%{$search}%")
+                        ->orWhere('content', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($user) use ($search) {
+                            $user->where('username', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->with(['tweet.user', 'tweet.likes', 'tweet.dislikes', 'tweet.reposts', 'tweet.comments'])
             ->latest()
             ->paginate(15);

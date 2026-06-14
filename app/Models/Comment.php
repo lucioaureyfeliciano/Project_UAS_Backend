@@ -12,7 +12,7 @@ class Comment extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     
-    protected $fillable = ['content', 'user_id', 'tweet_id', 'parent_id'];
+    protected $fillable = ['content', 'user_id', 'tweet_id', 'parent_id', 'is_pinned'];
 
     protected static function boot()
     {

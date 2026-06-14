@@ -200,13 +200,26 @@
             background: #3490dc;
             color: white;
         }
- 
+        
+        .pinned-comment-card {
+            border-left: 4px solid #f39c12;
+            background: #fffdf8;
+        }
+
+        .pinned-label {
+            font-size: 11px;
+            color: #f39c12;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
         .comment-card {
             background: white;
             border: 1px solid #ddd;
             border-radius: 10px;
             padding: 14px 16px;
             margin-bottom: 10px;
+            overflow: hidden;
         }
  
         .comment-card .comment-username {
@@ -221,6 +234,9 @@
             font-size: 14px;
             line-height: 1.5;
             margin-bottom: 6px;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;  
         }
  
         .comment-card .comment-meta {
@@ -228,7 +244,6 @@
             color: #aaa;
         }
  
-        /* Reply preview indent */
         .reply-preview {
             background: #f9f9f9;
             border-left: 3px solid #3490dc;
@@ -247,7 +262,13 @@
         }
  
         .reply-preview .reply-content {
+            font-size: 13px;
             color: #555;
+            line-height: 1.5;
+            margin-bottom: 4px;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;    
         }
 
         .see-all-comments {
@@ -390,8 +411,11 @@
         </div>
 
         @forelse($tweet->comments->whereNull('parent_id')->take(3) as $comment)
-            <div class="comment-card">
+            <div class="comment-card" {{ $comment->is_pinned ? 'pinned-comment-card' : '' }}">
                 <div class="comment-username">
+                    @if($comment->is_pinned)
+                        <div class="pinned-label">📌 Pinned by {{ $tweet->user?->username }}</div>
+                    @endif
                     <a href="{{ route('profile.show', $comment->user?->username) }}">
                         {{ $comment->user?->username ?? 'Unknown' }}
                     </a>

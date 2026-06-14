@@ -181,6 +181,9 @@
             font-size: 14px;
             line-height: 1.55;
             margin-bottom: 6px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
         }
  
         .comment-meta {
@@ -257,6 +260,7 @@
             padding: 10px 14px;
             border-radius: 0 8px 8px 0;
             margin-bottom: 8px;
+            overflow: hidden;
         }
  
         .reply-card .reply-username {
@@ -271,6 +275,9 @@
             font-size: 13px;
             line-height: 1.5;
             margin-bottom: 4px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
         }
  
         .reply-card .reply-meta {
@@ -329,6 +336,77 @@
         .reply-username a:hover {
             text-decoration: underline;
         }
+
+        .comment-sort {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .comment-sort-label {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .sort-tab {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            text-decoration: none;
+            background: white;
+            color: #555;
+            border: 1px solid #ddd;
+            transition: 0.2s;
+        }
+
+        .sort-tab:hover {
+            background: #f5f5f5;
+        }
+
+        .sort-tab.active {
+            background: #3490dc;
+            color: white;
+            border-color: #3490dc;
+        }
+
+        .pinned-label {
+            font-size: 11px;
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .pin-btn {
+            border: 1px solid #f39c12;
+            color: #f39c12;
+            background: transparent;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        .pin-btn:hover {
+            background: #fff4e6;
+        }
+
+        .pin-btn.active {
+            background: #f39c12;
+            color: white;
+        }
+
+        .reply-counter {
+            text-align: right;
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .reply-counter.limit {
+            color: #e74c3c;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -354,6 +432,17 @@
         </div>
     </div>
  
+    <div class="comment-sort">
+        <span class="comment-sort-label">Sort:</span>
+
+        @foreach(['newest'=>'Newest','oldest'=>'Oldest','popular'=>'Most Popular'] as $key => $label)
+            <a href="?sort={{ $key }}"
+            class="sort-tab {{ ($sort ?? 'newest') === $key ? 'active' : '' }}">
+                {{ $label }}
+            </a>
+        @endforeach
+    </div>
+
     <div class="section-header">
         <h2>Comments ({{ $comments->count() }})</h2>
         <a href="{{ route('comments.create', $tweet->id) }}" class="btn-primary">+ Add Comment</a>
@@ -372,6 +461,19 @@
  
             <div class="comment-actions">
  
+                @if($comment->is_pinned)
+                        <span class="pinned-label">📌 Pinned</span>
+                @endif
+
+                @if(auth()->id() === $tweet->user_id && is_null($comment->parent_id))
+                    <form method="POST" action="{{ route('comments.pin', [$tweet->id, $comment->id]) }}">
+                        @csrf
+                        <button type="submit" class="pin-btn {{ $comment->is_pinned ? 'active' : '' }}">
+                            {{ $comment->is_pinned ? '📌 Unpin' : '📌 Pin' }}
+                        </button>
+                    </form>
+                @endif
+
                 <button onclick="toggleEl('reply-{{ $comment->id }}')" class="reply-btn">↩ Reply</button>
  
                 @if($comment->user_id === auth()->id())
@@ -404,7 +506,15 @@
                 <form method="POST" action="{{ route('comments.store', $tweet->id) }}">
                     @csrf
                     <input type="hidden" name="parent_id" value="{{ $comment->id }}">
-                    <textarea name="content" rows="2" placeholder="Write a reply..." required></textarea>
+                    <textarea
+                        class="reply-box"
+                        name="content"
+                        rows="2"
+                        maxlength="280"
+                        placeholder="Write a reply..."
+                        required></textarea>
+
+                    <div class="reply-counter">0/280</div>
                     <div class="reply-actions">
                         <button type="submit" class="btn-primary">Send</button>
                         <button type="button" onclick="toggleEl('reply-{{ $comment->id }}')" class="btn-cancel">Cancel</button>
@@ -470,6 +580,22 @@
         el.style.display = el.style.display === 'block' ? 'none' : 'block';
     }
 </script>
- 
+<script>
+document.querySelectorAll('.reply-box').forEach(box => {
+    const counter = box.parentElement.querySelector('.reply-counter');
+
+    box.addEventListener('input', () => {
+        const len = box.value.length;
+        counter.innerText = `${len}/280`;
+
+        if(len >= 250){
+            counter.classList.add('limit');
+        } else {
+            counter.classList.remove('limit');
+        }
+    });
+
+});
+</script>
 </body>
 </html>

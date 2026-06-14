@@ -138,6 +138,45 @@
         .btn-view:hover {
             background: #2779bd;
         }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #3490dc;
+        }
+
+        .btn-search {
+            background: #3490dc;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-search:hover {
+            background: #2779bd;
+        }
+
+        mark{
+            background:#fff3a0;
+            padding:2px 4px;
+            border-radius:4px;
+        }
     </style>
 </head>
 <body>
@@ -160,15 +199,57 @@
  
     <div class="card">
         <h2>Your Bookmarks ({{ $bookmarks->total() }})</h2>
+        <form method="GET" class="search-form">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search bookmark..." class="search-input">
+            <button type="submit" class="btn-search">
+                🔍 Search
+            </button>
+        </form>
     </div>
  
     @forelse($bookmarks as $bookmark)
         <div class="bookmark-card">
- 
-            <div class="tweet-title">{{ $bookmark->tweet?->title ?? '[Tweet deleted]' }}</div>
-            <div class="tweet-content">{{ $bookmark->tweet?->content ?? '-' }}</div>
+
+            @php
+                $title = $bookmark->tweet?->title ?? '[Tweet deleted]';
+
+                if(request('search')) {
+                    $title = preg_replace(
+                        '/(' . preg_quote(request('search'), '/') . ')/i',
+                        '<mark>$1</mark>',
+                        $title
+                    );
+                }
+            @endphp
+
+            <div class="tweet-title">{!! $title !!}</div>
+            @php
+                $content = $bookmark->tweet?->content ?? '-';
+
+                if(request('search')) {
+                    $content = preg_replace(
+                        '/(' . preg_quote(request('search'), '/') . ')/i',
+                        '<mark>$1</mark>',
+                        $content
+                    );
+                }
+            @endphp
+
+            <div class="tweet-content">{!! $content !!}</div>         
+            @php
+                $username = $bookmark->tweet?->user?->username ?? 'Unknown';
+
+                if(request('search')) {
+                    $username = preg_replace(
+                        '/(' . preg_quote(request('search'), '/') . ')/i',
+                        '<mark>$1</mark>',
+                        $username
+                    );
+                }
+            @endphp
+
             <div class="tweet-meta">
-                By <strong>{{ $bookmark->tweet?->user?->username ?? 'Unknown' }}</strong>
+                By <strong>{!! $username !!}</strong>
                 · Bookmarked {{ $bookmark->created_at->diffForHumans() }}
             </div>
 

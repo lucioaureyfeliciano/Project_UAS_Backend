@@ -111,7 +111,10 @@ class TweetController extends Controller
         $tweet = Tweet::with([
             'user', 'likes', 'dislikes', 'reposts', 'bookmarks',
             'comments' => function($q) {
-                $q->whereNull('parent_id')->with(['user', 'replies.user'])->latest();
+                $q->whereNull('parent_id')
+                  ->with(['user', 'replies.user'])
+                  ->orderByDesc('is_pinned')
+                  ->latest();
             }
         ])->findOrFail($id);
 

@@ -13,13 +13,19 @@ class CommentController extends Controller
     public function index($tweet_id)
     {
         $tweet = Tweet::with('user')->findOrFail($tweet_id);
-        $comments = Comment::where('tweet_id', $tweet_id)
-            ->whereNull('parent_id')
-            ->with(['user', 'replies.user'])
-            ->latest()
-            ->get();
+        $sort  = request('sort', 'newest');
 
-        return view('comments.index', compact('tweet', 'comments'));
+        $query = Comment::where('tweet_id', $tweet_id)
+            ->whereNull('parent_id')
+            ->with(['user', 'replies.user']);
+
+        if ($sort === 'oldest') {$query->oldest();} 
+        elseif ($sort === 'popular') {$query->withCount('replies')->orderByDesc('replies_count');} 
+        else {$query->latest();}
+
+        $comments = $query->orderByDesc('is_pinned')->get();
+
+        return view('comments.index', compact('tweet', 'comments', 'sort'));
     }
 
     public function create($tweet_id)
@@ -100,4 +106,21 @@ class CommentController extends Controller
         return view('comments.show', compact('comment'));
     }
 
+    public function pin($tweet_id, $comment_id)
+    {
+        $tweet = Tweet::findOrFail($tweet_id);
+        if ($tweet->user_id !== auth()->id()) abort(403);
+
+        $comment = Comment::findOrFail($comment_id);
+        if ($comment->is_pinned) 
+        {
+            $comment->update(['is_pinned' => false]);
+            return back()->with('success', 'Pin removed.');
+        }
+
+        Comment::where('tweet_id', $tweet_id)->update(['is_pinned' => false]);
+
+        $comment->update(['is_pinned' => true]);
+        return back()->with('success', 'Comment pinned!');
+    }
 }
