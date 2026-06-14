@@ -288,79 +288,89 @@
 
         @endif
 
-        @forelse($users as $user)
+        @if($type == 'all' || $type == 'users')
+            @forelse($users as $user)
 
-            @php
+                @php
 
-                $isFollowing = \App\Models\Follow::where(
-                    'follower_id',
-                    auth()->id()
-                )
-                    ->where(
-                        'following_id',
-                        $user->id
+                    $isFollowing = \App\Models\Follow::where(
+                        'follower_id',
+                        auth()->id()
                     )
-                    ->exists();
+                        ->where(
+                            'following_id',
+                            $user->id
+                        )
+                        ->exists();
 
-            @endphp
+                @endphp
 
-            <div class="user-card">
+                <div class="user-card">
 
-                <div class="user-info">
-
-                    <a href="{{ route('profile.show', $user->username) }}" class="username-link">
-
-                        <div class="avatar">
-                            👤
-                        </div>
-
-                    </a>
-
-                    <div>
+                    <div class="user-info">
 
                         <a href="{{ route('profile.show', $user->username) }}" class="username-link">
 
-                            <h3 class="username">
-                                {{ $user->username }}
-                            </h3>
+                            <div class="avatar">
+                                👤
+                            </div>
 
                         </a>
 
-                        <div class="bio">
+                        <div>
 
-                            {{ $user->description ?: 'No description yet.' }}
+                            <a href="{{ route('profile.show', $user->username) }}" class="username-link">
+
+                                <h3 class="username">
+                                    {{ $user->username }}
+                                </h3>
+
+                            </a>
+
+                            <div class="bio">
+
+                                {{ $user->description ?: 'No description yet.' }}
+
+                            </div>
 
                         </div>
 
                     </div>
 
+                    @if(auth()->id() != $user->id)
+
+                        <form method="POST" action="{{ route('follow', $user->id) }}">
+
+                            @csrf
+
+                            <button type="submit" class="follow-btn {{ $isFollowing ? 'following' : 'follow' }}">
+
+                                {{ $isFollowing ? 'Following' : 'Follow' }}
+
+                            </button>
+
+                        </form>
+
+                    @endif
+
                 </div>
 
-                @if(auth()->id() != $user->id)
+            @empty
 
-                    <form method="POST" action="{{ route('follow', $user->id) }}">
+                @if($keyword)
 
-                        @csrf
-
-                        <button type="submit" class="follow-btn {{ $isFollowing ? 'following' : 'follow' }}">
-
-                            {{ $isFollowing ? 'Following' : 'Follow' }}
-
-                        </button>
-
-                    </form>
+                    <p>
+                        No users found.
+                    </p>
 
                 @endif
 
-            </div>
+            @endforelse
+        @endif
 
-        @empty
+        @if($type == 'all' || $type == 'tweets')
 
-            @if(
-                    ($type == 'all' || $type == 'tweets')
-                    &&
-                    $tweets->count()
-                )
+            @if($tweets->count())
 
                 <h2 class="section-title">
                     Tweets
@@ -407,11 +417,20 @@
                                 🔁 {{ $tweet->reposts->count() }}
                             </span>
 
-                            <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn">
+                            <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
+                                style="text-decoration:none;">
 
                                 💬 {{ $tweet->comments->count() }}
 
                             </a>
+
+                            <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
+                                @csrf
+                                <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
+                                <button type="submit" class="reaction-btn" style="color:#3490dc; background:white; font-size:14px;">
+                                    🔖 Bookmark
+                                </button>
+                            </form>
 
                         </div>
 
@@ -419,17 +438,13 @@
 
                 @endforeach
 
-            @endif
+            @elseif($keyword)
 
-            @if($keyword)
-
-                <p>
-                    No users found.
-                </p>
+                <p>No tweets found.</p>
 
             @endif
 
-        @endforelse
+        @endif
 
     </div>
 
