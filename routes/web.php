@@ -15,6 +15,7 @@ use App\Http\Controllers\RepostController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\MuteController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\FollowController;
 use App\Models\Tweet;
 
 Route::get('/', function () {
@@ -94,13 +95,33 @@ Route::post('/tweets/{tweet}/like', [LikeController::class, 'toggle'])->middlewa
 
 # Profile Routes
 Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth');
-Route::get('user/{username}', [ProfileController::class, 'show'])->middleware('auth')->name('user.profile');
+Route::get('user/{username}', [ProfileController::class, 'show'])->middleware('auth')->name('profile.show');
 
 # Update Description Profile
 Route::post('/profile/update-description', [ProfileController::class, 'updateDescription']);
 
 # Repost Routes
 Route::post('/tweets/{tweet}/repost', [RepostController::class, 'toggle'])->middleware('auth');
+
+# Follow Routes
+Route::post(
+    '/follow/{following_id}',
+    [FollowController::class, 'toggle']
+)->middleware('auth')->name('follow');
+
+# followers list
+Route::get(
+    '/profile/{username}/followers',
+    [ProfileController::class, 'followers']
+)->middleware('auth')
+    ->name('profile.followers');
+
+# following list
+Route::get(
+    '/profile/{username}/following',
+    [ProfileController::class, 'following']
+)->middleware('auth')
+    ->name('profile.following');
 
 # Message Routes
 Route::middleware('auth')->group(function () {
@@ -113,4 +134,10 @@ Route::middleware('auth')->group(function () {
 });
 
 // Hashtag Route
-Route::get('/hashtags/{name}', [TweetController::class, 'showHashtag'])->middleware('auth');
+Route::get('/hashtags/{name}', [TweetController::class, 'showHashtag'])->middleware('auth');// Search Route
+Route::get(
+    '/search/users',
+    [ProfileController::class, 'search']
+)->middleware('auth')
+ ->name('search.users');
+

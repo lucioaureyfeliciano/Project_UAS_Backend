@@ -127,6 +127,20 @@
 
                     <div class="message-time">
                         {{ $message->created_at->format('d M Y H:i') }}
+
+                            @if($message->sender_id == auth()->id())
+
+                                @if($message->read_at)
+
+                                    · Seen {{ \Carbon\Carbon::parse($message->read_at)->format('H:i') }}
+
+                                @else
+
+                                    · Sent
+
+                                @endif
+
+                            @endif
                     </div>
 
                 </div>
