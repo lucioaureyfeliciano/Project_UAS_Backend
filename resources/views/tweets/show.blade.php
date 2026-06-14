@@ -343,7 +343,7 @@
             </div>
             <div class="tweet-author-info">
                 <div class="username">
-                    <a href="{{ route('user.profile', $tweet->user?->username) }}">
+                    <a href="{{ route('profile.show', $tweet->user?->username) }}">
                         {{ $tweet->user?->username ?? 'Unknown' }}
                     </a>
                 </div>
@@ -416,7 +416,7 @@
                     @if($comment->is_pinned)
                         <div class="pinned-label">📌 Pinned by {{ $tweet->user?->username }}</div>
                     @endif
-                    <a href="{{ route('user.profile', $comment->user?->username) }}">
+                    <a href="{{ route('profile.show', $comment->user?->username) }}">
                         {{ $comment->user?->username ?? 'Unknown' }}
                     </a>
                 </div>
@@ -426,7 +426,7 @@
                 @if($comment->replies->count() > 0)
                     <div class="reply-preview">
                         <div class="reply-username">
-                            <a href="{{ route('user.profile', $comment->replies->first()->user?->username) }}">
+                            <a href="{{ route('profile.show', $comment->replies->first()->user?->username) }}">
                                 {{ $comment->replies->first()->user?->username ?? 'Unknown' }}
                             </a>
                         </div>

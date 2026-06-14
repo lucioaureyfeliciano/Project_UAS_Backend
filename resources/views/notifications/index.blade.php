@@ -432,7 +432,7 @@
                             @endif
 
                             @if($notification->relatedUser)
-                                <a href="{{ route('user.profile', $notification->relatedUser->username) }}"
+                                <a href="{{ route('profile.show', $notification->relatedUser->username) }}"
                                     class="notif-link user-link">
                                     👤 {{ $notification->relatedUser->username }}
                                 </a>
