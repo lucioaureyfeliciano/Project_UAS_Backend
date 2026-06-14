@@ -7,7 +7,8 @@ use App\Models\Block;
 use Illuminate\Http\Request;
 use App\Models\Mute;
 use App\Models\Hashtag;
-
+use App\Models\User;
+use App\Models\Notification;
 
 class TweetController extends Controller
 {
@@ -18,7 +19,7 @@ class TweetController extends Controller
             'content' => 'required|string',
         ]);
 
-        $tweet =Tweet::create([
+        $tweet = Tweet::create([
             'title' => $request->input('title'),
             'content' => $request->input('content'),
             'user_id' => auth()->id(),
@@ -29,6 +30,26 @@ class TweetController extends Controller
             $tweet->content,
             $matches
         );
+
+        foreach ($matches[1] as $username) {
+            $mentionedUser = User::where(
+                'username',
+                $username
+            )->first();
+
+            if ($mentionedUser) {
+                Notification::create([
+                    'user_id' => $mentionedUser->id,
+                    'type' => 'mention',
+                    'message' =>
+                        auth()->user()->username .
+                        ' mentioned you in a tweet',
+                    'is_read' => false,
+                    'related_user_id' => auth()->id(),
+                    'tweet_id' => $tweet->id,
+                ]);
+            }
+        }
 
         foreach ($matches[1] as $tag) {
 
@@ -67,7 +88,7 @@ class TweetController extends Controller
             ->orderByDesc('tweets_count')
             ->take(5)
             ->get();
-        
+
         return view('dashboard', compact('tweets', 'hashtags'));
     }
 
@@ -109,12 +130,16 @@ class TweetController extends Controller
     public function show($id)
     {
         $tweet = Tweet::with([
-            'user', 'likes', 'dislikes', 'reposts', 'bookmarks',
-            'comments' => function($q) {
+            'user',
+            'likes',
+            'dislikes',
+            'reposts',
+            'bookmarks',
+            'comments' => function ($q) {
                 $q->whereNull('parent_id')
-                  ->with(['user', 'replies.user'])
-                  ->orderByDesc('is_pinned')
-                  ->latest();
+                    ->with(['user', 'replies.user'])
+                    ->orderByDesc('is_pinned')
+                    ->latest();
             }
         ])->findOrFail($id);
 

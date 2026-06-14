@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('type', ['like', 'comment', 'follow', 'repost']);
+            $table->enum('type', ['like', 'comment', 'follow', 'repost', 'mention']);
             $table->text('message');
             $table->boolean('is_read')->default(false);
             $table->foreignId('related_user_id')->nullable()->constrained('users')->onDelete('cascade');

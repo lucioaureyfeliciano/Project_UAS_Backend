@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Tweet;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Notification;
 
@@ -13,15 +14,19 @@ class CommentController extends Controller
     public function index($tweet_id)
     {
         $tweet = Tweet::with('user')->findOrFail($tweet_id);
-        $sort  = request('sort', 'newest');
+        $sort = request('sort', 'newest');
 
         $query = Comment::where('tweet_id', $tweet_id)
             ->whereNull('parent_id')
             ->with(['user', 'replies.user']);
 
-        if ($sort === 'oldest') {$query->oldest();} 
-        elseif ($sort === 'popular') {$query->withCount('replies')->orderByDesc('replies_count');} 
-        else {$query->latest();}
+        if ($sort === 'oldest') {
+            $query->oldest();
+        } elseif ($sort === 'popular') {
+            $query->withCount('replies')->orderByDesc('replies_count');
+        } else {
+            $query->latest();
+        }
 
         $comments = $query->orderByDesc('is_pinned')->get();
 
@@ -46,30 +51,54 @@ class CommentController extends Controller
         ]);
 
         $tweet = Tweet::find($tweet_id);
-        if ($comment->parent_id) 
-        {
+        if ($comment->parent_id) {
             $parentComment = Comment::find($comment->parent_id);
             if ($parentComment && $parentComment->user_id !== auth()->id()) {
                 Notification::create([
-                    'user_id'         => $parentComment->user_id,
-                    'type'            => 'comment',
-                    'message'         => auth()->user()->username . ' replied to your comment',
-                    'is_read'         => false,
+                    'user_id' => $parentComment->user_id,
+                    'type' => 'comment',
+                    'message' => auth()->user()->username . ' replied to your comment',
+                    'is_read' => false,
                     'related_user_id' => auth()->id(),
-                    'tweet_id'        => $tweet_id,
+                    'tweet_id' => $tweet_id,
                 ]);
             }
 
-        } elseif ($tweet && $tweet->user_id !== auth()->id()) 
-        {
+        } elseif ($tweet && $tweet->user_id !== auth()->id()) {
             Notification::create([
-                'user_id'         => $tweet->user_id,
-                'type'            => 'comment',
-                'message'         => auth()->user()->username . ' commented on your tweet "' . $tweet->title . '"',
-                'is_read'         => false,
+                'user_id' => $tweet->user_id,
+                'type' => 'comment',
+                'message' => auth()->user()->username . ' commented on your tweet "' . $tweet->title . '"',
+                'is_read' => false,
                 'related_user_id' => auth()->id(),
-                'tweet_id'        => $tweet_id,
+                'tweet_id' => $tweet_id,
             ]);
+        }
+
+        preg_match_all(
+            '/@([a-zA-Z0-9_]+)/',
+            $comment->content,
+            $matches
+        );
+
+        foreach ($matches[1] as $username) {
+            $mentionedUser = User::where(
+                'username',
+                $username
+            )->first();
+
+            if ($mentionedUser) {
+                Notification::create([
+                    'user_id' => $mentionedUser->id,
+                    'type' => 'mention',
+                    'message' =>
+                        auth()->user()->username .
+                        ' mentioned you in a comment',
+                    'is_read' => false,
+                    'related_user_id' => auth()->id(),
+                    'tweet_id' => $tweet_id,
+                ]);
+            }
         }
         return redirect()->route('tweets.show', $tweet_id)->with('success', 'Comment posted!');
     }
@@ -77,14 +106,16 @@ class CommentController extends Controller
     public function edit($id)
     {
         $comment = Comment::findOrFail($id);
-        if ($comment->user_id !== auth()->id()) abort(403);
+        if ($comment->user_id !== auth()->id())
+            abort(403);
         return redirect()->route('comments.index', $comment->tweet_id);
     }
 
     public function update(Request $request, $id)
     {
         $comment = Comment::findOrFail($id);
-        if ($comment->user_id !== auth()->id()) abort(403);
+        if ($comment->user_id !== auth()->id())
+            abort(403);
 
         $comment->update(request()->validate(['content' => 'required|max:500']));
         return redirect()->route('tweets.show', $comment->tweet_id)->with('success', 'Comment updated!');
@@ -93,7 +124,8 @@ class CommentController extends Controller
     public function destroy($id)
     {
         $comment = Comment::findOrFail($id);
-        if ($comment->user_id !== auth()->id()) abort(403);
+        if ($comment->user_id !== auth()->id())
+            abort(403);
 
         $tweet_id = $comment->tweet_id;
         $comment->delete();
@@ -109,11 +141,11 @@ class CommentController extends Controller
     public function pin($tweet_id, $comment_id)
     {
         $tweet = Tweet::findOrFail($tweet_id);
-        if ($tweet->user_id !== auth()->id()) abort(403);
+        if ($tweet->user_id !== auth()->id())
+            abort(403);
 
         $comment = Comment::findOrFail($comment_id);
-        if ($comment->is_pinned) 
-        {
+        if ($comment->is_pinned) {
             $comment->update(['is_pinned' => false]);
             return back()->with('success', 'Pin removed.');
         }
