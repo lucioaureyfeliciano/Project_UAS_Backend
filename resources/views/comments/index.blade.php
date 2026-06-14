@@ -181,6 +181,9 @@
             font-size: 14px;
             line-height: 1.55;
             margin-bottom: 6px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
         }
  
         .comment-meta {
@@ -257,6 +260,7 @@
             padding: 10px 14px;
             border-radius: 0 8px 8px 0;
             margin-bottom: 8px;
+            overflow: hidden;
         }
  
         .reply-card .reply-username {
@@ -271,6 +275,9 @@
             font-size: 13px;
             line-height: 1.5;
             margin-bottom: 4px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
         }
  
         .reply-card .reply-meta {
@@ -388,6 +395,18 @@
             background: #f39c12;
             color: white;
         }
+
+        .reply-counter {
+            text-align: right;
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .reply-counter.limit {
+            color: #e74c3c;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -487,7 +506,15 @@
                 <form method="POST" action="{{ route('comments.store', $tweet->id) }}">
                     @csrf
                     <input type="hidden" name="parent_id" value="{{ $comment->id }}">
-                    <textarea name="content" rows="2" placeholder="Write a reply..." required></textarea>
+                    <textarea
+                        class="reply-box"
+                        name="content"
+                        rows="2"
+                        maxlength="280"
+                        placeholder="Write a reply..."
+                        required></textarea>
+
+                    <div class="reply-counter">0/280</div>
                     <div class="reply-actions">
                         <button type="submit" class="btn-primary">Send</button>
                         <button type="button" onclick="toggleEl('reply-{{ $comment->id }}')" class="btn-cancel">Cancel</button>
@@ -553,6 +580,22 @@
         el.style.display = el.style.display === 'block' ? 'none' : 'block';
     }
 </script>
- 
+<script>
+document.querySelectorAll('.reply-box').forEach(box => {
+    const counter = box.parentElement.querySelector('.reply-counter');
+
+    box.addEventListener('input', () => {
+        const len = box.value.length;
+        counter.innerText = `${len}/280`;
+
+        if(len >= 250){
+            counter.classList.add('limit');
+        } else {
+            counter.classList.remove('limit');
+        }
+    });
+
+});
+</script>
 </body>
 </html>

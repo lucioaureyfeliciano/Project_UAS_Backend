@@ -77,6 +77,18 @@
             font-size: 13px;
             margin-top: 4px;
         }
+ 
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .char-counter.limit {
+            color: #e74c3c;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -103,12 +115,15 @@
             <label for="content">Your Comment</label>
 
             <textarea
-                id="content"
+                id="comment-box"
                 name="content"
                 rows="4"
-                placeholder="Tulis komentarmu..."
+                maxlength="280"
+                placeholder="Write your comment..."
                 required>{{ old('content') }}</textarea>
 
+            <div id="counter" class="char-counter">0/280</div>
+            
             @error('content')
                 <div class="error">{{ $message }}</div>
             @enderror
@@ -119,6 +134,22 @@
         </form>
     </div>
 </div>
+<script>
+const box = document.getElementById('comment-box');
+const counter = document.getElementById('counter');
 
+if (box && counter) {
+    box.addEventListener('input', () => {
+        const len = box.value.length;
+        counter.innerText = `${len}/280`;
+
+        if (len >= 250) {
+            counter.classList.add('limit');
+        } else {
+            counter.classList.remove('limit');
+        }
+    });
+}
+</script>
 </body>
 </html>

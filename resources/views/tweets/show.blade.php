@@ -219,6 +219,7 @@
             border-radius: 10px;
             padding: 14px 16px;
             margin-bottom: 10px;
+            overflow: hidden;
         }
  
         .comment-card .comment-username {
@@ -233,6 +234,9 @@
             font-size: 14px;
             line-height: 1.5;
             margin-bottom: 6px;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;  
         }
  
         .comment-card .comment-meta {
@@ -240,7 +244,6 @@
             color: #aaa;
         }
  
-        /* Reply preview indent */
         .reply-preview {
             background: #f9f9f9;
             border-left: 3px solid #3490dc;
@@ -259,7 +262,13 @@
         }
  
         .reply-preview .reply-content {
+            font-size: 13px;
             color: #555;
+            line-height: 1.5;
+            margin-bottom: 4px;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;    
         }
 
         .see-all-comments {
