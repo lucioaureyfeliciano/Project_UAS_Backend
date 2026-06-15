@@ -81,7 +81,11 @@ class CommentController extends Controller
             $matches
         );
 
-        foreach ($matches[1] as $username) {
+        $mentionedUsers = array_unique(
+            $matches[1]
+        );
+
+        foreach ($mentionedUsers as $username) {
             $mentionedUser = User::where(
                 'username',
                 $username
