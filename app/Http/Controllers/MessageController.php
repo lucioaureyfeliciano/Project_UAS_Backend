@@ -94,19 +94,35 @@ class MessageController extends Controller
         return back();
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $messageId)
     {
-        $message = Message::findOrFail($id);
+        $message = Message::findOrFail($messageId);
 
-        if ($message->sender_id != auth()->id()) {
+        if ($message->sender_id !== auth()->id()) {
             abort(403);
         }
 
-        $message->update([
-            'message' => $request->message
+        if ($message->created_at->diffInMinutes(now()) > 5) {
+            return back()->with(
+                'error',
+                'Message can only be edited within 5 minutes.'
+            );
+        }
+
+        $request->validate([
+            'message' => 'required|string'
         ]);
 
-        return back();
+        $message->update([
+            'message' => $request->message,
+            'edited_at' => now(),
+            'read_at' => null
+        ]);
+
+        return back()->with(
+            'success',
+            'Message updated.'
+        );
     }
 
     public function destroy($id)

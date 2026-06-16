@@ -34,6 +34,7 @@
         .message {
             margin-bottom: 12px;
             display: flex;
+            position: relative;
         }
 
         .sent {
@@ -48,6 +49,60 @@
             max-width: 70%;
             padding: 10px 15px;
             border-radius: 15px;
+        }
+
+        .message-menu {
+            position: absolute;
+            top: 5px;
+            right: -10px;
+        }
+
+        .sent .message-menu {
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .sent:hover .message-menu {
+            opacity: 1;
+        }
+
+        .menu-btn {
+            background: transparent;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 20px;
+            background: white;
+            min-width: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,.15);
+        }
+
+        .message-menu:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-menu button {
+            width: 100%;
+            border: none;
+            background: white;
+            color: black;
+            text-align: left;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .dropdown-menu button:hover {
+            background: #f5f5f5;
         }
 
         .sent .bubble {
@@ -99,6 +154,27 @@
 
     </style>
 </head>
+
+<script>
+
+function openEdit(id)
+{
+    let form = document.getElementById(
+        'edit-' + id
+    );
+
+    if(form.style.display === 'none')
+    {
+        form.style.display = 'block';
+    }
+    else
+    {
+        form.style.display = 'none';
+    }
+}
+
+</script>
+
 <body>
 
 <div class="navbar">
@@ -121,29 +197,123 @@
 
             <div class="message {{ $message->sender_id == auth()->id() ? 'sent' : 'received' }}">
 
+                @if(
+                    $message->sender_id == auth()->id()
+                    &&
+                    $message->created_at->diffInMinutes(now()) <= 5
+                )
+
+                    <div class="message-menu">
+
+                        <button class="menu-btn">
+                            ▼
+                        </button>
+
+                        <div class="dropdown-menu">
+
+                            <button
+                                type="button"
+                                onclick="openEdit({{ $message->id }})"
+                            >
+                                Edit Message
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                @endif
+
+
                 <div class="bubble">
 
-                    {{ $message->message }}
+                    <div>
+
+                        {{ $message->message }}
+
+                        @if($message->edited_at)
+
+                            <small
+                                style="
+                                    display:block;
+                                    margin-top:4px;
+                                    opacity:.7;
+                                "
+                            >
+                                (edited)
+                            </small>
+
+                        @endif
+
+                    </div>
+
+                    @if(
+                        $message->sender_id == auth()->id()
+                        &&
+                        $message->created_at->diffInMinutes(now()) <= 5
+                    )
+
+                    @endif
 
                     <div class="message-time">
+
                         {{ $message->created_at->format('d M Y H:i') }}
 
-                            @if($message->sender_id == auth()->id())
+                        @if($message->sender_id == auth()->id())
 
-                                @if($message->read_at)
+                            @if($message->read_at)
 
-                                    · Seen {{ \Carbon\Carbon::parse($message->read_at)->format('H:i') }}
+                                · Seen {{ \Carbon\Carbon::parse($message->read_at)->format('H:i') }}
 
-                                @else
+                            @else
 
-                                    · Sent
-
-                                @endif
+                                · Sent
 
                             @endif
+
+                        @endif
+
                     </div>
 
                 </div>
+
+                @if($message->sender_id == auth()->id())
+
+                    <div
+                        id="edit-{{ $message->id }}"
+                        style="
+                            display:none;
+                            margin-top:5px;
+                            margin-bottom:10px;
+                        "
+                    >
+
+                        <form
+                            method="POST"
+                            action="/messages/{{ $message->id }}"
+                        >
+
+                            @csrf
+                            @method('PUT')
+
+                            <textarea
+                                name="message"
+                                rows="2"
+                                style="width:100%;"
+                            >{{ $message->message }}</textarea>
+
+                            <button
+                                type="submit"
+                                style="margin-top:5px;"
+                            >
+                                Save
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                @endif
 
             </div>
 
