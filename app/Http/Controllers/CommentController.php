@@ -91,7 +91,10 @@ class CommentController extends Controller
                 $username
             )->first();
 
-            if ($mentionedUser) {
+            if (
+                $mentionedUser &&
+                $mentionedUser->id != auth()->id()
+            ) {
                 Notification::create([
                     'user_id' => $mentionedUser->id,
                     'type' => 'mention',
