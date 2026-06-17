@@ -93,6 +93,11 @@
             background: #fff3cd;
             color: #856404;
         }
+        
+        .badge-mention {
+            background: #ffeaa7;
+            color: #6c5ce7;
+        }
 
         .notif-message {
             color: #333;
@@ -402,7 +407,8 @@
         @foreach([
             'like' => '👍 Like',
             'comment' => '💬 Comment',
-            'repost' => '🔁 Repost'
+            'repost' => '🔁 Repost',
+            'mention' => '@ Mention'
         ] as $key => $label)
 
             <a href="?filter={{ $filter }}&type={{ $key }}"
