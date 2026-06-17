@@ -453,6 +453,16 @@
         .follow-btn:hover {
             transform: scale(1.05);
         }
+
+        .mention-link {
+            color: #3490dc;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .mention-link:hover {
+            text-decoration: underline;
+        }
     </style>
 
 </head>
@@ -502,9 +512,9 @@
                                     @csrf
 
                                     <button type="submit" class="follow-btn-small" style="
-                                    background:
-                                    {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
-                                ">
+                                        background:
+                                        {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
+                                    ">
 
                                         {{ $isFollowing ? 'Following' : 'Follow' }}
 
@@ -691,7 +701,11 @@
                     </div>
 
                     <div class="tweet-content">
-                        {{ $tweet->content }}
+                        {!! preg_replace(
+                            '/@([a-zA-Z0-9_]+)/',
+                            '<a href="/user/$1" class="mention-link">@$1</a>',
+                            e($tweet->content)
+                        ) !!}
                     </div>
 
                     <div class="tweet-actions">

@@ -257,7 +257,7 @@
         }
 
         #scrollTopBtn:hover {
-            background: #2f7cc2;
+            background: #b4cde5;
             transform: translateY(-3px);
         }
 
@@ -301,6 +301,16 @@
         }
 
         .author-link:hover {
+            text-decoration: underline;
+        }
+
+        .mention-link {
+            color: #3490dc;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .mention-link:hover {
             text-decoration: underline;
         }
     </style>
@@ -434,154 +444,159 @@
                 <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
             @else
                 @foreach($tweets as $tweet)
-                    <div class="tweet-card">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <div class="tweet-content">
-                                <h4>{{ $tweet->title }}</h4>
-                                <p>{{ $tweet->content }}</p>
-    
-                            <small>
-                                @if($tweet->user_id === auth()->id())
-                                    <a href="/profile" style="text-decoration: none; color: #3490dc; font-weight: bold;">
-                                        {{ $tweet->user?->username ?? 'Unknown' }}
-                                    </a>
-                                @else
-                                    <a href="{{ route('profile.show', $tweet->user?->username) }}" style="text-decoration: none; color: #3490dc; font-weight: bold;">
-                                        {{ $tweet->user?->username ?? 'Unknown' }}
-                                    </a>
-                                @endif
-                                •
-                                    {{ $tweet->created_at->diffForHumans() }}
-                                @if($tweet->updated_at != $tweet->created_at)
-                                    <span style="color: #999; font-size: 0.85rem; font-style: italic;">
-                                        (Edited {{ $tweet->updated_at->diffForHumans() }})
-                                    </span>
-                                @endif
-                            </small>
-                            </div>
+                        <div class="tweet-card">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <div class="tweet-content">
+                                    <h4>{{ $tweet->title }}</h4>
+                                    {!! preg_replace(
+                                        '/@([a-zA-Z0-9_]+)/',
+                                        '<a href="/user/$1" class="mention-link">@$1</a>',
+                                        e($tweet->content)
+                                    ) !!}
 
-                            <div style="display: flex; gap: 8px; align-items: center;">
+                                    <small>
+                                        @if($tweet->user_id === auth()->id())
+                                            <a href="/profile" style="text-decoration: none; color: #3490dc; font-weight: bold;">
+                                                {{ $tweet->user?->username ?? 'Unknown' }}
+                                            </a>
+                                        @else
+                                            <a href="{{ route('profile.show', $tweet->user?->username) }}"
+                                                style="text-decoration: none; color: #3490dc; font-weight: bold;">
+                                                {{ $tweet->user?->username ?? 'Unknown' }}
+                                            </a>
+                                        @endif
+                                        •
+                                        {{ $tweet->created_at->diffForHumans() }}
+                                        @if($tweet->updated_at != $tweet->created_at)
+                                            <span style="color: #999; font-size: 0.85rem; font-style: italic;">
+                                                (Edited {{ $tweet->updated_at->diffForHumans() }})
+                                            </span>
+                                        @endif
+                                    </small>
+                                </div>
+
+                                <div style="display: flex; gap: 8px; align-items: center;">
                                     @if($tweet->user_id === auth()->id())
-                                    <div class="tweet-menu-container">
-                                        <button class="tweet-menu-btn">•••</button>
-                                        <div class="tweet-dropdown">
-                                            <button onclick="openEdit({{ $tweet->id }})">Edit</button>
-                                            <form action="/tweets/{{ $tweet->id }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" style="color:red;">Delete</button>
-                                            </form>
+                                        <div class="tweet-menu-container">
+                                            <button class="tweet-menu-btn">•••</button>
+                                            <div class="tweet-dropdown">
+                                                <button onclick="openEdit({{ $tweet->id }})">Edit</button>
+                                                <form action="/tweets/{{ $tweet->id }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" style="color:red;">Delete</button>
+                                                </form>
+                                            </div>
                                         </div>
-                                    </div>
-                                @endif
+                                    @endif
 
-                                @if($tweet->user_id !== auth()->id())
-                                    @php
-                                        $isBlocked = \App\Models\Block::where('user_id', auth()->id())
-                                            ->where('blocked_user_id', $tweet->user_id)
-                                            ->exists();
+                                    @if($tweet->user_id !== auth()->id())
+                                        @php
+                                            $isBlocked = \App\Models\Block::where('user_id', auth()->id())
+                                                ->where('blocked_user_id', $tweet->user_id)
+                                                ->exists();
 
-                                        $isMuted = \App\Models\Mute::where('user_id', auth()->id())
-                                            ->where('muted_user_id', $tweet->user_id)
-                                            ->exists();
-                                    @endphp
+                                            $isMuted = \App\Models\Mute::where('user_id', auth()->id())
+                                                ->where('muted_user_id', $tweet->user_id)
+                                                ->exists();
+                                        @endphp
 
-                                    @php
+                                        @php
 
-                                        $isFollowing = \App\Models\Follow::where(
-                                            'follower_id',
-                                            auth()->id()
-                                        )
-                                            ->where(
-                                                'following_id',
-                                                $tweet->user_id
+                                            $isFollowing = \App\Models\Follow::where(
+                                                'follower_id',
+                                                auth()->id()
                                             )
-                                            ->exists();
+                                                ->where(
+                                                    'following_id',
+                                                    $tweet->user_id
+                                                )
+                                                ->exists();
 
-                                    @endphp
+                                        @endphp
 
-                                    <form method="POST" action="{{ route('follow', $tweet->user_id) }}">
+                                        <form method="POST" action="{{ route('follow', $tweet->user_id) }}">
 
-                                        @csrf
+                                            @csrf
 
-                                        <button type="submit" class="reaction-btn" style="
-                                                    color:white;
-                                                    background:
-                                                        {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
-                                                ">
-                                            {{ $isFollowing ? 'Following' : 'Follow' }}
-                                        </button>
+                                            <button type="submit" class="reaction-btn" style="
+                                                                                                    color:white;
+                                                                                                    background:
+                                                                                                        {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
+                                                                                                ">
+                                                {{ $isFollowing ? 'Following' : 'Follow' }}
+                                            </button>
 
-                                    </form>
+                                        </form>
 
-                                    <div class="tweet-menu-container">
-                                        <button class="tweet-menu-btn">•••</button>
-                                        <div class="tweet-dropdown">
-                                            @if(!$isBlocked)
-                                                <form method="POST" action="{{ route('block', $tweet->user_id) }}"
-                                                    onsubmit="return confirm('Yakin ingin memblokir akun ini?')">
-                                                    @csrf
-                                                    <button type="submit" style="color: #7f8c8d;">Block</button>
-                                                </form>
-                                            @endif
+                                        <div class="tweet-menu-container">
+                                            <button class="tweet-menu-btn">•••</button>
+                                            <div class="tweet-dropdown">
+                                                @if(!$isBlocked)
+                                                    <form method="POST" action="{{ route('block', $tweet->user_id) }}"
+                                                        onsubmit="return confirm('Yakin ingin memblokir akun ini?')">
+                                                        @csrf
+                                                        <button type="submit" style="color: #7f8c8d;">Block</button>
+                                                    </form>
+                                                @endif
 
-                                            @if(!$isBlocked && !$isMuted)
-                                                <form method="POST" action="{{ route('mute', $tweet->user_id) }}"
-                                                    onsubmit="return confirm('Yakin ingin membisukan akun ini?')">
-                                                    @csrf
-                                                    <button type="submit" style="color: #d35400;">Mute</button>
-                                                </form>
-                                            @endif
+                                                @if(!$isBlocked && !$isMuted)
+                                                    <form method="POST" action="{{ route('mute', $tweet->user_id) }}"
+                                                        onsubmit="return confirm('Yakin ingin membisukan akun ini?')">
+                                                        @csrf
+                                                        <button type="submit" style="color: #d35400;">Mute</button>
+                                                    </form>
+                                                @endif
+                                            </div>
                                         </div>
-                                    </div>
-                                @endif
+                                    @endif
+                                </div>
                             </div>
-                        </div>
 
-                        @if($tweet->user_id === auth()->id())
-                            <div class="edit-modal" id="edit-{{ $tweet->id }}">
-                                <form action="/tweets/{{ $tweet->id }}" method="POST">
+                            @if($tweet->user_id === auth()->id())
+                                <div class="edit-modal" id="edit-{{ $tweet->id }}">
+                                    <form action="/tweets/{{ $tweet->id }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="text" name="title" value="{{ $tweet->title }}">
+                                        <textarea name="content" rows="4">{{ $tweet->content }}</textarea>
+                                        <div class="description-actions">
+                                            <button type="submit" class="save-btn">Save</button>
+                                            <button type="button" class="cancel-btn"
+                                                onclick="closeEdit({{ $tweet->id }})">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            @endif
+
+                            <div class="tweet-actions">
+                                <button class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
+                                    👍 <span
+                                        id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
+                                </button>
+                                <button class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
+                                    👎 <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
+                                </button>
+                                <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
+                                    🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
+                                </button>
+
+                                <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
+                                    style="text-decoration:none;">
+                                    💬 {{ $tweet->comments->count() }}
+                                </a>
+
+                                <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
                                     @csrf
-                                    @method('PUT')
-                                    <input type="text" name="title" value="{{ $tweet->title }}">
-                                    <textarea name="content" rows="4">{{ $tweet->content }}</textarea>
-                                    <div class="description-actions">
-                                        <button type="submit" class="save-btn">Save</button>
-                                        <button type="button" class="cancel-btn"
-                                            onclick="closeEdit({{ $tweet->id }})">Cancel</button>
-                                    </div>
+                                    <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
+                                    <button type="submit" class="reaction-btn"
+                                        style="color:#3490dc; background:white; font-size:14px;">
+                                        🔖 Bookmark
+                                    </button>
                                 </form>
                             </div>
-                        @endif
 
-                        <div class="tweet-actions">
-                            <button class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
-                                👍 <span
-                                    id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
-                            </button>
-                            <button class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
-                                👎 <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
-                            </button>
-                            <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
-                                🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
-                            </button>
-
-                            <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
-                                style="text-decoration:none;">
-                                💬 {{ $tweet->comments->count() }}
-                            </a>
-
-                            <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
-                                @csrf
-                                <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
-                                <button type="submit" class="reaction-btn"
-                                    style="color:#3490dc; background:white; font-size:14px;">
-                                    🔖 Bookmark
-                                </button>
-                            </form>
                         </div>
-
-                    </div>
                 @endforeach
             @endif
         </div>
