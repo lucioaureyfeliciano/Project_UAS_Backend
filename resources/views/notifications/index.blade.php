@@ -99,6 +99,11 @@
             color: #6c5ce7;
         }
 
+        .badge-follow {
+            background: #fff3cd;
+            color: #856404;
+        }
+
         .notif-message {
             color: #333;
             line-height: 1.5;
@@ -405,10 +410,11 @@
 
         {{-- Type --}}
         @foreach([
-            'like' => '👍 Like',
-            'comment' => '💬 Comment',
-            'repost' => '🔁 Repost',
-            'mention' => '@ Mention'
+            'like' => '👍',
+            'comment' => '💬',
+            'repost' => '🔁',
+            'mention' => '@',
+            'follow' => '👤'
         ] as $key => $label)
 
             <a href="?filter={{ $filter }}&type={{ $key }}"

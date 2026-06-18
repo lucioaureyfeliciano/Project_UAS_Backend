@@ -431,13 +431,13 @@
                         <form method="POST" action="{{ route('bookmarks.destroy', $tweet->id) }}">
                             @csrf
                             @method('DELETE')
-                            <button type="submit">🔖 Saved</button>
+                            <button type="submit">🔖 Bookmarked</button>
                         </form>
                     @else
                         <form method="POST" action="{{ route('bookmarks.store') }}">
                             @csrf
                             <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
-                            <button type="submit">🔖 Save</button>
+                            <button type="submit">🔖 Bookmark</button>
                         </form>
                     @endif
                 </span>
