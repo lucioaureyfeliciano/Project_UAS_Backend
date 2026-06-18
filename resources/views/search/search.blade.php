@@ -229,6 +229,16 @@
             text-decoration: none;
             color: black;
         }
+
+        .mention-link {
+            color: #3490dc;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .mention-link:hover {
+            text-decoration: underline;
+        }
     </style>
 
 </head>
@@ -400,7 +410,11 @@
                         </div>
 
                         <div class="tweet-content">
-                            {{ $tweet->content }}
+                            {!! preg_replace(
+                            '/@([a-zA-Z0-9_]+)/',
+                            '<a href="/user/$1" class="mention-link">@$1</a>',
+                            e($tweet->content)
+                        ) !!}
                         </div>
 
                         <div class="tweet-actions">

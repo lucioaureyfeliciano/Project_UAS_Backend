@@ -160,4 +160,26 @@ class ProfileController extends Controller
         );
     }
 
+    public function searchMentions(Request $request)
+    {
+        $keyword = strtolower($request->query('q', ''));
+
+        if ($keyword === '') {
+            return response()->json([]);
+        }
+
+        $users = User::select('username')
+            ->whereRaw('LOWER(username) LIKE ?', ['%' . $keyword . '%'])
+            ->where('id', '!=', auth()->id())
+            ->orderByRaw(
+                'CASE WHEN LOWER(username) LIKE ? THEN 0 ELSE 1 END',
+                [$keyword . '%']
+            )
+            ->orderBy('username')
+            ->limit(5)
+            ->get();
+
+        return response()->json($users);
+    }
+
 }

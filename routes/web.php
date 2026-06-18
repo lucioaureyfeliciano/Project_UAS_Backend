@@ -95,6 +95,7 @@ Route::post('/tweets/{tweet}/like', [LikeController::class, 'toggle'])->middlewa
 
 # Profile Routes
 Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth');
+Route::get('/mentions/search', [ProfileController::class, 'searchMentions'])->middleware('auth');
 Route::get('user/{username}', [ProfileController::class, 'show'])->middleware('auth')->name('profile.show');
 
 # Update Description Profile
@@ -142,4 +143,3 @@ Route::get(
     [ProfileController::class, 'search']
 )->middleware('auth')
  ->name('search.users');
-
