@@ -11,7 +11,8 @@ class BookmarkController extends Controller
     public function index(Request $request)
     {
         $search = $request->search;
-        $bookmarks = Bookmark::where('user_id', auth()->id())
+        $sort   = $request->sort ?? 'newest';
+        $bookmarks = Bookmark::where('bookmarks.user_id', auth()->id())
             ->when($search, function ($query) use ($search) {
                 $query->whereHas('tweet', function ($tweet) use ($search) {
                     $tweet->where('title', 'like', "%{$search}%")
@@ -22,10 +23,18 @@ class BookmarkController extends Controller
                 });
             })
             ->with(['tweet.user', 'tweet.likes', 'tweet.dislikes', 'tweet.reposts', 'tweet.comments'])
-            ->latest()
-            ->paginate(15);
+            ->when($sort === 'oldest', function ($query) {$query->oldest();})
+            ->when($sort === 'newest', function ($query) {$query->latest();})
+            ->when($sort === 'author', function ($query) {
+                $query->join('tweets', 'bookmarks.tweet_id', '=', 'tweets.id')
+                    ->join('users', 'tweets.user_id', '=', 'users.id')
+                    ->orderBy('users.username')
+                    ->select('bookmarks.*');
+            })
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('bookmarks.index', compact('bookmarks'));
+        return view('bookmarks.index', compact('bookmarks', 'sort'));
     }
 
     public function store()

@@ -177,6 +177,35 @@
             padding:2px 4px;
             border-radius:4px;
         }
+
+        .sort-row { 
+            display:flex; 
+            gap:8px; 
+            align-items:center; 
+            margin-top:12px; 
+            flex-wrap:wrap; 
+        }
+        .sort-label { 
+            font-size:13px; 
+            color:#888; 
+        }
+        .sort-tab { 
+            padding:5px 14px; 
+            border-radius:20px; 
+            font-size:12px; 
+            text-decoration:none; 
+            background:white; 
+            color:#555; 
+            border:1px solid #ddd; 
+        }
+        .sort-tab:hover { 
+            background:#f5f5f5; 
+        }
+        .sort-tab.active { 
+            background:#3490dc; 
+            color:white; 
+            border-color:#3490dc; 
+        }
     </style>
 </head>
 <body>
@@ -205,6 +234,16 @@
                 🔍 Search
             </button>
         </form>
+
+        <div class="sort-row">
+            <span class="sort-label">Sort:</span>
+            @foreach(['newest' => 'Newest', 'oldest' => 'Oldest', 'tweet_date' => 'Tweet Date', 'author' => 'Author'] as $key => $label)
+                <a href="?sort={{ $key }}&search={{ request('search') }}"
+                    class="sort-tab {{ $sort === $key ? 'active' : '' }}">
+                    {{ $label }}
+                </a>
+            @endforeach
+        </div>
     </div>
  
     @forelse($bookmarks as $bookmark)
