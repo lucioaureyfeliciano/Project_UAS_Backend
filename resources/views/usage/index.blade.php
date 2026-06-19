@@ -84,6 +84,7 @@
     </style>
 </head>
 <body>
+@include('components.toast')
 
 <div class="navbar">
     <a href="/dashboard" class="back-btn">← Back</a>

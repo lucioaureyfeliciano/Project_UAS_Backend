@@ -126,6 +126,7 @@
     </style>
 </head>
 <body>
+@include('components.toast')
 <div class="navbar">
     <a href="{{ route('tweets.show', $tweet->id) }}" class="back-btn">← Back to Tweet</a>
     <div>Add Comment</div>

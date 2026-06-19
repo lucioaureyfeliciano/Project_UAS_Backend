@@ -26,15 +26,6 @@
             font-size: 18px;
         }
 
-        .success-alert {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #a3cfbb;
-        }
-
         .container {
             width: 75%;
             max-width: 900px;
@@ -468,6 +459,7 @@
 </head>
 
 <body>
+    @include('components.toast')
 
     <div class="navbar">
 
@@ -478,14 +470,6 @@
     </div>
 
     <div class="container">
-        @if(session('success'))
-
-            <div class="success-alert" id="successAlert">
-                {{ session('success') }}
-            </div>
-
-        @endif
-
         <h1 class="section-title">Profile</h1>
         <div class="profile-card">
 
@@ -788,23 +772,6 @@
         function closeEdit(id) {
             document.getElementById(`edit-${id}`).style.display = 'none';
         }
-
-        setTimeout(() => {
-
-            const alertBox = document.getElementById('successAlert');
-
-            if (alertBox) {
-
-                alertBox.style.transition = '0.5s';
-                alertBox.style.opacity = '0';
-
-                setTimeout(() => {
-                    alertBox.style.display = 'none';
-                }, 500);
-
-            }
-
-        }, 5000);
 
         window.onscroll = function () {
 
