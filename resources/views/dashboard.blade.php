@@ -21,15 +21,19 @@
         }
 
         .container {
-            width: 600px;
-            margin: 20px auto;
+            width: 75%;
+            max-width: 900px;
+            margin: 35px auto;
         }
 
         .card {
             background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
+            padding: 22px; 
+            margin-bottom: 20px; 
+            border-radius: 18px; 
+            border: 1px solid #ddd; 
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .logout-btn {
@@ -85,11 +89,13 @@
         }
 
         .tweet-card {
-            margin-bottom: 18px;
-            padding: 14px;
+            margin-bottom: 20px;
+            padding: 22px; 
             border: 1px solid #ddd;
-            border-radius: 12px;
+            border-radius: 18px; 
             background: white;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .tweet-menu-container {
@@ -261,30 +267,6 @@
             transform: translateY(-3px);
         }
 
-        .mute-btn:hover {
-            background: #d35400;
-        }
-
-        .notification-btn {
-            position: relative;
-        }
-
-        .notif-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: red;
-            color: white;
-            border-radius: 50%;
-            min-width: 18px;
-            height: 18px;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
         .comment-btn {
             color: #27ae60;
         }
@@ -312,6 +294,20 @@
 
         .mention-link:hover {
             text-decoration: underline;
+        }
+
+        .card form input[type="text"],
+        .card form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;   
+            border-radius: 8px;           
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            outline: none;             
         }
     </style>
 </head>
@@ -354,13 +350,11 @@
             </div>
             {{-- Search --}}
             <form action="{{ route('search.users') }}" method="GET">
-
                 <input type="text" name="search" placeholder="Search user..." style="
                 padding:8px;
                 border:none;
                 border-radius:8px;
             ">
-
             </form>
         </div>
     </div>
@@ -385,31 +379,21 @@
         </div>
 
         <div class="card">
-
             <h3>Trending Hashtags</h3>
-
             @forelse($hashtags as $hashtag)
-
                 <div style="padding:8px 0; border-bottom:1px solid #eee;">
-
                     <strong>
                         <a href="/hashtags/{{ $hashtag->name }}">
                             #{{ $hashtag->name }}
                         </a>
                     </strong>
-
                     <span style="float:right;">
                         {{ $hashtag->tweets_count }}
                     </span>
-
                 </div>
-
             @empty
-
                 <p>No hashtags yet.</p>
-
             @endforelse
-
         </div>
 
         <div class="card">
@@ -418,8 +402,7 @@
                 @csrf
                 <div style="margin-bottom: 12px;">
                     <label for="title">Title</label><br>
-                    <input id="title" name="title" type="text" value="{{ old('title') }}"
-                        style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;" />
+                    <input id="title" name="title" type="text" value="{{ old('title') }}" placeholder="Write your title..." />
                     @error('title')
                         <div style="color:red; margin-top:4px;">{{ $message }}</div>
                     @enderror
@@ -427,18 +410,17 @@
 
                 <div style="margin-bottom: 12px;">
                     <label for="content">Content</label><br>
-                    <textarea id="content" name="content" rows="4"
-                        style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;">{{ old('content') }}</textarea>
+                    <textarea id="content" name="content" rows="4" placeholder="Write your content...">{{ old('content') }}</textarea>
                     @error('content')
                         <div style="color:red; margin-top:4px;">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <button type="submit" class="logout-btn" style="background:#3490dc;">Add Tweet</button>
+                <button type="submit" class="logout-btn" style="background:#3490dc; border-radius: 8px; padding: 10px 22px;">Add Tweet</button>
             </form>
         </div>
 
-        <div class="card">
+        <div class="card" style="background: transparent; border: none; padding: 0;">
             <h2>Your Tweets</h2>
             @if($tweets->isEmpty())
                 <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
@@ -454,6 +436,7 @@
                                         e($tweet->content)
                                     ) !!}
 
+                                    <br><br>
                                     <small>
                                         @if($tweet->user_id === auth()->id())
                                             <a href="/profile" style="text-decoration: none; color: #3490dc; font-weight: bold;">
@@ -502,7 +485,6 @@
                                         @endphp
 
                                         @php
-
                                             $isFollowing = \App\Models\Follow::where(
                                                 'follower_id',
                                                 auth()->id()
@@ -512,13 +494,10 @@
                                                     $tweet->user_id
                                                 )
                                                 ->exists();
-
                                         @endphp
 
                                         <form method="POST" action="{{ route('follow', $tweet->user_id) }}">
-
                                             @csrf
-
                                             <button type="submit" class="reaction-btn" style="
                                                                                                     color:white;
                                                                                                     background:
@@ -526,7 +505,6 @@
                                                                                                 ">
                                                 {{ $isFollowing ? 'Following' : 'Follow' }}
                                             </button>
-
                                         </form>
 
                                         <div class="tweet-menu-container">
@@ -699,26 +677,7 @@
                     });
             });
         });
-
-        window.onscroll = function () {
-            const button = document.getElementById("scrollTopBtn");
-            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-                button.style.display = "block";
-            } else {
-                button.style.display = "none";
-            }
-        };
-
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
     </script>
-    </script>
-
 </body>
 
 </html>

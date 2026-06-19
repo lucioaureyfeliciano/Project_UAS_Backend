@@ -31,21 +31,4 @@ class BlockController extends Controller
         }
         return back()->with('success', $message);
     }
-
-    public function togglePrivacy(Request $request)
-    {
-        $user = auth()->user();
-
-        if ($user->is_private == 1) {
-            $user->is_private = 0;
-            $message = 'Akun berhasil diubah menjadi publik.';
-        } else {
-            $user->is_private = 1;
-            $message = 'Akun berhasil digembok.';
-        }
-
-        $user->save();
-
-        return back()->with('success', $message);
-    }
 }
