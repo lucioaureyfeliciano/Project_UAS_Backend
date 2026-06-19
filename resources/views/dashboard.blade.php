@@ -389,7 +389,7 @@
             {{-- Search --}}
             <form action="{{ route('search.users') }}" method="GET">
 
-                <input type="text" name="search" placeholder="Search user..." style="
+                <input type="text" name="search" placeholder="What to look? " style="
                 padding:8px;
                 border:none;
                 border-radius:8px;
