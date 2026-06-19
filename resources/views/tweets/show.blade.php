@@ -45,16 +45,6 @@
             margin: 28px auto;
         }
 
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            border: 1px solid #a3cfbb;
-            font-size: 14px;
-        }
-
         .tweet-card {
             background: white;
             border-radius: 12px;
@@ -362,6 +352,7 @@
 </head>
 
 <body>
+    @include('components.toast')
 
     <div class="navbar">
         <a href="/dashboard" class="back-btn">← Dashboard</a>
@@ -370,10 +361,6 @@
     </div>
 
     <div class="container">
-
-        @if(session('success'))
-            <div class="alert-success">✅ {{ session('success') }}</div>
-        @endif
 
         <div class="tweet-card">
             <div class="tweet-meta-top">

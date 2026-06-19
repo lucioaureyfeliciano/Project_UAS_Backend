@@ -286,6 +286,40 @@
             text-decoration: underline;
         }
 
+        .mention-autocomplete-wrapper {
+            position: relative;
+        }
+
+        .mention-autocomplete-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 50;
+            padding: 6px 0;
+        }
+
+        .mention-autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .mention-suggestion {
+            padding: 10px 12px;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .mention-suggestion:hover {
+            background: #3490dc;
+            color: white;
+        }
+
         .mention-link {
             color: #3490dc;
             font-weight: bold;
@@ -313,6 +347,7 @@
 </head>
 
 <body>
+    @include('components.toast')
 
     @php
         $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
@@ -350,7 +385,8 @@
             </div>
             {{-- Search --}}
             <form action="{{ route('search.users') }}" method="GET">
-                <input type="text" name="search" placeholder="Search user..." style="
+
+                <input type="text" name="search" placeholder="What to look? " style="
                 padding:8px;
                 border:none;
                 border-radius:8px;
@@ -360,18 +396,6 @@
     </div>
 
     <div class="container">
-
-        @if(session('success'))
-            <div class="card" id="successAlert" style="border: 1px solid #2ecc71; background: #ecf9f1; color: #155724;">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="card" style="border: 1px solid #e74c3c; background: #fdf2f2; color: #721c24;">
-                {{ session('error') }}
-            </div>
-        @endif
 
         <div class="card">
             <h3>Welcome, {{ auth()->user()->username }}</h3>
@@ -410,7 +434,11 @@
 
                 <div style="margin-bottom: 12px;">
                     <label for="content">Content</label><br>
-                    <textarea id="content" name="content" rows="4" placeholder="Write your content...">{{ old('content') }}</textarea>
+                    <div class="mention-autocomplete-wrapper">
+                        <textarea id="content" class="mention-autocomplete-input" name="content" rows="4"
+                            style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;">{{ old('content') }}</textarea>
+                        <div class="mention-autocomplete-dropdown"></div>
+                    </div>
                     @error('content')
                         <div style="color:red; margin-top:4px;">{{ $message }}</div>
                     @enderror
@@ -592,17 +620,6 @@
             document.getElementById(`edit-${id}`).style.display = 'none';
         }
 
-        setTimeout(() => {
-            const alertBox = document.getElementById('successAlert');
-            if (alertBox) {
-                alertBox.style.transition = '0.5s';
-                alertBox.style.opacity = '0';
-                setTimeout(() => {
-                    alertBox.style.display = 'none';
-                }, 500);
-            }
-        }, 5000);
-
         window.onscroll = function () {
             const button = document.getElementById("scrollTopBtn");
             if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
@@ -618,6 +635,128 @@
                 behavior: 'smooth'
             });
         }
+
+        function setupMentionAutocomplete(textarea) {
+            const wrapper = textarea.closest('.mention-autocomplete-wrapper');
+            const dropdown = wrapper.querySelector('.mention-autocomplete-dropdown');
+            let debounceTimer = null;
+            let activeMention = null;
+            let requestId = 0;
+            let ignoreNextInput = false;
+
+            const hideDropdown = () => {
+                dropdown.classList.remove('show');
+                dropdown.innerHTML = '';
+                activeMention = null;
+            };
+
+            const findActiveMention = () => {
+                const cursorPosition = textarea.selectionStart;
+                const textBeforeCursor = textarea.value.slice(0, cursorPosition);
+                const match = textBeforeCursor.match(/(^|[\s(])@([A-Za-z0-9_]{1,30})$/);
+
+                if (!match) {
+                    return null;
+                }
+
+                return {
+                    keyword: match[2],
+                    start: cursorPosition - match[2].length - 1,
+                    end: cursorPosition
+                };
+            };
+
+            const insertMention = (username) => {
+                if (!activeMention) {
+                    return;
+                }
+
+                textarea.value =
+                    textarea.value.slice(0, activeMention.start) +
+                    `@${username}` +
+                    textarea.value.slice(activeMention.end);
+
+                const cursorPosition = activeMention.start + username.length + 1;
+                textarea.focus();
+                textarea.setSelectionRange(cursorPosition, cursorPosition);
+                ignoreNextInput = true;
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                hideDropdown();
+            };
+
+            const renderSuggestions = (users) => {
+                if (!users.length) {
+                    hideDropdown();
+                    return;
+                }
+
+                dropdown.innerHTML = '';
+
+                users.forEach((user) => {
+                    const item = document.createElement('div');
+                    item.className = 'mention-suggestion';
+                    item.textContent = user.username;
+                    item.addEventListener('mousedown', (event) => {
+                        event.preventDefault();
+                        insertMention(user.username);
+                    });
+                    dropdown.appendChild(item);
+                });
+
+                dropdown.classList.add('show');
+            };
+
+            textarea.addEventListener('input', () => {
+                if (ignoreNextInput) {
+                    ignoreNextInput = false;
+                    hideDropdown();
+                    return;
+                }
+
+                clearTimeout(debounceTimer);
+
+                const mention = findActiveMention();
+                if (!mention) {
+                    hideDropdown();
+                    return;
+                }
+
+                activeMention = mention;
+
+                debounceTimer = setTimeout(() => {
+                    const currentRequest = ++requestId;
+
+                    fetch(`/mentions/search?q=${encodeURIComponent(mention.keyword)}`, {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(users => {
+                            if (currentRequest === requestId) {
+                                renderSuggestions(users);
+                            }
+                        })
+                        .catch(() => hideDropdown());
+                }, 250);
+            });
+
+            textarea.addEventListener('keydown', () => {
+                setTimeout(() => {
+                    if (!findActiveMention()) {
+                        hideDropdown();
+                    }
+                }, 0);
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!wrapper.contains(event.target)) {
+                    hideDropdown();
+                }
+            });
+        }
+
+        document.querySelectorAll('.mention-autocomplete-input').forEach(setupMentionAutocomplete);
 
         // AJAX Dislike
         document.querySelectorAll('.dislike-btn').forEach(button => {
@@ -677,6 +816,23 @@
                     });
             });
         });
+
+        window.onscroll = function () {
+            const button = document.getElementById("scrollTopBtn");
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                button.style.display = "block";
+            } else {
+                button.style.display = "none";
+            }
+        };
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
     </script>
 </body>
 

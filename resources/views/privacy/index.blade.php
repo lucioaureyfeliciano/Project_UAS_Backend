@@ -100,6 +100,7 @@
     </style>
 </head>
 <body>
+@include('components.toast')
 
 <div class="navbar">
     <div>Social Media - Privacy Settings</div>
@@ -109,12 +110,6 @@
 </div>
 
 <div class="container">
-
-    @if(session('success'))
-        <div class="card" style="border: 1px solid #2ecc71; background: #ecf9f1; color: #155724;">
-            {{ session('success') }}
-        </div>
-    @endif
 
     {{-- KOTAK PRIVASI --}}
     <div class="card" style="border-top: 4px solid #3490dc;">
