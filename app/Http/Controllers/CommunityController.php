@@ -28,6 +28,16 @@ class CommunityController extends Controller
     {
         $community = Community::with('creator', 'members')->findOrFail($id);
 
+        if ($community->is_private && 
+            $community->user_id !== auth()->id() && 
+            !$community->members()->where('user_id', auth()->id())->exists())
+        {
+            return redirect('/community')->with(
+                'error',
+                'This is a private community. Please send a join request.'
+            );
+        }
+
         return view('community.show', compact('community'));
     }
 
@@ -167,7 +177,17 @@ class CommunityController extends Controller
             }
 
             if ($joinRequest->status === 'approved') {
-                return redirect()->back()->with('error', 'Your join request has already been approved.');
+                $joinRequest->update([
+                    'status' => 'pending',
+                ]);
+
+                CommunityActivity::create([
+                    'community_id' => $community->id,
+                    'user_id' => auth()->id(),
+                    'action' => 'requested_join',
+                    'description' => auth()->user()->username . ' requested to join community ' . $community->name,
+                ]);
+                return redirect()->back()->with('success', 'Join request submitted again.');
             }
 
             if ($joinRequest->status === 'rejected') {

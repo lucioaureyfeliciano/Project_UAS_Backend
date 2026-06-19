@@ -7,7 +7,6 @@ use App\Models\Tweet;
 use App\Models\Follow;
 use App\Models\Community;
 use App\Models\CommunityActivity;
-use App\Models\CommunityJoinRequest;
 
 class UsageController extends Controller
 {
@@ -48,6 +47,21 @@ class UsageController extends Controller
         ]);
     }
 
+    public function followActivities()
+    {
+        $activities = Follow::with([
+            'follower',
+            'following'
+        ])
+        ->latest()
+        ->get();
+
+        return view('usage.detail', [
+            'title' => 'Follow Activities',
+            'items' => $activities,
+        ]);
+    }
+
     public function communities()
     {
         $communities = Community::with('creator')->latest()->get();
@@ -66,21 +80,6 @@ class UsageController extends Controller
 
         return view('usage.detail', [
             'title' => 'Community Activities',
-            'items' => $activities,
-        ]);
-    }
-
-    public function followActivities()
-    {
-        $activities = Follow::with([
-            'follower',
-            'following'
-        ])
-        ->latest()
-        ->get();
-
-        return view('usage.detail', [
-            'title' => 'Follow Activities',
             'items' => $activities,
         ]);
     }

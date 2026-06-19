@@ -127,10 +127,31 @@
 
             @elseif($title == 'Community Activities')
 
-                <strong>{{ $item->description }}</strong>
+                <strong>{{ $item->user->username }}</strong>
+
+                @if($item->action == 'created')
+                    <span class="badge badge-approved">created</span>
+                @elseif($item->action == 'updated')
+                    <span class="badge badge-pending">updated</span>
+                @elseif($item->action == 'joined')
+                    <span class="badge badge-approved">joined</span>
+                @elseif($item->action == 'left')
+                    <span class="badge badge-rejected">left</span>
+                @elseif($item->action == 'requested_join')
+                    <span class="badge badge-pending">requested to join</span>
+                @elseif($item->action == 'approved_request')
+                    <span class="badge badge-approved">was approved to join</span>
+                @elseif($item->action == 'rejected_request')
+                    <span class="badge badge-rejected">was rejected from</span>
+                @endif
+
+                community
+
+                <strong style="color: #3490dc;">
+                    {{ $item->community->name }}
+                </strong>
+
                 <div class="meta">
-                    Action: {{ str_replace('_', ' ', ucfirst($item->action)) }}
-                    |
                     {{ $item->created_at->diffForHumans() }}
                 </div>
 
