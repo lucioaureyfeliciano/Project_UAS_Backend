@@ -97,6 +97,19 @@
             text-decoration: none;
         }
 
+        .chat-link {
+            color: inherit;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        .sent .chat-link {
+            color: #fff;
+        }
+
+        .received .chat-link {
+            color: #3490dc;
+        }
     </style>
 </head>
 <body>
@@ -123,7 +136,7 @@
 
                 <div class="bubble">
 
-                    {{ $message->message }}
+                    {!! \App\Models\Message::linkify($message->message) !!}
 
                     <div class="message-time">
                         {{ $message->created_at->format('d M Y H:i') }}

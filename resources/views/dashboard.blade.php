@@ -313,6 +313,88 @@
         .mention-link:hover {
             text-decoration: underline;
         }
+
+        .share-modal {
+            display: none;
+            margin-top: 12px;
+            padding: 14px;
+            background: #fafafa;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        .share-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #6c5ce7;
+        }
+
+        .share-select,
+        .share-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dcdcdc;
+            border-radius: 10px;
+            font-size: 13px;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        .share-select {
+            margin-bottom: 10px;
+        }
+
+        .share-textarea {
+            resize: none;
+            min-height: 70px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .share-textarea:focus,
+        .share-select:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        .share-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .share-send-btn {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .share-send-btn:hover {
+            background: #5a4fcf;
+        }
+
+        .share-cancel-btn {
+            background: #f1f1f1;
+            color: #555;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .share-cancel-btn:hover {
+            background: #e0e0e0;
+        }
     </style>
 </head>
 
@@ -594,8 +676,55 @@
                                         🔖 Bookmark
                                     </button>
                                 </form>
-                            </div>
 
+                               <button class="reaction-btn" style="color:#6c5ce7;"
+                                    onclick="toggleShareModal('share-tw-{{ $tweet->id }}')">
+                                    💬 Share
+                                </button>
+
+                                <div id="share-tw-{{ $tweet->id }}" class="share-modal">
+
+                                    <div class="share-header">
+                                        💬 Share to Message
+                                    </div>
+
+                                    <form method="POST" action="{{ route('messages.share') }}">
+                                        @csrf
+
+                                        <select name="receiver_id" required class="share-select">
+                                            <option value="">Select user...</option>
+
+                                            @foreach(\App\Models\User::where('id', '!=', auth()->id())->orderBy('username')->get() as $u)
+                                                <option value="{{ $u->id }}">
+                                                    {{ $u->username }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+
+                                        <textarea
+                                            name="message"
+                                            rows="3"
+                                            required
+                                            class="share-textarea"
+                                        >{{ $tweet->user?->username }}: "{{ Str::limit($tweet->title, 60) }}" — {{ route('tweets.show', $tweet->id) }}</textarea>
+
+                                        <div class="share-actions">
+                                            <button
+                                                type="button"
+                                                class="share-cancel-btn"
+                                                onclick="toggleShareModal('share-tw-{{ $tweet->id }}')"
+                                            >
+                                                Cancel
+                                            </button>
+
+                                            <button type="submit" class="share-send-btn">
+                                                Send
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                            </div> 
                         </div>
                 @endforeach
             @endif
@@ -716,6 +845,16 @@
             });
         }
 
+        function toggleShareModal(id) {
+            const el = document.getElementById(id);
+
+            if (!el) return;
+
+            el.style.display =
+                el.style.display === 'block'
+                    ? 'none'
+                    : 'block';
+        }
     </script>
     </script>
 
