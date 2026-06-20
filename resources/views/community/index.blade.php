@@ -239,7 +239,7 @@
 
     @if($communities->isEmpty())
         <div class="card empty-state">
-            <p>Community tidak ditemukan.</p>
+            <p>No communities found.</p>
         </div>
     @endif
 

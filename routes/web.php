@@ -81,6 +81,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     # Usage Routes
     Route::get('/usage', [UsageController::class, 'index']);
+    Route::get('/usage/users', [UsageController::class, 'users']);
+    Route::get('/usage/tweets', [UsageController::class, 'tweets']);
+    Route::get('/usage/communities', [UsageController::class, 'communities']);
+    Route::get('/usage/follow-activities', [UsageController::class, 'followActivities']);
+    Route::get('/usage/community-activities', [UsageController::class, 'communityActivities']);
 
     # Community Routes
     Route::get('/community', [CommunityController::class, 'index']);

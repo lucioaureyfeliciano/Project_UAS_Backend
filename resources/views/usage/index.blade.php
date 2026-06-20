@@ -81,6 +81,16 @@
             font-size: 14px;
             margin-top: 5px;
         }
+
+        .stat-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .stat-link:hover .stat-card {
+            transform: translateY(-3px);
+            transition: 0.2s;
+        }
     </style>
 </head>
 <body>
@@ -97,61 +107,46 @@
         <div class="usage-header">
             <div class="usage-info">
                 <h2>Platform Statistics</h2>
-
-                <div class="usage-total">
-                    Summary of application usage data
-                </div>
+                <div class="usage-total">Summary of application usage data</div>
             </div>
-
         </div>
-
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card">
-            <h3>Total Users</h3>
-            <p>{{ $totalUsers }}</p>
-        </div>
+        <a href="/usage/users" class="stat-link">
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <p>{{ $totalUsers }}</p>
+            </div>
+        </a>
 
-        <div class="stat-card">
-            <h3>Total Tweets</h3>
-            <p>{{ $totalTweets }}</p>
-        </div>
+        <a href="/usage/tweets" class="stat-link">
+            <div class="stat-card">
+                <h3>Total Tweets</h3>
+                <p>{{ $totalTweets }}</p>
+            </div>
+        </a>
 
-        <div class="stat-card">
-            <h3>Total Communities</h3>
-            <p>{{ $totalCommunities }}</p>
-        </div>
+        <a href="/usage/communities" class="stat-link">
+            <div class="stat-card">
+                <h3>Total Communities</h3>
+                <p>{{ $totalCommunities }}</p>
+            </div>
+        </a>
 
-        <div class="stat-card">
-            <h3>Total Comments</h3>
-            <p>{{ $totalComments }}</p>
-        </div>
+        <a href="/usage/community-activities" class="stat-link">
+            <div class="stat-card">
+                <h3>Community Activities</h3>
+                <p>{{ $communityActivities }}</p>
+            </div>
+        </a>
 
-        <div class="stat-card">
-            <h3>Total Likes</h3>
-            <p>{{ $totalLikes }}</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>Total Dislikes</h3>
-            <p>{{ $totalDislikes }}</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>Total Reposts</h3>
-            <p>{{ $totalReposts }}</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>Total Messages</h3>
-            <p>{{ $totalMessages }}</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>Total Bookmarks</h3>
-            <p>{{ $totalBookmarks }}</p>
-        </div>
+        <a href="/usage/follow-activities" class="stat-link">
+            <div class="stat-card">
+                <h3>Follow Activities</h3>
+                <p>{{ $followActivities }}</p>
+            </div>
+        </a>
 
     </div>
 
