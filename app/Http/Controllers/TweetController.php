@@ -153,20 +153,6 @@ class TweetController extends Controller
         return view('tweets.show', compact('tweet'));
     }
 
-    public function show_privacy()
-    {
-        $user_id = auth()->id();
-        $blockedUsers = Block::where('user_id', $user_id)
-            ->with('blockedUser')
-            ->get();
-
-        $mutedUsers = Mute::where('user_id', $user_id)
-            ->with('mutedUser')
-            ->get();
-
-        return view('privacy', compact('blockedUsers', 'mutedUsers'));
-    }
-
     public function showHashtag($name)
     {
         $hashtag = Hashtag::where(

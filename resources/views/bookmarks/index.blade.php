@@ -86,24 +86,6 @@
             background: #c0392b;
         }
  
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px 18px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #a3cfbb;
-        }
- 
-        .alert-error {
-            background: #fdf2f2;
-            color: #721c24;
-            padding: 12px 18px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #f5c6cb;
-        }
- 
         h2 { margin-top: 0; }
  
         .empty-state {
@@ -209,6 +191,7 @@
     </style>
 </head>
 <body>
+@include('components.toast')
  
 <div class="navbar">
     <a href="/dashboard" class="back-btn">← Dashboard</a>
@@ -217,14 +200,6 @@
 </div>
  
 <div class="container">
- 
-    @if(session('success'))
-        <div class="alert-success">{{ session('success') }}</div>
-    @endif
- 
-    @if(session('error'))
-        <div class="alert-error">{{ session('error') }}</div>
-    @endif
  
     <div class="card">
         <h2>Your Bookmarks ({{ $bookmarks->total() }})</h2>

@@ -17,6 +17,7 @@ use App\Http\Controllers\MuteController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\FollowController;
 use App\Models\Tweet;
+use App\Http\Controllers\PrivacyController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -33,15 +34,22 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 # Tweet, Block, Mute, privacy Route
 Route::middleware('auth')->group(function () {
+    # Tweet Routes
     Route::post('/tweets', [TweetController::class, 'post_tweet']);
     Route::get('/tweets', [TweetController::class, 'show_tweets']);
     Route::get('/tweets/{id}', [TweetController::class, 'show'])->name('tweets.show');
     Route::delete('/tweets/{id}', [TweetController::class, 'delete_tweet']);
     Route::put('/tweets/{id}', [TweetController::class, 'edit_tweet']);
+    
+    # Block & Mute Routes (Menggunakan POST toggle untuk aksi masuk & keluar daftar)
     Route::post('/block/{blocked_user_id}', [BlockController::class, 'toggle'])->name('block');
     Route::post('/mute/{muted_user_id}', [MuteController::class, 'toggle'])->name('mute');
-    Route::get('/privacy', [TweetController::class, 'show_privacy'])->name('privacy');
-    Route::post('/privacy/toggle', [BlockController::class, 'togglePrivacy'])->name('privacy.toggle');
+
+    # Privacy & List Detail Pages (Semua rute GET untuk memuat halaman)
+    Route::get('/privacy', [PrivacyController::class, 'show_privacy'])->name('privacy');
+    Route::post('/privacy/toggle', [PrivacyController::class, 'togglePrivacy'])->name('privacy.toggle');
+    Route::get('/privacy/blocked', [PrivacyController::class, 'blocked_list'])->name('privacy.blocked');
+    Route::get('/privacy/muted', [PrivacyController::class, 'muted_list'])->name('privacy.muted');
 });
 
 Route::middleware('auth')->group(function () {
@@ -73,6 +81,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     # Usage Routes
     Route::get('/usage', [UsageController::class, 'index']);
+    Route::get('/usage/users', [UsageController::class, 'users']);
+    Route::get('/usage/tweets', [UsageController::class, 'tweets']);
+    Route::get('/usage/communities', [UsageController::class, 'communities']);
+    Route::get('/usage/follow-activities', [UsageController::class, 'followActivities']);
+    Route::get('/usage/community-activities', [UsageController::class, 'communityActivities']);
 
     # Community Routes
     Route::get('/community', [CommunityController::class, 'index']);
@@ -95,6 +108,7 @@ Route::post('/tweets/{tweet}/like', [LikeController::class, 'toggle'])->middlewa
 
 # Profile Routes
 Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth');
+Route::get('/mentions/search', [ProfileController::class, 'searchMentions'])->middleware('auth');
 Route::get('user/{username}', [ProfileController::class, 'show'])->middleware('auth')->name('profile.show');
 
 # Update Description Profile
@@ -143,4 +157,3 @@ Route::get(
     [ProfileController::class, 'search']
 )->middleware('auth')
  ->name('search.users');
-

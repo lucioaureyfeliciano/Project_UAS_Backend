@@ -46,16 +46,6 @@
             margin: 28px auto;
         }
 
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            border: 1px solid #a3cfbb;
-            font-size: 14px;
-        }
-
         .tweet-ref-card {
             background: white;
             border-radius: 12px;
@@ -437,6 +427,7 @@
 </head>
 
 <body>
+    @include('components.toast')
 
     <div class="navbar">
         <a href="{{ route('tweets.show', $tweet->id) }}" class="back-btn">← Back to Tweet</a>
@@ -445,10 +436,6 @@
     </div>
 
     <div class="container">
-
-        @if(session('success'))
-            <div class="alert-success">✅ {{ session('success') }}</div>
-        @endif
 
         <div class="tweet-ref-card">
             <div class="tweet-title">{{ $tweet->title }}</div>

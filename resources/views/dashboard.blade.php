@@ -21,15 +21,19 @@
         }
 
         .container {
-            width: 600px;
-            margin: 20px auto;
+            width: 75%;
+            max-width: 900px;
+            margin: 35px auto;
         }
 
         .card {
             background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
+            padding: 22px; 
+            margin-bottom: 20px; 
+            border-radius: 18px; 
+            border: 1px solid #ddd; 
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .logout-btn {
@@ -85,11 +89,13 @@
         }
 
         .tweet-card {
-            margin-bottom: 18px;
-            padding: 14px;
+            margin-bottom: 20px;
+            padding: 22px; 
             border: 1px solid #ddd;
-            border-radius: 12px;
+            border-radius: 18px; 
             background: white;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .tweet-menu-container {
@@ -261,30 +267,6 @@
             transform: translateY(-3px);
         }
 
-        .mute-btn:hover {
-            background: #d35400;
-        }
-
-        .notification-btn {
-            position: relative;
-        }
-
-        .notif-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: red;
-            color: white;
-            border-radius: 50%;
-            min-width: 18px;
-            height: 18px;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
         .comment-btn {
             color: #27ae60;
         }
@@ -304,6 +286,40 @@
             text-decoration: underline;
         }
 
+        .mention-autocomplete-wrapper {
+            position: relative;
+        }
+
+        .mention-autocomplete-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 50;
+            padding: 6px 0;
+        }
+
+        .mention-autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .mention-suggestion {
+            padding: 10px 12px;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .mention-suggestion:hover {
+            background: #3490dc;
+            color: white;
+        }
+
         .mention-link {
             color: #3490dc;
             font-weight: bold;
@@ -312,6 +328,20 @@
 
         .mention-link:hover {
             text-decoration: underline;
+        }
+
+        .card form input[type="text"],
+        .card form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;   
+            border-radius: 8px;           
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            outline: none;             
         }
 
         .share-modal {
@@ -399,6 +429,7 @@
 </head>
 
 <body>
+    @include('components.toast')
 
     @php
         $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
@@ -437,29 +468,16 @@
             {{-- Search --}}
             <form action="{{ route('search.users') }}" method="GET">
 
-                <input type="text" name="search" placeholder="Search user..." style="
+                <input type="text" name="search" placeholder="What to look? " style="
                 padding:8px;
                 border:none;
                 border-radius:8px;
             ">
-
             </form>
         </div>
     </div>
 
     <div class="container">
-
-        @if(session('success'))
-            <div class="card" id="successAlert" style="border: 1px solid #2ecc71; background: #ecf9f1; color: #155724;">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="card" style="border: 1px solid #e74c3c; background: #fdf2f2; color: #721c24;">
-                {{ session('error') }}
-            </div>
-        @endif
 
         <div class="card">
             <h3>Welcome, {{ auth()->user()->username }}</h3>
@@ -467,31 +485,21 @@
         </div>
 
         <div class="card">
-
             <h3>Trending Hashtags</h3>
-
             @forelse($hashtags as $hashtag)
-
                 <div style="padding:8px 0; border-bottom:1px solid #eee;">
-
                     <strong>
                         <a href="/hashtags/{{ $hashtag->name }}">
                             #{{ $hashtag->name }}
                         </a>
                     </strong>
-
                     <span style="float:right;">
                         {{ $hashtag->tweets_count }}
                     </span>
-
                 </div>
-
             @empty
-
                 <p>No hashtags yet.</p>
-
             @endforelse
-
         </div>
 
         <div class="card">
@@ -500,8 +508,7 @@
                 @csrf
                 <div style="margin-bottom: 12px;">
                     <label for="title">Title</label><br>
-                    <input id="title" name="title" type="text" value="{{ old('title') }}"
-                        style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;" />
+                    <input id="title" name="title" type="text" value="{{ old('title') }}" placeholder="Write your title..." />
                     @error('title')
                         <div style="color:red; margin-top:4px;">{{ $message }}</div>
                     @enderror
@@ -509,18 +516,21 @@
 
                 <div style="margin-bottom: 12px;">
                     <label for="content">Content</label><br>
-                    <textarea id="content" name="content" rows="4"
-                        style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;">{{ old('content') }}</textarea>
+                    <div class="mention-autocomplete-wrapper">
+                        <textarea id="content" class="mention-autocomplete-input" name="content" rows="4"
+                            style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;">{{ old('content') }}</textarea>
+                        <div class="mention-autocomplete-dropdown"></div>
+                    </div>
                     @error('content')
                         <div style="color:red; margin-top:4px;">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <button type="submit" class="logout-btn" style="background:#3490dc;">Add Tweet</button>
+                <button type="submit" class="logout-btn" style="background:#3490dc; border-radius: 8px; padding: 10px 22px;">Add Tweet</button>
             </form>
         </div>
 
-        <div class="card">
+        <div class="card" style="background: transparent; border: none; padding: 0;">
             <h2>Your Tweets</h2>
             @if($tweets->isEmpty())
                 <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
@@ -536,6 +546,7 @@
                                         e($tweet->content)
                                     ) !!}
 
+                                    <br><br>
                                     <small>
                                         @if($tweet->user_id === auth()->id())
                                             <a href="/profile" style="text-decoration: none; color: #3490dc; font-weight: bold;">
@@ -584,7 +595,6 @@
                                         @endphp
 
                                         @php
-
                                             $isFollowing = \App\Models\Follow::where(
                                                 'follower_id',
                                                 auth()->id()
@@ -594,13 +604,10 @@
                                                     $tweet->user_id
                                                 )
                                                 ->exists();
-
                                         @endphp
 
                                         <form method="POST" action="{{ route('follow', $tweet->user_id) }}">
-
                                             @csrf
-
                                             <button type="submit" class="reaction-btn" style="
                                                                                                     color:white;
                                                                                                     background:
@@ -608,7 +615,6 @@
                                                                                                 ">
                                                 {{ $isFollowing ? 'Following' : 'Follow' }}
                                             </button>
-
                                         </form>
 
                                         <div class="tweet-menu-container">
@@ -743,17 +749,6 @@
             document.getElementById(`edit-${id}`).style.display = 'none';
         }
 
-        setTimeout(() => {
-            const alertBox = document.getElementById('successAlert');
-            if (alertBox) {
-                alertBox.style.transition = '0.5s';
-                alertBox.style.opacity = '0';
-                setTimeout(() => {
-                    alertBox.style.display = 'none';
-                }, 500);
-            }
-        }, 5000);
-
         window.onscroll = function () {
             const button = document.getElementById("scrollTopBtn");
             if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
@@ -769,6 +764,128 @@
                 behavior: 'smooth'
             });
         }
+
+        function setupMentionAutocomplete(textarea) {
+            const wrapper = textarea.closest('.mention-autocomplete-wrapper');
+            const dropdown = wrapper.querySelector('.mention-autocomplete-dropdown');
+            let debounceTimer = null;
+            let activeMention = null;
+            let requestId = 0;
+            let ignoreNextInput = false;
+
+            const hideDropdown = () => {
+                dropdown.classList.remove('show');
+                dropdown.innerHTML = '';
+                activeMention = null;
+            };
+
+            const findActiveMention = () => {
+                const cursorPosition = textarea.selectionStart;
+                const textBeforeCursor = textarea.value.slice(0, cursorPosition);
+                const match = textBeforeCursor.match(/(^|[\s(])@([A-Za-z0-9_]{1,30})$/);
+
+                if (!match) {
+                    return null;
+                }
+
+                return {
+                    keyword: match[2],
+                    start: cursorPosition - match[2].length - 1,
+                    end: cursorPosition
+                };
+            };
+
+            const insertMention = (username) => {
+                if (!activeMention) {
+                    return;
+                }
+
+                textarea.value =
+                    textarea.value.slice(0, activeMention.start) +
+                    `@${username}` +
+                    textarea.value.slice(activeMention.end);
+
+                const cursorPosition = activeMention.start + username.length + 1;
+                textarea.focus();
+                textarea.setSelectionRange(cursorPosition, cursorPosition);
+                ignoreNextInput = true;
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                hideDropdown();
+            };
+
+            const renderSuggestions = (users) => {
+                if (!users.length) {
+                    hideDropdown();
+                    return;
+                }
+
+                dropdown.innerHTML = '';
+
+                users.forEach((user) => {
+                    const item = document.createElement('div');
+                    item.className = 'mention-suggestion';
+                    item.textContent = user.username;
+                    item.addEventListener('mousedown', (event) => {
+                        event.preventDefault();
+                        insertMention(user.username);
+                    });
+                    dropdown.appendChild(item);
+                });
+
+                dropdown.classList.add('show');
+            };
+
+            textarea.addEventListener('input', () => {
+                if (ignoreNextInput) {
+                    ignoreNextInput = false;
+                    hideDropdown();
+                    return;
+                }
+
+                clearTimeout(debounceTimer);
+
+                const mention = findActiveMention();
+                if (!mention) {
+                    hideDropdown();
+                    return;
+                }
+
+                activeMention = mention;
+
+                debounceTimer = setTimeout(() => {
+                    const currentRequest = ++requestId;
+
+                    fetch(`/mentions/search?q=${encodeURIComponent(mention.keyword)}`, {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(users => {
+                            if (currentRequest === requestId) {
+                                renderSuggestions(users);
+                            }
+                        })
+                        .catch(() => hideDropdown());
+                }, 250);
+            });
+
+            textarea.addEventListener('keydown', () => {
+                setTimeout(() => {
+                    if (!findActiveMention()) {
+                        hideDropdown();
+                    }
+                }, 0);
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!wrapper.contains(event.target)) {
+                    hideDropdown();
+                }
+            });
+        }
+
+        document.querySelectorAll('.mention-autocomplete-input').forEach(setupMentionAutocomplete);
 
         // AJAX Dislike
         document.querySelectorAll('.dislike-btn').forEach(button => {
@@ -856,8 +973,6 @@
                     : 'block';
         }
     </script>
-    </script>
-
 </body>
 
 </html>

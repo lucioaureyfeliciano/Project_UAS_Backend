@@ -327,21 +327,13 @@
             background: #c0392b;
         }
 
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px 18px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #a3cfbb;
-        }
-
         h2 {
             margin-top: 0;
         }
     </style>   
 </head>
 <body>
+@include('components.toast')
 
 <div class="navbar">
     <a href="/dashboard" class="back-btn">← Dashboard</a>
@@ -351,10 +343,6 @@
 
 <div class="container">
 
-    @if(session('success'))
-        <div class="alert-success">{{ session('success') }}</div>
-    @endif
-    
     {{-- Notif Header --}}
     <div class="card">
         <div class="notification-header">
