@@ -30,7 +30,8 @@ class ProfileController extends Controller
         ]);
 
         $user = auth()->user();
-        $user->description = $request->description;
+        // store into `bio` column (database uses `bio`) — keep incoming field name `description`
+        $user->bio = $request->description;
         $user->save();
 
         return back()->with('success', 'Description updated successfully');
