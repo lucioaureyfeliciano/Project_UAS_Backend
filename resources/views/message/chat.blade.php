@@ -100,6 +100,7 @@
     </style>
 </head>
 <body>
+@include('components.toast')
 
 <div class="navbar">
 

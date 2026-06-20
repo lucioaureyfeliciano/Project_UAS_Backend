@@ -22,7 +22,7 @@ class NotificationController extends Controller
             $query->where('is_read', true);
         }
 
-        if ($type && in_array($type, ['like', 'comment', 'repost'])) {
+        if ($type && in_array($type, ['like', 'comment', 'repost', 'mention'])) {
             $query->where('type', $type);
         } 
 

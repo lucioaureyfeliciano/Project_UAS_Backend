@@ -52,7 +52,19 @@ class ProfileController extends Controller
             $tweets = collect();
             $isLocked = true;
 
-            return view('profile', compact('user', 'tweets', 'isLocked'));
+            $isFollowing = false;
+
+            if (auth()->id() != $user->id) {
+                $isFollowing = \App\Models\Follow::where(
+                    'follower_id',
+                    auth()->id()
+                )->where(
+                    'following_id',
+                    $user->id
+                )->exists();
+            }
+
+            return view('profile', compact('user', 'tweets', 'isLocked', 'isFollowing'));
         }
 
         $tweets = Tweet::where('user_id', $user->id)
@@ -100,21 +112,86 @@ class ProfileController extends Controller
     {
         $keyword = $request->search;
 
-        $users = User::where(
-            'username',
-            'like',
-            '%' . $keyword . '%'
-        )
-            ->where('id', '!=', auth()->id())
-            ->get();
+        $type = $request->type ?? 'all';
+
+        $users = collect();
+        $tweets = collect();
+
+        if ($type == 'all' || $type == 'users') {
+
+            $users = User::where(
+                'username',
+                'like',
+                '%' . $keyword . '%'
+            )
+                ->where(
+                    'id',
+                    '!=',
+                    auth()->id()
+                )
+                ->get();
+
+        }
+
+        if ($type == 'all' || $type == 'tweets') {
+
+            $tweets = Tweet::with([
+                'user',
+                'likes',
+                'dislikes',
+                'reposts',
+                'comments'
+            ])
+                ->where(function ($query) use ($keyword) {
+
+                    $query->where(
+                        'title',
+                        'like',
+                        '%' . $keyword . '%'
+                    )
+                        ->orWhere(
+                            'content',
+                            'like',
+                            '%' . $keyword . '%'
+                        );
+
+                })
+                ->latest()
+                ->get();
+
+        }
 
         return view(
             'search.search',
             compact(
                 'users',
-                'keyword'
+                'tweets',
+                'keyword',
+                'type'
             )
         );
+    }
+
+    public function searchMentions(Request $request)
+    {
+        $keyword = strtolower($request->query('q', ''));
+
+        if ($keyword === '') {
+            return response()->json([]);
+        }
+
+        $users = User::select('username')
+            ->whereRaw('LOWER(username) LIKE ?', ['%' . $keyword . '%'])
+            ->where('id', '!=', auth()->id())
+            ->orderByRaw(
+                'CASE WHEN LOWER(username) LIKE ? THEN 0 ELSE 1 END',
+                [$keyword . '%']
+            )
+            ->orderBy('username')
+            ->limit(5)
+            ->get();
+
+        return response()->json($users);
     }
 
 }

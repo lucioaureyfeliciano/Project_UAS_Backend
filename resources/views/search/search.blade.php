@@ -169,11 +169,82 @@
         #scrollTopBtn:hover {
             background: #2779bd;
         }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .filter-tab {
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            background: white;
+            color: black;
+            font-weight: bold;
+        }
+
+        .filter-tab.active {
+            background: #3490dc;
+            color: white;
+        }
+
+        .tweet-card {
+            background: white;
+            padding: 18px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        .tweet-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .tweet-content {
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .tweet-info {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .tweet-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .reaction-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: black;
+        }
+
+        .mention-link {
+            color: #3490dc;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .mention-link:hover {
+            text-decoration: underline;
+        }
     </style>
 
 </head>
 
 <body>
+    @include('components.toast')
 
     <div class="navbar">
 
@@ -189,7 +260,7 @@
 
             <form method="GET">
 
-                <input type="text" name="search" class="search-input" placeholder="Search username..."
+                <input type="text" name="search" class="search-input" placeholder="Search username or tweets"
                     value="{{ $keyword }}">
 
                 <button type="submit" class="search-btn">
@@ -202,89 +273,193 @@
 
         @if($keyword)
 
+            <div class="filter-tabs">
+
+                <a href="?search={{ $keyword }}&type=all" class="filter-tab {{ $type == 'all' ? 'active' : '' }}">
+                    All
+                </a>
+
+                <a href="?search={{ $keyword }}&type=users" class="filter-tab {{ $type == 'users' ? 'active' : '' }}">
+                    Users
+                </a>
+
+                <a href="?search={{ $keyword }}&type=tweets" class="filter-tab {{ $type == 'tweets' ? 'active' : '' }}">
+                    Tweets
+                </a>
+
+            </div>
+
+        @endif
+
+        @if($keyword)
+
             <h2 class="section-title">
                 Search Results
             </h2>
 
         @endif
 
-        @forelse($users as $user)
+        @if($type == 'all' || $type == 'users')
+            @forelse($users as $user)
 
-            @php
+                @php
 
-                $isFollowing = \App\Models\Follow::where(
-                    'follower_id',
-                    auth()->id()
-                )
-                    ->where(
-                        'following_id',
-                        $user->id
+                    $isFollowing = \App\Models\Follow::where(
+                        'follower_id',
+                        auth()->id()
                     )
-                    ->exists();
+                        ->where(
+                            'following_id',
+                            $user->id
+                        )
+                        ->exists();
 
-            @endphp
+                @endphp
 
-            <div class="user-card">
+                <div class="user-card">
 
-                <div class="user-info">
-
-                    <a href="{{ route('profile.show', $user->username) }}" class="username-link">
-
-                        <div class="avatar">
-                            👤
-                        </div>
-
-                    </a>
-
-                    <div>
+                    <div class="user-info">
 
                         <a href="{{ route('profile.show', $user->username) }}" class="username-link">
 
-                            <h3 class="username">
-                                {{ $user->username }}
-                            </h3>
+                            <div class="avatar">
+                                👤
+                            </div>
 
                         </a>
 
-                        <div class="bio">
+                        <div>
 
-                            {{ $user->description ?: 'No description yet.' }}
+                            <a href="{{ route('profile.show', $user->username) }}" class="username-link">
+
+                                <h3 class="username">
+                                    {{ $user->username }}
+                                </h3>
+
+                            </a>
+
+                            <div class="bio">
+
+                                {{ $user->description ?: 'No description yet.' }}
+
+                            </div>
 
                         </div>
 
                     </div>
 
+                    @if(auth()->id() != $user->id)
+
+                        <form method="POST" action="{{ route('follow', $user->id) }}">
+
+                            @csrf
+
+                            <button type="submit" class="follow-btn {{ $isFollowing ? 'following' : 'follow' }}">
+
+                                {{ $isFollowing ? 'Following' : 'Follow' }}
+
+                            </button>
+
+                        </form>
+
+                    @endif
+
                 </div>
 
-                @if(auth()->id() != $user->id)
+            @empty
 
-                    <form method="POST" action="{{ route('follow', $user->id) }}">
+                @if($keyword)
 
-                        @csrf
-
-                        <button type="submit" class="follow-btn {{ $isFollowing ? 'following' : 'follow' }}">
-
-                            {{ $isFollowing ? 'Following' : 'Follow' }}
-
-                        </button>
-
-                    </form>
+                    <p>
+                        No users found.
+                    </p>
 
                 @endif
 
-            </div>
+            @endforelse
+        @endif
 
-        @empty
+        @if($type == 'all' || $type == 'tweets')
 
-            @if($keyword)
+            @if($tweets->count())
 
-                <p>
-                    No users found.
-                </p>
+                <h2 class="section-title">
+                    Tweets
+                </h2>
+
+                @foreach($tweets as $tweet)
+
+                    <div class="tweet-card">
+
+                        <div class="tweet-info">
+
+                            <a href="{{ route('profile.show', $tweet->user->username) }}"
+                                style="text-decoration:none;color:#3490dc;font-weight:bold;">
+
+                                {{ $tweet->user->username }}
+
+                            </a>
+
+                            •
+
+                            {{ $tweet->created_at->diffForHumans() }}
+
+                        </div>
+
+                        <div class="tweet-title">
+                            {{ $tweet->title }}
+                        </div>
+
+                        <div class="tweet-content">
+                            {!! preg_replace(
+                            '/@([a-zA-Z0-9_]+)/',
+                            '<a href="/user/$1" class="mention-link">@$1</a>',
+                            e($tweet->content)
+                        ) !!}
+                        </div>
+
+                        <div class="tweet-actions">
+
+                            <span class="reaction-btn">
+                                👍 {{ $tweet->likes->count() }}
+                            </span>
+
+                            <span class="reaction-btn">
+                                👎 {{ $tweet->dislikes->count() }}
+                            </span>
+
+                            <span class="reaction-btn">
+                                🔁 {{ $tweet->reposts->count() }}
+                            </span>
+
+                            <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
+                                style="text-decoration:none;">
+
+                                💬 {{ $tweet->comments->count() }}
+
+                            </a>
+
+                            <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
+                                @csrf
+                                <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
+                                <button type="submit" class="reaction-btn" style="color:#3490dc; background:white; font-size:14px;">
+                                    🔖 Bookmark
+                                </button>
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                @endforeach
+
+            @elseif($keyword)
+
+                <p>No tweets found.</p>
 
             @endif
 
-        @endforelse
+        @endif
 
     </div>
 

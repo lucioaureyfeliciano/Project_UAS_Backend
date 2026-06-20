@@ -67,6 +67,7 @@
     </style>
 </head>
 <body>
+@include('components.toast')
 
 <div class="container">
     <h2>Register</h2>
