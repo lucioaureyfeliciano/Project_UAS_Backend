@@ -117,6 +117,7 @@ use Illuminate\Support\Str;
     </style>
 </head>
 <body>
+@include('components.toast')
 
 <div class="navbar">
 

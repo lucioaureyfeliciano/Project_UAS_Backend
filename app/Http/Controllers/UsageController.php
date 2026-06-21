@@ -4,14 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Tweet;
+use App\Models\Follow;
 use App\Models\Community;
-use App\Models\Comment;
-use App\Models\Like;
-use App\Models\Dislike;
-use App\Models\Repost;
-use App\Models\Message;
-use App\Models\Bookmark;
-use Illuminate\Support\Facades\DB;
+use App\Models\CommunityActivity;
 
 class UsageController extends Controller
 {
@@ -19,24 +14,73 @@ class UsageController extends Controller
     {
         $totalUsers = User::count();
         $totalTweets = Tweet::count();
+        $followActivities = Follow::count();
         $totalCommunities = Community::count();
-        $totalComments = Comment::count();
-        $totalLikes = Like::count();
-        $totalDislikes = Dislike::count();
-        $totalReposts = Repost::count();
-        $totalMessages = Message::count();
-        $totalBookmarks = Bookmark::count();
-        
+        $communityActivities = CommunityActivity::count();
+
         return view('usage.index', compact(
             'totalUsers',
             'totalTweets',
+            'followActivities',
             'totalCommunities',
-            'totalComments',
-            'totalLikes',
-            'totalDislikes',
-            'totalReposts',
-            'totalMessages',
-            'totalBookmarks'
+            'communityActivities',
         ));
+    }
+
+    public function users()
+    {
+        $users = User::latest()->get();
+
+        return view('usage.detail', [
+            'title' => 'All Users',
+            'items' => $users,
+        ]);
+    }
+
+    public function tweets()
+    {
+        $tweets = Tweet::with('user')->latest()->get();
+
+        return view('usage.detail', [
+            'title' => 'All Tweets',
+            'items' => $tweets,
+        ]);
+    }
+
+    public function followActivities()
+    {
+        $activities = Follow::with([
+            'follower',
+            'following'
+        ])
+        ->latest()
+        ->get();
+
+        return view('usage.detail', [
+            'title' => 'Follow Activities',
+            'items' => $activities,
+        ]);
+    }
+
+    public function communities()
+    {
+        $communities = Community::with('creator')->latest()->get();
+
+        return view('usage.detail', [
+            'title' => 'All Communities',
+            'items' => $communities,
+        ]);
+    }
+
+    public function communityActivities()
+    {
+        $activities = CommunityActivity::with('user', 'community')
+            ->latest()
+            ->get();
+
+        return view('usage.detail', [
+            'title' => 'Community Activities',
+            'items' => $activities,
+        ]);
     }
 }

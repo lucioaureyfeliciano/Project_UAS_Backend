@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('comments', function (Blueprint $table) {
-            $table->boolean('is_pinned')->default(false);
+            $table->boolean('is_pinned')->default(false)->after('content');
         });
     }
 

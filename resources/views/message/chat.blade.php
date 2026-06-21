@@ -176,6 +176,7 @@ function openEdit(id)
 </script>
 
 <body>
+@include('components.toast')
 
 <div class="navbar">
 
