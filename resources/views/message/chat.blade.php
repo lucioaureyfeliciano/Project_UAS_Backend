@@ -110,6 +110,34 @@
         .received .chat-link {
             color: #3490dc;
         }
+
+        .shared-tweet-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            max-width: 320px;
+        }
+
+        .shared-tweet-user {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .shared-tweet-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #222;
+        }
+
+        .shared-tweet-content {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -137,7 +165,49 @@
 
                 <div class="bubble">
 
-                    {!! \App\Models\Message::linkify($message->message) !!}
+                    @php
+                        preg_match('/\[TWEET:(\d+)\]/', $message->message, $matches);
+                        $tweetId = $matches[1] ?? null;
+
+                        $cleanMessage = $tweetId
+                            ? trim(preg_replace('/\[TWEET:\d+\]\s*/', '', $message->message))
+                            : $message->message;
+
+                    @endphp
+                    
+                    @if($tweetId)
+                        @php
+                            $sharedTweet = \App\Models\Tweet::with('user')->find($tweetId);
+                        @endphp 
+
+                        @if($sharedTweet)
+                            <a href="{{ route('tweets.show', $sharedTweet->id) }}"
+                                style="text-decoration:none; color:inherit;">
+
+                                <div class="shared-tweet-card">
+
+                                    <div class="shared-tweet-user">
+                                        👤 {{ $sharedTweet->user?->username }}
+                                    </div>
+
+                                    <div class="shared-tweet-title">
+                                        {{ $sharedTweet->title }}
+                                    </div>
+
+                                    <div class="shared-tweet-content">
+                                        {{ Str::limit($sharedTweet->content, 120) }}
+                                    </div>
+
+                                </div>
+                            </a>
+                        @endif
+                    @endif
+
+                    @if($cleanMessage)
+                        <div class="chat-text">
+                            {!! \App\Models\Message::linkify($cleanMessage) !!}
+                        </div>
+                    @endif
 
                     <div class="message-time">
                         {{ $message->created_at->format('d M Y H:i') }}

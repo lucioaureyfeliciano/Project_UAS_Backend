@@ -709,17 +709,15 @@
 
                                         <textarea
                                             name="message"
-                                            rows="3"
-                                            required
                                             class="share-textarea"
-                                        >{{ $tweet->user?->username }}: "{{ Str::limit($tweet->title, 60) }}" — {{ route('tweets.show', $tweet->id) }}</textarea>
+                                            placeholder="Add a message..."
+                                        >[TWEET:{{ $tweet->id }}]</textarea>
 
                                         <div class="share-actions">
                                             <button
                                                 type="button"
                                                 class="share-cancel-btn"
-                                                onclick="toggleShareModal('share-tw-{{ $tweet->id }}')"
-                                            >
+                                                onclick="toggleShareModal('share-tw-{{ $tweet->id }}')">
                                                 Cancel
                                             </button>
 
