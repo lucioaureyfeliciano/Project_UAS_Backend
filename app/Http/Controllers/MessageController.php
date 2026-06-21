@@ -85,13 +85,13 @@ class MessageController extends Controller
             'message' => 'required|max:1000'
         ]);
 
-        Message::create([
+        $message = Message::create([
             'sender_id' => auth()->id(),
             'receiver_id' => $request->receiver_id,
-            'message' => $request->message
+            'message'     => preg_replace('/^\s+|\s+$/u', '', $request->message),
         ]);
 
-        return back();
+        return response()->json($message, 201);
     }
 
     public function update(Request $request, $messageId)
@@ -103,26 +103,25 @@ class MessageController extends Controller
         }
 
         if ($message->created_at->diffInMinutes(now()) > 5) {
-            return back()->with(
-                'error',
-                'Message can only be edited within 5 minutes.'
-            );
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Pesan hanya bisa diedit dalam 5 menit.'], 403);
+            }
+            return back()->with('error', 'Message can only be edited within 5 minutes.');
         }
 
-        $request->validate([
-            'message' => 'required|string'
-        ]);
+        $request->validate(['message' => 'required|string']);
 
         $message->update([
-            'message' => $request->message,
+            'message'   => $request->message,
             'edited_at' => now(),
-            'read_at' => null
+            'read_at'   => null
         ]);
 
-        return back()->with(
-            'success',
-            'Message updated.'
-        );
+        if ($request->expectsJson()) {
+            return response()->json($message);
+        }
+
+        return back()->with('success', 'Message updated.');
     }
 
     public function destroy($id)
@@ -134,6 +133,10 @@ class MessageController extends Controller
         }
 
         $message->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Pesan berhasil dihapus.']);
+        }
 
         return back();
     }
