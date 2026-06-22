@@ -172,6 +172,7 @@
             border-radius: 10px;
             padding: 14px 16px;
             margin-bottom: 12px;
+            overflow: hidden;
         }
 
         .comment-username {
@@ -186,9 +187,12 @@
             font-size: 14px;
             line-height: 1.55;
             margin-bottom: 6px;
-            word-break: break-word;
-            overflow-wrap: break-word;
             white-space: pre-wrap;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+            max-width: 100%;    
+            width: 100%;
+            min-width: 0;
         }
 
         .comment-meta {
@@ -280,9 +284,12 @@
             font-size: 13px;
             line-height: 1.5;
             margin-bottom: 4px;
-            word-break: break-word;
-            overflow-wrap: break-word;
             white-space: pre-wrap;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+            max-width: 100%;
+            width: 100%;
+            min-width: 0;
         }
 
         .reply-card .reply-meta {
@@ -377,14 +384,17 @@
         }
 
         .pinned-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             font-size: 11px;
-            color: #f39c12;
+            color: #3490dc;
             font-weight: bold;
         }
 
         .pin-btn {
-            border: 1px solid #f39c12;
-            color: #f39c12;
+            border: 1px solid #3490dc;
+            color: #3490dc;
             background: transparent;
             padding: 4px 12px;
             border-radius: 6px;
@@ -398,7 +408,7 @@
         }
 
         .pin-btn.active {
-            background: #f39c12;
+            background: #70b5ff;
             color: white;
         }
 
@@ -431,8 +441,13 @@
 
     <div class="navbar">
         <a href="{{ route('tweets.show', $tweet->id) }}" class="back-btn">← Back to Tweet</a>
-        <div>💬 Comments</div>
-        <div></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <img src="{{ asset('image/paper.png') }}"
+                width="18"
+                height="18"
+                alt="">
+            <span>Comments</span>
+        </div>
     </div>
 
     <div class="container">
@@ -452,7 +467,6 @@
             By <strong>{{ $tweet->user?->username ?? 'Unknown' }}</strong>
             · {{ $tweet->created_at->diffForHumans() }}
         </div>
-    </div>
 
     <div class="comment-sort">
         <span class="comment-sort-label">Sort:</span>
@@ -487,14 +501,23 @@
             <div class="comment-actions">
 
                 @if($comment->is_pinned)
-                    <span class="pinned-label">📌 Pinned</span>
+                    <span class="pinned-label">
+                        <img src="{{ asset('image/pin.png') }}"
+                            width="14"
+                            height="14"
+                            alt="">
+                        Pinned</span>
                 @endif
 
                 @if(auth()->id() === $tweet->user_id && is_null($comment->parent_id))
                     <form method="POST" action="{{ route('comments.pin', [$tweet->id, $comment->id]) }}">
                         @csrf
                         <button type="submit" class="pin-btn {{ $comment->is_pinned ? 'active' : '' }}">
-                            {{ $comment->is_pinned ? '📌 Unpin' : '📌 Pin' }}
+                            <img src="{{ asset('image/pin.png') }}"
+                                width="12"
+                                height="12"
+                                alt="">
+                            {{ $comment->is_pinned ? 'Unpin' : 'Pin' }}
                         </button>
                     </form>
                 @endif
@@ -595,7 +618,7 @@
 
         </div>
     @empty
-        <div class="empty-state">No comments yet. Be the first! 👇</div>
+        <div class="empty-state">No comments yet. Be the first! </div>
     @endforelse
 
     </div>

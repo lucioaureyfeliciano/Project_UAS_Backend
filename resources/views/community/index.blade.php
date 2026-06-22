@@ -185,6 +185,14 @@
         h1, h2 {
             margin-top: 0;
         }
+
+        .community-icon img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -246,7 +254,9 @@
     @foreach($communities as $community)
         <div class="community-card {{ $community->is_private ? 'private' : 'public' }}">
 
-            <div class="community-icon"> 👥 </div>
+            <div class="community-icon"> 
+                <img src="/image/profile2.png" alt="community icon"> 
+            </div>
 
             <div class="community-body">
 

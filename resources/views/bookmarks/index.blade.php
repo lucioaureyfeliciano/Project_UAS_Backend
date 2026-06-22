@@ -159,6 +159,87 @@
             padding:2px 4px;
             border-radius:4px;
         }
+
+        .sort-row { 
+            display:flex; 
+            gap:8px; 
+            align-items:center; 
+            margin-top:12px; 
+            flex-wrap:wrap; 
+        }
+        .sort-label { 
+            font-size:13px; 
+            color:#888; 
+        }
+        .sort-tab { 
+            padding:5px 14px; 
+            border-radius:20px; 
+            font-size:12px; 
+            text-decoration:none; 
+            background:white; 
+            color:#555; 
+            border:1px solid #ddd; 
+        }
+        .sort-tab:hover { 
+            background:#f5f5f5; 
+        }
+
+        .sort-tab.active { 
+            background:#3490dc; 
+            color:white; 
+            border-color:#3490dc; 
+        }
+
+        .navbar-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-icon {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+        }
+
+        .btn-icon {
+            width: 14px;
+            height: 14px;
+            object-fit: contain;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+
+        .stat-icon {
+            width: 14px;
+            height: 14px;
+            object-fit: contain;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+
+        .empty-icon {
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+        }
+
+        .btn-search,
+        .btn-view,
+        .btn-remove {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bookmark-stats span {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .dislike-icon {
+            transform: scaleY(-1);
+        }
     </style>
 </head>
 <body>
@@ -166,7 +247,10 @@
  
 <div class="navbar">
     <a href="/dashboard" class="back-btn">← Dashboard</a>
-    <div>🔖 Bookmarks</div>
+    <div class="navbar-title">
+        <img src="{{ asset('image/save.png') }}" class="nav-icon">
+        Bookmarks
+    </div>
     <div></div>
 </div>
  
@@ -177,9 +261,20 @@
         <form method="GET" class="search-form">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search bookmark..." class="search-input">
             <button type="submit" class="btn-search">
-                🔍 Search
+                <img src="{{ asset('image/glass.png') }}" class="btn-icon">
+                Search
             </button>
         </form>
+
+        <div class="sort-row">
+            <span class="sort-label">Sort:</span>
+            @foreach(['newest' => 'Newest', 'oldest' => 'Oldest', 'tweet_date' => 'Tweet Date', 'author' => 'Author'] as $key => $label)
+                <a href="?sort={{ $key }}&search={{ request('search') }}"
+                    class="sort-tab {{ $sort === $key ? 'active' : '' }}">
+                    {{ $label }}
+                </a>
+            @endforeach
+        </div>
     </div>
  
     @forelse($bookmarks as $bookmark)
@@ -230,25 +325,43 @@
 
             @if($bookmark->tweet)
                 <div class="bookmark-stats">
-                    <span>👍 {{ $bookmark->tweet->likes->count() }}</span>
-                    <span>👎 {{ $bookmark->tweet->dislikes->count() }}</span>
-                    <span>🔁 {{ $bookmark->tweet->reposts->count() }}</span>
-                    <span>💬 {{ $bookmark->tweet->comments->count() }}</span>
+                    <span>
+                        <img src="{{ asset('image/like.png') }}" class="stat-icon"> 
+                        {{ $bookmark->tweet->likes->count() }}
+                    </span>
+
+                    <span>
+                        <img src="{{ asset('image/like.png') }}" class="stat-icon dislike-icon">
+                        {{ $bookmark->tweet->dislikes->count() }}
+                    </span>
+
+                    <span>
+                        <img src="{{ asset('image/repost.png') }}" class="stat-icon">
+                        {{ $bookmark->tweet->reposts->count() }}
+                    </span>
+
+                    <span>
+                        <img src="{{ asset('image/comment.png') }}" class="stat-icon">
+                        {{ $bookmark->tweet->comments->count() }}
+                    </span>
                 </div>
             @endif
 
             <div class="bookmark-actions">
                 @if($bookmark->tweet)
                     <a href="{{ route('tweets.show', $bookmark->tweet_id) }}"
-                        style="background:#3490dc; color:white; padding:6px 14px; border-radius:6px; text-decoration:none; font-size:13px;">
-                        📄 View Tweet
+                        class="btn-view">
+                        <img src="{{ asset('image/paper.png') }}" class="btn-icon">
+                        View Tweet
                     </a>
                 @endif
                 <form action="{{ route('bookmarks.destroy', $bookmark->tweet_id) }}" method="POST"
                     onsubmit="return confirm('Delete this bookmark?')">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn-remove">🗑 Remove</button>
+                    <button type="submit" class="btn-remove">
+                       <img src="{{ asset('image/trash.png') }}" class="btn-icon">
+                       Remove</button>
                 </form>
             </div>
  
@@ -256,7 +369,9 @@
     @empty
         <div class="card">
             <div class="empty-state">
-                <div class="icon">🔖</div>
+                <div class="icon">
+                    <img src="{{ asset('image/bookmark.png') }}" class="empty-icon">
+                </div>
                 <p>No bookmarks yet. Save your favorite tweets!</p>
             </div>
         </div>

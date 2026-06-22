@@ -100,6 +100,13 @@
             border: 2px solid rgba(255, 255, 255, .8);
         }
 
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
         .since {
             margin-top: 10px;
             font-size: 13px;
@@ -240,7 +247,7 @@
                             <div class="user-info">
 
                                 <div class="avatar">
-                                    👤
+                                    <img src="{{ asset('image/profile.png') }}" alt="Profile" class="avatar-img">
                                 </div>
 
                                 <div>

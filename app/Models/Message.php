@@ -32,4 +32,24 @@ class Message extends Model
             'reply_to_id'
         );
     }
+    
+    public static function linkify(string $text): string
+    {
+        $escaped = e($text);
+
+        $pattern = '/(https?:\/\/[^\s<]+)/i';
+
+        return preg_replace_callback($pattern, function ($matches) {
+
+            $url = rtrim($matches[1], '.,)');
+
+            return '<a href="' . $url . '"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="chat-link">'
+                        . $url .
+                    '</a>';
+
+        }, $escaped);
+    }
 }

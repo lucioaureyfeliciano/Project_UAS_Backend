@@ -340,13 +340,21 @@
         }
 
         .mention-link {
-            color: #3490dc5;
+            color: #3490dc;
             font-weight: bold;
             text-decoration: none;
         }
 
         .mention-link:hover {
             text-decoration: underline;
+        }
+
+        .icon-img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            display: inline-block;
+            vertical-align: middle;
         }
     </style>
 </head>
@@ -356,8 +364,12 @@
 
     <div class="navbar">
         <a href="/dashboard" class="back-btn">← Dashboard</a>
-        <div class="title">📄 Tweet Detail</div>
-        <div></div>
+        <div class="title" style="display:flex;align-items:center;gap:8px;">
+            <img src="{{ asset('image/paper.png') }}" 
+                class="icon-img"
+                alt="Tweet Detail">
+            Tweet Detail
+        </div>
     </div>
 
     <div class="container">
@@ -392,21 +404,37 @@
                 <form method="POST" action="/tweets/{{ $tweet->id }}/like"
                     class="stat-btn {{ $tweet->likes->contains('user_id', auth()->id()) ? 'liked' : '' }}">
                     @csrf
-                    <button type="submit">👍 {{ $tweet->likes->count() }} Like</button>
+                    <button type="submit">
+                        <img src="{{ asset('image/' . ($tweet->likes->contains('user_id', auth()->id()) ? 'liked.png' : 'like.png')) }}"
+                            class="icon-img"
+                            alt="Like">
+                        {{ $tweet->likes->count() }} Like
+                    </button>
                 </form>
 
                 {{-- Dislike --}}
                 <form method="POST" action="/tweets/{{ $tweet->id }}/dislike"
                     class="stat-btn {{ $tweet->dislikes->contains('user_id', auth()->id()) ? 'disliked' : '' }}">
                     @csrf
-                    <button type="submit">👎 {{ $tweet->dislikes->count() }} Dislike</button>
+                    <button type="submit">
+                        <img src="{{ asset('image/' . ($tweet->dislikes->contains('user_id', auth()->id()) ? 'liked.png' : 'like.png')) }}"
+                            class="icon-img"
+                            alt="Dislike"
+                            style="transform:scaleY(-1);">
+                        {{ $tweet->dislikes->count() }} Dislike
+                    </button>
                 </form>
 
                 {{-- Repost --}}
                 <form method="POST" action="/tweets/{{ $tweet->id }}/repost"
                     class="stat-btn {{ $tweet->reposts->contains('user_id', auth()->id()) ? 'reposted' : '' }}">
                     @csrf
-                    <button type="submit">🔁 {{ $tweet->reposts->count() }} Repost</button>
+                    <button type="submit">
+                        <img src="{{ asset('image/repost.png') }}"
+                            class="icon-img"
+                            alt="Repost">
+                        {{ $tweet->reposts->count() }} Repost
+                    </button>
                 </form>
 
                 {{-- Bookmark --}}
@@ -418,27 +446,44 @@
                         <form method="POST" action="{{ route('bookmarks.destroy', $tweet->id) }}">
                             @csrf
                             @method('DELETE')
-                            <button type="submit">🔖 Saved</button>
+                            <button type="submit"> 
+                                <img src="{{ asset('image/saved.png') }}"
+                                    class="icon-img"
+                                    alt="Saved">
+                                Bookmarked
+                            </button>
                         </form>
                     @else
                         <form method="POST" action="{{ route('bookmarks.store') }}">
                             @csrf
                             <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
-                            <button type="submit">🔖 Save</button>
+                            <button type="submit"> 
+                                <img src="{{ asset('image/save.png') }}"
+                                    class="icon-img"
+                                    alt="Saved">
+                                Bookmark
+                            </button>
                         </form>
                     @endif
                 </span>
 
                 <a href="{{ route('comments.index', $tweet->id) }}" class="stat-btn">
-                    💬 {{ $tweet->comments->count() }} Comments
+                    <img src="{{ asset('image/comment.png') }}"
+                        class="icon-img"
+                        alt="Comment">
+                    {{ $tweet->comments->count() }} Comments
                 </a>
 
             </div>
         </div>
 
         <div class="card">
-            <div class="section-header">
-                <h3>💬 Comments ({{ $tweet->comments->count() }})</h3>
+            <div class="section-header" style="display:flex;align-items:center;gap:8px;">
+                    <img src="{{ asset('image/comment.png') }}"
+                        class="icon-img"
+                        alt="Comments"> 
+                    Comments ({{ $tweet->comments->count() }})
+                </h3>
                 <a href="{{ route('comments.create', $tweet->id) }}" class="btn-primary">+ Add Comment</a>
             </div>
 
@@ -446,7 +491,13 @@
                         <div class="comment-card" {{ $comment->is_pinned ? 'pinned-comment-card' : '' }}">
                             <div class="comment-username">
                                 @if($comment->is_pinned)
-                                    <div class="pinned-label">📌 Pinned by {{ $tweet->user?->username }}</div>
+                                    <div class="pinned-label"
+                                        style="display:flex;align-items:center;gap:6px;">
+                                        <img src="{{ asset('image/pin.png') }}"
+                                            class="icon-img"
+                                            alt="Pinned">
+                                        Pinned by {{ $tweet->user?->username }}
+                                    </div>
                                 @endif
                                 <a href="{{ route('profile.show', $comment->user?->username) }}">
                                     {{ $comment->user?->username ?? 'Unknown' }}
@@ -478,7 +529,7 @@
                             @endif
                         </div>
             @empty
-                <div class="empty-comments">No comments yet. Be the first! 👇</div>
+                <div class="empty-comments">No comments yet. Be the first! </div>
             @endforelse
 
             @if($tweet->comments->whereNull('parent_id')->count() > 3)

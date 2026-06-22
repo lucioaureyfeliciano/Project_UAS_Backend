@@ -142,6 +142,7 @@ Route::get(
 # Message Routes
 Route::middleware('auth')->group(function () {
     Route::get('/messages/inbox', [MessageController::class, 'inbox']);
+    Route::post('/messages/share', [MessageController::class, 'shareToChat'])->name('messages.share');
     Route::get('/messages/chat/{userId}', [MessageController::class, 'chat']);
     Route::post('/messages', [MessageController::class, 'store']);
     Route::put('/messages/{messageId}', [MessageController::class, 'update']);
