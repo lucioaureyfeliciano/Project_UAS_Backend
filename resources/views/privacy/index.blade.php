@@ -19,14 +19,12 @@
             justify-content: space-between;
         }
 
-        /* Lebar container disesuaikan agar sama persis dengan profile & dashboard */
         .container {
             width: 75%;
             max-width: 900px;
             margin: 35px auto;
         }
 
-        /* KARTU DIUBAH: Membulat lebar (18px), padding (22px), dan border tipis khas profile/tweet card */
         .card {
             background: white;
             padding: 22px;
@@ -48,7 +46,6 @@
             text-decoration: none;
         }
 
-        /* TOMBOL AKSI: Dibuat membulat elips khas tombol aplikasi kamu */
         .block-btn {
             background: #3490dc;
             color: white;
@@ -79,7 +76,6 @@
             background: #2574a9;
         }
 
-        /* GAYA BARU UNTUK BUTTON TOGGLE PRIVACY: Dibuat rounded pill lonjong biar matching */
         .privacy-toggle-btn {
             display: flex;
             align-items: center;
@@ -87,7 +83,7 @@
             padding: 10px 22px;
             color: white;
             border: none;
-            border-radius: 20px; /* Bikin bulat pil kyk tombol follow */
+            border-radius: 20px; 
             cursor: pointer;
             font-weight: bold;
             font-size: 14px;

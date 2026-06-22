@@ -18,13 +18,14 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\FollowController;
 use App\Models\Tweet;
 use App\Http\Controllers\PrivacyController;
+use App\Http\Controllers\FeedController;
 
 Route::get('/', function () {
     return redirect('/login');
 });
 
 # Dashboard Route
-Route::get('/dashboard', [TweetController::class, 'show_tweets'])->middleware('auth');
+Route::get('/dashboard', [FeedController::class, 'index'])->middleware('auth');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
@@ -32,7 +33,6 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-# Tweet, Block, Mute, privacy Route
 Route::middleware('auth')->group(function () {
     # Tweet Routes
     Route::post('/tweets', [TweetController::class, 'post_tweet']);
@@ -41,11 +41,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/tweets/{id}', [TweetController::class, 'delete_tweet']);
     Route::put('/tweets/{id}', [TweetController::class, 'edit_tweet']);
     
-    # Block & Mute Routes (Menggunakan POST toggle untuk aksi masuk & keluar daftar)
+    # Block & Mute Routes 
     Route::post('/block/{blocked_user_id}', [BlockController::class, 'toggle'])->name('block');
     Route::post('/mute/{muted_user_id}', [MuteController::class, 'toggle'])->name('mute');
 
-    # Privacy & List Detail Pages (Semua rute GET untuk memuat halaman)
+    # Privacy & List Detail Pages 
     Route::get('/privacy', [PrivacyController::class, 'show_privacy'])->name('privacy');
     Route::post('/privacy/toggle', [PrivacyController::class, 'togglePrivacy'])->name('privacy.toggle');
     Route::get('/privacy/blocked', [PrivacyController::class, 'blocked_list'])->name('privacy.blocked');
