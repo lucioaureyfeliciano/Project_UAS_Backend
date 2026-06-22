@@ -18,13 +18,14 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\FollowController;
 use App\Models\Tweet;
 use App\Http\Controllers\PrivacyController;
+use App\Http\Controllers\FeedController;
 
 Route::get('/', function () {
     return redirect('/login');
 });
 
 # Dashboard Route
-Route::get('/dashboard', [TweetController::class, 'show_tweets'])->middleware('auth');
+Route::get('/dashboard', [FeedController::class, 'index'])->middleware('auth');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
