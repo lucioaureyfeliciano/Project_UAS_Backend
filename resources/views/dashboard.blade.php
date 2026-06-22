@@ -36,6 +36,28 @@
             box-sizing: border-box;
         }
 
+        .icon-img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .nav-icon-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            text-decoration: none;
+            position: relative;
+        }
+
         .logout-btn {
             background: red;
             color: white;
@@ -70,6 +92,11 @@
             border-color: #ff6b6b;
         }
 
+        .dislike-btn.active {
+            background: #ffe5e5;
+            border-color: #e74c3c;
+        }
+
         .like-btn {
             color: #3490dc;
         }
@@ -79,6 +106,11 @@
             border-color: #3490dc;
         }
 
+        .like-btn.active   { 
+            background: #dbeeff; 
+            border-color: #3490dc; 
+        }
+
         .repost-btn {
             color: #6c5ce7;
         }
@@ -86,6 +118,16 @@
         .repost-btn:hover {
             background: #f0e6ff;
             border-color: #9b59b6;
+        }
+
+        .repost-btn.active { 
+            background: #ede9fd; 
+            border-color: #6c5ce7; 
+        }
+  
+        .bookmark-btn.active { 
+            background: #dbeeff; 
+            border-color: #3490dc; 
         }
 
         .tweet-card {
@@ -346,11 +388,14 @@
 
         .share-modal {
             display: none;
+            width: 100%;
+            flex-basis: 100%;
             margin-top: 12px;
             padding: 14px;
             background: #fafafa;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
+            box-sizing: border-box;
         }
 
         .share-header {
@@ -441,7 +486,10 @@
         <div>Social Media</div>
         <div style="display:flex; gap:10px; align-items:center;">
             {{-- Notifications --}}
-            <a class="menu-button notification-btn" href="{{ route('notifications.index') }}"> 🔔
+            <a class="nav-icon-btn" href="{{ route('notifications.index') }}" style="position:relative;">
+                <img
+                    src="{{ asset('image/' . ($unreadCount > 0 ? 'notifed.png' : 'notif.png')) }}"
+                    class="icon-img" alt="Notifications">
                 @if($unreadCount > 0)
                     <span class="notif-badge">
                         {{ $unreadCount }}
@@ -450,8 +498,13 @@
             </a>
 
             {{-- Bookmarks --}}
-            <a class="menu-button" href="{{ route('bookmarks.index') }}">🔖</a>
-            <a class="menu-button" href="/messages/inbox">💬</a>
+            <a class="nav-icon-btn" href="{{ route('bookmarks.index') }}">
+                <img src="{{ asset('image/save.png') }}" class="icon-img" alt="Bookmarks">
+            </a>
+            <a class="nav-icon-btn" href="/messages/inbox">
+                <img src="{{ asset('image/message.png') }}" class="icon-img" alt="Messages">
+            </a>
+
             <div class="menu-container">
                 <button class="menu-button">☰</button>
                 <div class="menu-dropdown">
@@ -536,6 +589,13 @@
                 <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
             @else
                 @foreach($tweets as $tweet)
+                        @php
+                            $userLiked    = $tweet->likes->contains('user_id', auth()->id());
+                            $userDisliked  = $tweet->dislikes->contains('user_id', auth()->id());
+                            $userReposted = $tweet->reposts->contains('user_id', auth()->id());
+                            $userSaved    = \App\Models\Bookmark::where('user_id', auth()->id())
+                                                ->where('tweet_id', $tweet->id)->exists();
+                        @endphp
                         <div class="tweet-card">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                                 <div class="tweet-content">
@@ -658,40 +718,71 @@
                             @endif
 
                             <div class="tweet-actions">
-                                <button class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
-                                    👍 <span
-                                        id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
-                                </button>
-                                <button class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
-                                    👎 <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
-                                </button>
-                                <button class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
-                                    🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
+                                <button 
+                                    class="like-btn reaction-btn {{ $userLiked ? 'active' : '' }}"
+                                    data-id="{{ $tweet->id }}"
+                                    data-liked="{{ $userLiked ? '1' : '0' }}">   
+
+                                    <img 
+                                        src="{{ asset('image/' . ($userLiked ? 'liked.png' : 'like.png')) }}" 
+                                        class="icon-img" 
+                                        alt="Like">
+
+                                    <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes->count() }}</span>
                                 </button>
 
-                                <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
+                                <button 
+                                    class="dislike-btn reaction-btn {{ $userDisliked ? 'active' : '' }}"
+                                    data-id="{{ $tweet->id }}"
+                                    data-disliked="{{ $userDisliked ? '1' : '0' }}">
+
+                                    <img 
+                                        src="{{ asset('image/' . ($userDisliked ? 'liked.png' : 'like.png')) }}"
+                                        class="icon-img" 
+                                        alt="Dislike"
+                                        style="transform: scaleY(-1);">
+
+                                    <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
+                                </button>
+
+                                <button
+                                    class="repost-btn reaction-btn {{ $userReposted ? 'active' : '' }}"
+                                    data-id="{{ $tweet->id }}"
+                                    data-reposted="{{ $userReposted ? '1' : '0' }}">
+                                    <img src="{{ asset('image/repost.png') }}" class="icon-img" alt="Repost">
+                                    <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
+                                </button>
+
+                                <a href="{{ route('tweets.show', $tweet->id) }}"
+                                    class="reaction-btn comment-btn"
                                     style="text-decoration:none;">
-                                    💬 {{ $tweet->comments->count() }}
+                                    <img src="{{ asset('image/comment.png') }}" class="icon-img" alt="Comment">
+                                    {{ $tweet->comments->count() }}
                                 </a>
 
                                 <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
                                     @csrf
                                     <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
-                                    <button type="submit" class="reaction-btn"
-                                        style="color:#3490dc; background:white; font-size:14px;">
-                                        🔖 Bookmark
+                                    <button type="submit" class="reaction-btn bookmark-btn {{ $userSaved ? 'active' : '' }}" id="bookmark-btn-{{ $tweet->id }}">
+                                        <img
+                                            id="bookmark-icon-{{ $tweet->id }}"
+                                            src="{{ asset($userSaved ? 'image/saved.png' : 'image/save.png') }}"
+                                            class="icon-img"id="like-co
+                                            alt="Bookmark">
+                                        {{ $userSaved ? 'Saved' : 'Save' }}
                                     </button>
                                 </form>
 
-                               <button class="reaction-btn" style="color:#6c5ce7;"
+                               <button class="reaction-btn share-btn"
                                     onclick="toggleShareModal('share-tw-{{ $tweet->id }}')">
-                                    💬 Share
+                                    <img src="{{ asset('image/share.png') }}" class="icon-img" alt="Share">
+                                    Share
                                 </button>
 
                                 <div id="share-tw-{{ $tweet->id }}" class="share-modal">
-
                                     <div class="share-header">
-                                        💬 Share to Message
+                                        <img src="{{ asset('image/share.png') }}" class="icon-img" alt="Share">
+                                        Share to Message
                                     </div>
 
                                     <form method="POST" action="{{ route('messages.share') }}">

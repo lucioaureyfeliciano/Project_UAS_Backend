@@ -138,6 +138,37 @@
             color: #555;
             line-height: 1.5;
         }
+
+        .profile-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 5px;
+        }
+
+        .wave-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        .shared-tweet-user {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: bold;
+
+            display: flex;
+            align-items: center;
+        }
+
+        .start-chat {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -187,7 +218,8 @@
                                 <div class="shared-tweet-card">
 
                                     <div class="shared-tweet-user">
-                                        👤 {{ $sharedTweet->user?->username }}
+                                        <img src="{{ asset('image/profile.png') }}" alt="Profile" class="profile-icon">
+                                        {{ $sharedTweet->user?->username }}
                                     </div>
 
                                     <div class="shared-tweet-title">
@@ -234,7 +266,8 @@
         @empty
 
             <p>
-                Start your conversation 👋
+                Start your conversation 
+                <img src="{{ asset('image/hand.png') }}" alt="Wave" class="wave-icon">
             </p>
 
         @endforelse
