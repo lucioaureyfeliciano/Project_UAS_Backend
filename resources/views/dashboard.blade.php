@@ -343,6 +343,36 @@
             font-family: Arial, sans-serif;
             outline: none;             
         }
+
+        .timeline-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .tab-link {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            text-decoration: none;
+            color: #666;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .tab-link:hover {
+            background: #f5f5f5;
+            color: #3490dc;
+        }
+
+        .tab-link.active {
+            color: #3490dc;
+            border-bottom: 3px solid #3490dc;
+            background: #e8f5ff;
+        }
     </style>
 </head>
 
@@ -453,9 +483,23 @@
         </div>
 
         <div class="card" style="background: transparent; border: none; padding: 0;">
+            
+            <div class="timeline-tabs">
+                <a href="?tab=foryou" class="tab-link {{ $currentTab === 'foryou' ? 'active' : '' }}">
+                    For You
+                </a>
+                <a href="?tab=following" class="tab-link {{ $currentTab === 'following' ? 'active' : '' }}">
+                    Following
+                </a>
+            </div>
+
             <h2>Your Tweets</h2>
             @if($tweets->isEmpty())
-                <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
+                @if($currentTab === 'following')
+                    <p style="background: white; padding: 22px; border-radius: 18px; border: 1px solid #ddd;">No tweets in your following feed yet.</p>
+                @else
+                    <p style="background: white; padding: 22px; border-radius: 18px; border: 1px solid #ddd;">No tweets available yet.</p>
+                @endif
             @else
                 @foreach($tweets as $tweet)
                         <div class="tweet-card">
