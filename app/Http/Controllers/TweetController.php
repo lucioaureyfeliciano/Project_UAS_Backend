@@ -15,8 +15,8 @@ class TweetController extends Controller
     public function post_tweet(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'title' => 'required|string|max:60',
+            'content' => 'required|string|max:280',
         ]);
 
         $tweet = Tweet::create([
@@ -123,7 +123,7 @@ class TweetController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'content' => 'required|string|max:280',
         ]);
 
         $tweet->update([
