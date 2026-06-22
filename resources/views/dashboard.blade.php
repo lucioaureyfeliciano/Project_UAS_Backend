@@ -485,10 +485,10 @@
         <div class="card" style="background: transparent; border: none; padding: 0;">
             
             <div class="timeline-tabs">
-                <a href="?tab=foryou" class="tab-link {{ $currentTab === 'foryou' ? 'active' : '' }}">
+                <a href="/dashboard/foryou" class="tab-link {{ $currentTab === 'foryou' ? 'active' : '' }}">
                     For You
                 </a>
-                <a href="?tab=following" class="tab-link {{ $currentTab === 'following' ? 'active' : '' }}">
+                <a href="/dashboard/following" class="tab-link {{ $currentTab === 'following' ? 'active' : '' }}">
                     Following
                 </a>
             </div>
