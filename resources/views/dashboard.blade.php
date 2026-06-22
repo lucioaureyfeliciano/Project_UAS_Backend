@@ -851,7 +851,7 @@
                 })
                     .then(res => res.json())
                     .then(data => {
-                        document.getElementById(`like-count-${tweetId}`).innerText = data.count;
+                        document.getElementById('like-count-' + tweetId).innerText = data.count;
                     })
                     .catch(err => console.log(err));
             });
