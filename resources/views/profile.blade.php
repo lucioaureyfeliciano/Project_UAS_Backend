@@ -433,6 +433,55 @@
         .mention-link:hover {
             text-decoration: underline;
         }
+
+        .icon-img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .nav-icon-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .like-btn.active {
+            background: #dbeeff;
+            border-color: #3490dc;
+        }
+
+        .dislike-btn.active {
+            background: #ffe5e5;
+            border-color: #e74c3c;
+        }
+
+        .repost-btn.active {
+            background: #ede9fd;
+            border-color: #6c5ce7;
+        }
+
+        .bookmark-btn.active {
+            background: #dbeeff;
+            border-color: #3490dc;
+        }
+
+        .private-lock-icon {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
     </style>
 
 </head>
@@ -453,7 +502,7 @@
             <div class="profile-left">
                 <div class="profile-user-info">
                     <div class="profile-avatar">
-                        👤
+                        <img src="{{ asset('image/profile.png') }}" class="icon-img" alt="Avatar">
                     </div>
 
                     <div class="profile-details">
@@ -565,14 +614,26 @@
 
         @if($isLocked)
             <div class="private-lock-box">
-                <h2 style="font-size: 48px; margin-bottom:10px;">🔒</h2>
-                <h3 style="margin: 0 0 10px 0; color: #333;">Akun Ini Bersifat Private</h3>
-                <p style="margin: 0; color: #777; font-size: 15px;">Ikuti akun ini untuk melihat postingan</p>
+                    <img
+                        src="{{ asset('image/lock.png') }}"
+                        class="private-lock-icon"
+                        alt="Private">
+                <h3 style="margin: 0 0 10px 0; color: #333;">This Profile is Private</h3>
+                <p style="margin: 0; color: #777; font-size: 15px;">Follow this account to see posts</p>
             </div>
         @else
             <h1 class="section-title">Your Tweets</h1>
 
             @foreach ($tweets as $tweet)
+                @php
+                    $userLiked     = $tweet->likes->contains('user_id', auth()->id());
+                    $userDisliked  = $tweet->dislikes->contains('user_id', auth()->id());
+                    $userReposted  = $tweet->reposts->contains('user_id', auth()->id());
+
+                    $userSaved = \App\Models\Bookmark::where('user_id', auth()->id())
+                        ->where('tweet_id', $tweet->id)
+                        ->exists();
+                @endphp
                 <div class="tweet-card">
                     <div class="tweet-top">
                         <div class="tweet-info">
@@ -603,25 +664,45 @@
                     </div>
 
                     <div class="tweet-actions">
-                        <button type="button" class="like-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            👍 <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
-                        </button>
-                        <button type="button" class="dislike-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            👎 <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
-                        </button>
-                        <button type="button" class="repost-btn reaction-btn" data-id="{{ $tweet->id }}">
-                            🔁 <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
+                        <button type="button" class="like-btn reaction-btn{{ $userLiked ? 'active' : '' }}" data-id="{{ $tweet->id }}">
+                            <img
+                                src="{{ asset('image/' . ($userLiked ? 'liked.png' : 'like.png')) }}"
+                                class="icon-img"
+                                alt="Like">
+                            <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
                         </button>
 
-                        <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn" style="text-decoration:none;">
+                        <button type="button" class="dislike-btn reaction-btn {{ $userDisliked ? 'active' : '' }}" data-id="{{ $tweet->id }}">
+                            <img
+                                src="{{ asset('image/' . ($userDisliked ? 'liked.png' : 'like.png')) }}"
+                                class="icon-img"
+                                alt="Dislike"
+                                style="transform: scaleY(-1);">
+                            <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
+                        </button>
+
+                        <button type="button" class="repost-btn reaction-btn {{ $userReposted ? 'active' : '' }}" data-id="{{ $tweet->id }}">
+                            <img
+                                src="{{ asset('image/repost.png') }}"
+                                class="icon-img"
+                                alt="Repost">
+                            <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
+                        </button>
+
+                        <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
+                            style="text-decoration:none;">
                             💬 {{ $tweet->comments->count() }}
                         </a>
 
                         <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
                             @csrf
                             <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
-                            <button type="submit" class="reaction-btn" style="color:#3490dc; background:white; font-size:14px;">
-                                🔖 Bookmark
+                            <button type="submit" class="reaction-btn bookmark-btn {{ $userSaved ? 'active' : '' }}">
+                                <img
+                                    src="{{ asset($userSaved ? 'image/saved.png' : 'image/save.png') }}"
+                                    class="icon-img"
+                                    alt="Bookmark">
+                                {{ $userSaved ? 'Saved' : 'Save' }}
                             </button>
                         </form>
                     </div>

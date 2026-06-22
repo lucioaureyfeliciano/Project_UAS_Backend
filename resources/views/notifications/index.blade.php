@@ -99,6 +99,11 @@
             color: #6c5ce7;
         }
 
+        .badge-follow {
+            background: #fff3cd;
+            color: #856404;
+        }
+
         .notif-message {
             color: #333;
             line-height: 1.5;
@@ -325,6 +330,43 @@
         h2 {
             margin-top: 0;
         }
+
+        .navbar-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-icon {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+        }
+
+        .filter-icon {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+        }
+
+        .link-icon {
+            width: 14px;
+            height: 14px;
+            object-fit: contain;
+        }
+
+        .badge-icon {
+            width: 14px;
+            height: 14px;
+            object-fit: contain;
+            margin-right: 4px;
+        }
+
+        .notif-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
     </style>   
 </head>
 <body>
@@ -332,8 +374,10 @@
 
 <div class="navbar">
     <a href="/dashboard" class="back-btn">← Dashboard</a>
-    <div>🔔 Notifications</div>
-    <div></div>
+    <div class="navbar-title">
+        <img src="{{ asset('image/notif.png') }}" alt="Notif" class="nav-icon">
+        Notifications
+    </div>
 </div>
 
 <div class="container">
@@ -393,15 +437,16 @@
 
         {{-- Type --}}
         @foreach([
-            'like' => '👍 Like',
-            'comment' => '💬 Comment',
-            'repost' => '🔁 Repost',
-            'mention' => '@ Mention'
-        ] as $key => $label)
+            'like' => asset('image/like.png'),
+            'comment' => asset('image/comment.png'),
+            'repost' => asset('image/repost.png'),
+            'mention' => asset('image/at.png'),
+            'follow' => asset('image/profile.png')
+        ] as $key => $icon)
 
             <a href="?filter={{ $filter }}&type={{ $key }}"
                 class="type-filter-tab {{ ($type ?? '') === $key ? 'active' : '' }}">
-                {{ $label }}
+                <img src="{{ $icon }}" class="filter-icon">
             </a>
         @endforeach
     </div>
@@ -412,7 +457,23 @@
         @forelse($notifications as $notification)
             <div class="notif-card {{ $notification->is_read ? 'read' : 'unread' }}">
                 <div class="notif-body">
-                    <span class="notif-badge badge-{{ $notification->type }}">{{ strtoupper($notification->type) }}</span>
+                    <span class="notif-badge badge-{{ $notification->type }}">
+                    
+                        @if($notification->type == 'like')
+                            <img src="{{ asset('image/liked.png') }}" class="badge-icon">
+                        @elseif($notification->type == 'comment')
+                            <img src="{{ asset('image/comment.png') }}" class="badge-icon">
+                        @elseif($notification->type == 'repost')
+                            <img src="{{ asset('image/repost.png') }}" class="badge-icon">
+                        @elseif($notification->type == 'mention')
+                            <img src="{{ asset('image/at.png') }}" class="badge-icon">
+                        @elseif($notification->type == 'follow')
+                            <img src="{{ asset('image/profile.png') }}" class="badge-icon">
+                        @endif       
+
+                        {{ strtoupper($notification->type) }}
+                    </span>
+
                     <div class="notif-message">{{ $notification->message }}</div>
                     
                     @if($notification->tweet_id || $notification->relatedUser)
@@ -421,14 +482,16 @@
                             @if($notification->tweet_id)
                                 <a href="{{ route('tweets.show', $notification->tweet_id) }}"
                                     class="notif-link tweet-link">
-                                    📄 View Tweet
+                                    <img src="{{ asset('image/paper.png') }}" class="link-icon">
+                                    View Tweet
                                 </a>
                             @endif
 
                             @if($notification->relatedUser)
                                 <a href="{{ route('profile.show', $notification->relatedUser->username) }}"
                                     class="notif-link user-link">
-                                    👤 {{ $notification->relatedUser->username }}
+                                    <img src="{{ asset('image/profile.png') }}" class="link-icon">
+                                    {{ $notification->relatedUser->username }}
                                 </a>
                             @endif
 

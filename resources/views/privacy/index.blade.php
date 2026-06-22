@@ -93,6 +93,12 @@
         .privacy-toggle-btn:hover {
             transform: scale(1.03);
         }
+
+        .privacy-icon {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
@@ -115,12 +121,18 @@
             @csrf
             
             @if(auth()->user()->is_private == 1)
-                <button type="submit" class="privacy-toggle-btn" style="background-color: #2c3e50;">
-                    <span>🔒</span> PRIVATE (Klik untuk Ubah ke Public)
+                <button type="submit" class="privacy-toggle-btn" style="background-color: #4d5661;">
+                    <img src="{{ asset('image/lock.png') }}" 
+                        alt="Private"
+                        class="privacy-icon"> 
+                    PRIVATE (Klik untuk Ubah ke Public)
                 </button>
             @else
                 <button type="submit" class="privacy-toggle-btn" style="background-color: #3498db;">
-                    <span>🔓</span> PUBLIC (Klik untuk Ubah ke Private)
+                    <img src="{{ asset('image/unlock.png') }}" 
+                        alt="Public"
+                        class="privacy-icon"> 
+                    PUBLIC (Klik untuk Ubah ke Private)
                 </button>
             @endif
         </form>

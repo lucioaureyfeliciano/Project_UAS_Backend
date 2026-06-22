@@ -97,6 +97,78 @@
             text-decoration: none;
         }
 
+        .chat-link {
+            color: inherit;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        .sent .chat-link {
+            color: #fff;
+        }
+
+        .received .chat-link {
+            color: #3490dc;
+        }
+
+        .shared-tweet-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            max-width: 320px;
+        }
+
+        .shared-tweet-user {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .shared-tweet-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #222;
+        }
+
+        .shared-tweet-content {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .profile-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 5px;
+        }
+
+        .wave-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        .shared-tweet-user {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: bold;
+
+            display: flex;
+            align-items: center;
+        }
+
+        .start-chat {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -124,7 +196,50 @@
 
                 <div class="bubble">
 
-                    {{ $message->message }}
+                    @php
+                        preg_match('/\[TWEET:(\d+)\]/', $message->message, $matches);
+                        $tweetId = $matches[1] ?? null;
+
+                        $cleanMessage = $tweetId
+                            ? trim(preg_replace('/\[TWEET:\d+\]\s*/', '', $message->message))
+                            : $message->message;
+
+                    @endphp
+                    
+                    @if($tweetId)
+                        @php
+                            $sharedTweet = \App\Models\Tweet::with('user')->find($tweetId);
+                        @endphp 
+
+                        @if($sharedTweet)
+                            <a href="{{ route('tweets.show', $sharedTweet->id) }}"
+                                style="text-decoration:none; color:inherit;">
+
+                                <div class="shared-tweet-card">
+
+                                    <div class="shared-tweet-user">
+                                        <img src="{{ asset('image/profile.png') }}" alt="Profile" class="profile-icon">
+                                        {{ $sharedTweet->user?->username }}
+                                    </div>
+
+                                    <div class="shared-tweet-title">
+                                        {{ $sharedTweet->title }}
+                                    </div>
+
+                                    <div class="shared-tweet-content">
+                                        {{ Str::limit($sharedTweet->content, 120) }}
+                                    </div>
+
+                                </div>
+                            </a>
+                        @endif
+                    @endif
+
+                    @if($cleanMessage)
+                        <div class="chat-text">
+                            {!! \App\Models\Message::linkify($cleanMessage) !!}
+                        </div>
+                    @endif
 
                     <div class="message-time">
                         {{ $message->created_at->format('d M Y H:i') }}
@@ -151,7 +266,8 @@
         @empty
 
             <p>
-                Start your conversation 👋
+                Start your conversation 
+                <img src="{{ asset('image/hand.png') }}" alt="Wave" class="wave-icon">
             </p>
 
         @endforelse

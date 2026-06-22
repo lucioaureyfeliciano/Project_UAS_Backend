@@ -156,4 +156,20 @@ class MessageController extends Controller
             'keyword'
         ));
     }
+
+    public function shareToChat(Request $request)
+    {
+        $request->validate([
+            'receiver_id' => 'required|exists:users,id',
+            'message'     => 'required|max:1000',
+        ]);
+
+        Message::create([
+            'sender_id'   => auth()->id(),
+            'receiver_id' => $request->receiver_id,
+            'message'     => $request->message,
+        ]);
+
+        return back()->with('success', 'Shared to chat!');
+    }
 }
