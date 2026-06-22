@@ -25,7 +25,9 @@ Route::get('/', function () {
 });
 
 # Dashboard Route
-Route::get('/dashboard', [FeedController::class, 'index'])->middleware('auth');
+Route::get('/dashboard/foryou', [FeedController::class, 'index'])->middleware(['auth'])->name('dashboard.foryou');
+Route::get('/dashboard/following', [FeedController::class, 'index'])->middleware(['auth'])->name('dashboard.following');
+Route::redirect('/dashboard', '/dashboard/foryou');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
