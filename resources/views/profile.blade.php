@@ -67,19 +67,13 @@
         .profile-avatar {
             width: 95px;
             height: 95px;
-
             border-radius: 50%;
-
             background: white;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
             font-size: 42px;
-
             border: 2px solid rgba(255, 255, 255, .8);
-
             flex-shrink: 0;
         }
 
@@ -92,10 +86,12 @@
             align-items: center;
             gap: 12px;
             margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .description-section {
             margin-top: 5px;
+            width: 100%;
         }
 
         .description-text {
@@ -103,13 +99,8 @@
             color: #444;
             line-height: 1.7;
             word-break: break-word;
-        }
-
-        .username-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            text-align: left;
+            margin: 0;
         }
 
         .follow-btn-small {
@@ -125,19 +116,6 @@
 
         .follow-btn-small:hover {
             transform: scale(1.05);
-        }
-
-        .description-section {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .description-text {
-            font-size: 16px;
-            color: #444;
-            line-height: 1.6;
-            text-align: left;
-            margin: 0;
         }
 
         .edit-description-card {
@@ -324,6 +302,7 @@
             overflow: hidden;
             box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
             min-width: 120px;
+            z-index: 10;
         }
 
         .tweet-dropdown button {
@@ -511,11 +490,9 @@
     @include('components.toast')
 
     <div class="navbar">
-
         <a href="/dashboard" class="back-btn">
             ← Back
         </a>
-
     </div>
 
     <div class="container">
@@ -523,122 +500,97 @@
         <div class="profile-card">
 
             <div class="profile-left">
-
                 <div class="profile-user-info">
-
                     <div class="profile-avatar">
                         <img src="{{ asset('image/profile.png') }}" class="icon-img" alt="Avatar">
                     </div>
 
                     <div class="profile-details">
-
                         <div class="username-row">
-
                             <h1 style="margin:0;">
                                 {{ $user->username }}
                             </h1>
 
                             @if(auth()->id() !== $user->id)
-
                                 <form method="POST" action="{{ route('follow', $user->id) }}" style="margin:0;">
-
                                     @csrf
-
-                                    <button type="submit" class="follow-btn-small" style="
-                                        background:
-                                        {{ $isFollowing ? '#95a5a6' : '#3490dc' }};
-                                    ">
-
+                                    <button type="submit" class="follow-btn-small" style="background: {{ $isFollowing ? '#95a5a6' : '#3490dc' }};">
                                         {{ $isFollowing ? 'Following' : 'Follow' }}
-
                                     </button>
-
                                 </form>
 
-                            @endif
+                                <div class="tweet-menu-container" style="display: inline-block; margin-left: 4px;">
+                                    <button class="tweet-menu-btn">•️•️•️</button>
+                                    <div class="tweet-dropdown" style="left: 0; right: auto; margin-top: 6px;">
 
+                                        <form action="{{ route('block', $user->id) }}" method="POST" onsubmit="return confirm('Apakah anda yakin ingin memproses akun ini?')">
+                                            @csrf
+                                            <button type="submit" style="color: #333;">
+                                                Block
+                                            </button>
+                                        </form>
+
+                                        <form action="{{ route('mute', $user->id) }}" method="POST" onsubmit="return confirm('Apakah anda yakin ingin memproses status bisu akun ini?')">
+                                            @csrf
+                                            <button type="submit" style="color: #e67e22;">
+                                                Mute
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="description-section">
-
                             <p class="description-text">
-
                                 {{ $user->description ?: 'No description yet.' }}
-
                             </p>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
             <div class="stats">
-
                 <div class="stat-box">
-                    <a href="{{ route('profile.following', $user->username) }}"
-                        style="text-decoration:none;color:black;">
+                    <a href="{{ route('profile.following', $user->username) }}" style="text-decoration:none;color:black;">
                         <div class="stat-title">Following</div>
-
-                        <div class="stat-number">
-                            {{ $user->following->count() }}
-                        </div>
+                        <div class="stat-number">{{ $user->following->count() }}</div>
                     </a>
                 </div>
 
                 <div class="stat-box">
-                    <a href="{{ route('profile.followers', $user->username) }}"
-                        style="text-decoration:none;color:black;">
+                    <a href="{{ route('profile.followers', $user->username) }}" style="text-decoration:none;color:black;">
                         <div class="stat-title">Followers</div>
-
-                        <div class="stat-number">
-                            {{ $user->followers->count() }}
-                        </div>
+                        <div class="stat-number">{{ $user->followers->count() }}</div>
                     </a>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-title">Likes</div>
                     <div class="stat-number">
-
-                        {{ $tweets->sum(function ($tweet) {
-    return $tweet->likes->count();
-}) }}
-
+                        {{ $tweets->sum(function ($tweet) { return $tweet->likes->count(); }) }}
                     </div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-title">Dislikes</div>
                     <div class="stat-number">
-
-                        {{ $tweets->sum(function ($tweet) {
-    return $tweet->dislikes->count();
-}) }}
-
+                        {{ $tweets->sum(function ($tweet) { return $tweet->dislikes->count(); }) }}
                     </div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-title">Tweets</div>
-                    <div class="stat-number">
-                        {{ $tweets->count() }}
-                    </div>
+                    <div class="stat-number">{{ $tweets->count() }}</div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-title">Repost</div>
                     <div class="stat-number">
-
-                        {{ $tweets->sum(function ($tweet) {
-    return $tweet->reposts->count();
-}) }}
-
+                        {{ $tweets->sum(function ($tweet) { return $tweet->reposts->count(); }) }}
                     </div>
                 </div>
-
             </div>
 
         </div>
@@ -649,28 +601,14 @@
             </button>
 
             <div class="description-modal" id="descriptionModal">
-
                 <form action="/profile/update-description" method="POST">
-
                     @csrf
-
-                    <textarea name="description" rows="4"
-                        placeholder="Write your description...">{{ $user->description }}</textarea>
-
+                    <textarea name="description" rows="4" placeholder="Write your description...">{{ $user->description }}</textarea>
                     <div class="description-actions">
-
-                        <button type="submit" class="save-btn">
-                            Save
-                        </button>
-
-                        <button type="button" class="cancel-btn" onclick="closeDescriptionEdit()">
-                            Cancel
-                        </button>
-
+                        <button type="submit" class="save-btn">Save</button>
+                        <button type="button" class="cancel-btn" onclick="closeDescriptionEdit()">Cancel</button>
                     </div>
-
                 </form>
-
             </div>
         @endif
 
@@ -683,7 +621,6 @@
                 <h3 style="margin: 0 0 10px 0; color: #333;">This Profile is Private</h3>
                 <p style="margin: 0; color: #777; font-size: 15px;">Follow this account to see posts</p>
             </div>
-
         @else
             <h1 class="section-title">Your Tweets</h1>
 
@@ -697,48 +634,25 @@
                         ->where('tweet_id', $tweet->id)
                         ->exists();
                 @endphp
-
                 <div class="tweet-card">
-
                     <div class="tweet-top">
-
                         <div class="tweet-info">
-                            {{ $user->username }}
-                            •
-                            posted {{ $tweet->created_at->diffForHumans() }}
+                            {{ $user->username }} • posted {{ $tweet->created_at->diffForHumans() }}
                         </div>
 
                         @if(auth()->id() == $user->id)
-
                             <div class="tweet-menu-container">
-
-                                <button class="tweet-menu-btn">
-                                    •••
-                                </button>
-
+                                <button class="tweet-menu-btn">•••</button>
                                 <div class="tweet-dropdown">
-
-                                    <button onclick="openEdit({{ $tweet->id }})">
-                                        Edit
-                                    </button>
-
+                                    <button onclick="openEdit({{ $tweet->id }})">Edit</button>
                                     <form action="/tweets/{{ $tweet->id }}" method="POST">
-
                                         @csrf
                                         @method('DELETE')
-
-                                        <button type="submit" style="color:red;">
-                                            Delete
-                                        </button>
-
+                                        <button type="submit" style="color:red;">Delete</button>
                                     </form>
-
                                 </div>
-
                             </div>
-
                         @endif
-
                     </div>
 
                     <div class="tweet-title">
@@ -746,11 +660,7 @@
                     </div>
 
                     <div class="tweet-content">
-                        {!! preg_replace(
-                            '/@([a-zA-Z0-9_]+)/',
-                            '<a href="/user/$1" class="mention-link">@$1</a>',
-                            e($tweet->content)
-                        ) !!}
+                        {!! preg_replace('/@([a-zA-Z0-9_]+)/', '<a href="/user/$1" class="mention-link">@$1</a>', e($tweet->content)) !!}
                     </div>
 
                     <div class="tweet-actions">
@@ -781,11 +691,7 @@
 
                         <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
                             style="text-decoration:none;">
-                            <img
-                                src="{{ asset('image/comment.png') }}"
-                                class="icon-img"
-                                alt="Comment">
-                            {{ $tweet->comments->count() }}
+                            💬 {{ $tweet->comments->count() }}
                         </a>
 
                         <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
@@ -802,45 +708,26 @@
                     </div>
 
                     <div class="edit-modal" id="edit-{{ $tweet->id }}">
-
                         <form action="/tweets/{{ $tweet->id }}" method="POST">
-
                             @csrf
                             @method('PUT')
-
                             <input type="text" name="title" value="{{ $tweet->title }}">
-
                             <textarea name="content" rows="4">{{ $tweet->content }}</textarea>
-
                             <div class="description-actions">
-
-                                <button type="submit" class="save-btn">
-                                    Save
-                                </button>
-
-                                <button type="button" class="cancel-btn" onclick="closeEdit({{ $tweet->id }})">
-                                    Cancel
-                                </button>
-
+                                <button type="submit" class="save-btn">Save</button>
+                                <button type="button" class="cancel-btn" onclick="closeEdit({{ $tweet->id }})">Cancel</button>
                             </div>
-
                         </form>
-
                     </div>
-
                 </div>
-
             @endforeach
         @endif
 
     </div>
 
-    <button id="scrollTopBtn" onclick="scrollToTop()">
-        ↑
-    </button>
+    <button id="scrollTopBtn" onclick="scrollToTop()">↑</button>
 
     <script>
-
         function openDescriptionEdit() {
             document.getElementById('descriptionModal').style.display = 'block';
         }
@@ -858,28 +745,16 @@
         }
 
         window.onscroll = function () {
-
             const button = document.getElementById("scrollTopBtn");
-
             if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-
                 button.style.display = "block";
-
             } else {
-
                 button.style.display = "none";
-
             }
-
         };
 
         function scrollToTop() {
-
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         document.querySelectorAll('.dislike-btn').forEach(button => {
@@ -893,11 +768,11 @@
                         'Accept': 'application/json'
                     }
                 })
-                    .then(res => res.json())
-                    .then(data => {
-                        document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
-                    })
-                    .catch(err => console.log(err));
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
+                })
+                .catch(err => console.log(err));
             });
         });
 
@@ -912,11 +787,11 @@
                         'Accept': 'application/json'
                     }
                 })
-                    .then(res => res.json())
-                    .then(data => {
-                        document.getElementById(`like-count-${tweetId}`).innerText = data.count;
-                    })
-                    .catch(err => console.log(err));
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById(`like-count-${tweetId}`).innerText = data.count;
+                })
+                .catch(err => console.log(err));
             });
         });
 
@@ -931,15 +806,12 @@
                         'Accept': 'application/json'
                     }
                 })
-                    .then(res => res.json())
-                    .then(data => {
-                        document.getElementById(`repost-count-${tweetId}`).innerText = data.count;
-                    });
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById(`repost-count-${tweetId}`).innerText = data.count;
+                });
             });
         });
-
     </script>
-
 </body>
-
 </html>

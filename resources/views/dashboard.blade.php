@@ -470,6 +470,35 @@
         .share-cancel-btn:hover {
             background: #e0e0e0;
         }
+        .timeline-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .tab-link {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            text-decoration: none;
+            color: #666;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .tab-link:hover {
+            background: #f5f5f5;
+            color: #3490dc;
+        }
+
+        .tab-link.active {
+            color: #3490dc;
+            border-bottom: 3px solid #3490dc;
+            background: #e8f5ff;
+        }
     </style>
 </head>
 
@@ -520,7 +549,6 @@
             </div>
             {{-- Search --}}
             <form action="{{ route('search.users') }}" method="GET">
-
                 <input type="text" name="search" placeholder="What to look? " style="
                 padding:8px;
                 border:none;
@@ -561,7 +589,9 @@
                 @csrf
                 <div style="margin-bottom: 12px;">
                     <label for="title">Title</label><br>
-                    <input id="title" name="title" type="text" value="{{ old('title') }}" placeholder="Write your title..." />
+                    <input id="title" name="title" type="text" value="{{ old('title') }}" maxlength="60" placeholder="Write your title..." />
+                    <div id="title-counter" style="text-align: right; font-size: 12px; color: #888; margin-top: -8px; margin-bottom: 12px;">0/60</div>
+
                     @error('title')
                         <div style="color:red; margin-top:4px;">{{ $message }}</div>
                     @enderror
@@ -570,10 +600,13 @@
                 <div style="margin-bottom: 12px;">
                     <label for="content">Content</label><br>
                     <div class="mention-autocomplete-wrapper">
-                        <textarea id="content" class="mention-autocomplete-input" name="content" rows="4"
+                        <textarea id="content" class="mention-autocomplete-input" name="content" rows="4" maxlength="280" placeholder="Write your content..."
                             style="width:100%; padding:8px; margin-top:4px; box-sizing: border-box;">{{ old('content') }}</textarea>
                         <div class="mention-autocomplete-dropdown"></div>
                     </div>
+                    
+                    <div id="tweet-counter" style="text-align: right; font-size: 12px; color: #888; margin-top: 5px;">0/280</div>
+
                     @error('content')
                         <div style="color:red; margin-top:4px;">{{ $message }}</div>
                     @enderror
@@ -584,9 +617,23 @@
         </div>
 
         <div class="card" style="background: transparent; border: none; padding: 0;">
+            
+            <div class="timeline-tabs">
+                <a href="/dashboard/foryou" class="tab-link {{ $currentTab === 'foryou' ? 'active' : '' }}">
+                    For You
+                </a>
+                <a href="/dashboard/following" class="tab-link {{ $currentTab === 'following' ? 'active' : '' }}">
+                    Following
+                </a>
+            </div>
+
             <h2>Your Tweets</h2>
             @if($tweets->isEmpty())
-                <p>No tweets yet. Tambahkan tweet pertama kamu!</p>
+                @if($currentTab === 'following')
+                    <p style="background: white; padding: 22px; border-radius: 18px; border: 1px solid #ddd;">No tweets in your following feed yet.</p>
+                @else
+                    <p style="background: white; padding: 22px; border-radius: 18px; border: 1px solid #ddd;">No tweets available yet.</p>
+                @endif
             @else
                 @foreach($tweets as $tweet)
                         @php
@@ -706,8 +753,13 @@
                                     <form action="/tweets/{{ $tweet->id }}" method="POST">
                                         @csrf
                                         @method('PUT')
-                                        <input type="text" name="title" value="{{ $tweet->title }}">
-                                        <textarea name="content" rows="4">{{ $tweet->content }}</textarea>
+                                        
+                                        <input type="text" class="edit-title-box" name="title" value="{{ $tweet->title }}" maxlength="60">
+                                        <div class="edit-title-counter" style="text-align: right; font-size: 12px; color: #888; margin-top: -8px; margin-bottom: 12px;">0/60</div>
+
+                                        <textarea class="edit-content-box" name="content" rows="4" maxlength="280">{{ $tweet->content }}</textarea>
+                                        <div class="edit-content-counter" style="text-align: right; font-size: 12px; color: #888; margin-top: -8px; margin-bottom: 12px;">0/280</div>
+
                                         <div class="description-actions">
                                             <button type="submit" class="save-btn">Save</button>
                                             <button type="button" class="cancel-btn"
@@ -831,7 +883,13 @@
 
     <script>
         function openEdit(id) {
-            document.getElementById(`edit-${id}`).style.display = 'block';
+            const modal = document.getElementById(`edit-${id}`);
+            modal.style.display = 'block';
+            
+            const titleInput = modal.querySelector('.edit-title-box');
+            const contentInput = modal.querySelector('.edit-content-box');
+            if (titleInput) titleInput.dispatchEvent(new Event('input'));
+            if (contentInput) contentInput.dispatchEvent(new Event('input'));
         }
 
         function closeEdit(id) {
@@ -1010,7 +1068,7 @@
                 })
                     .then(res => res.json())
                     .then(data => {
-                        document.getElementById(`like-count-${tweetId}`).innerText = data.count;
+                        document.getElementById('like-count-' + tweetId).innerText = data.count;
                     })
                     .catch(err => console.log(err));
             });
@@ -1035,19 +1093,21 @@
             });
         });
 
-        window.onscroll = function () {
-            const button = document.getElementById("scrollTopBtn");
-            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-                button.style.display = "block";
-            } else {
-                button.style.display = "none";
-            }
-        };
+        const postTitleBox = document.getElementById('title');
+        const postTitleCounter = document.getElementById('title-counter');
 
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+        if (postTitleBox && postTitleCounter) {
+            postTitleBox.addEventListener('input', () => {
+                const currentLength = postTitleBox.value.length;
+                postTitleCounter.innerText = `${currentLength}/60`;
+
+                if (currentLength >= 50) {
+                    postTitleCounter.style.color = '#e74c3c';
+                    postTitleCounter.style.fontWeight = 'bold';
+                } else {
+                    postTitleCounter.style.color = '#888';
+                    postTitleCounter.style.fontWeight = 'normal';
+                }
             });
         }
 
@@ -1061,6 +1121,56 @@
                     ? 'none'
                     : 'block';
         }
+        
+        const postTweetBox = document.getElementById('content');
+        const postTweetCounter = document.getElementById('tweet-counter');
+
+        if (postTweetBox && postTweetCounter) {
+            postTweetBox.addEventListener('input', () => {
+                const currentLength = postTweetBox.value.length;
+                postTweetCounter.innerText = `${currentLength}/280`;
+
+                if (currentLength >= 250) {
+                    postTweetCounter.style.color = '#e74c3c';
+                    postTweetCounter.style.fontWeight = 'bold';
+                } else {
+                    postTweetCounter.style.color = '#888';
+                    postTweetCounter.style.fontWeight = 'normal';
+                }
+            });
+        }
+
+        document.addEventListener('input', function (event) {
+            if (event.target.classList.contains('edit-title-box')) {
+                const input = event.target;
+                const counter = input.nextElementSibling;
+                const len = input.value.length;
+                counter.innerText = `${len}/60`;
+                
+                if (len >= 50) {
+                    counter.style.color = '#e74c3c';
+                    counter.style.fontWeight = 'bold';
+                } else {
+                    counter.style.color = '#888';
+                    counter.style.fontWeight = 'normal';
+                }
+            }
+            
+            if (event.target.classList.contains('edit-content-box')) {
+                const textarea = event.target;
+                const counter = textarea.nextElementSibling;
+                const len = textarea.value.length;
+                counter.innerText = `${len}/280`;
+                
+                if (len >= 250) {
+                    counter.style.color = '#e74c3c';
+                    counter.style.fontWeight = 'bold';
+                } else {
+                    counter.style.color = '#888';
+                    counter.style.fontWeight = 'normal';
+                }
+            }
+        });
     </script>
 </body>
 
