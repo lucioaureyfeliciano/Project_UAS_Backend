@@ -13,6 +13,8 @@
             font-family: Arial, sans-serif;
             background: #f4f4f4;
             margin: 0;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .navbar {
@@ -28,19 +30,26 @@
         .container {
             width: 700px;
             margin: 20px auto;
+            height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
         }
 
         .chat-box {
             background: white;
-            border-radius: 12px;
+            border-radius: 12px 12px 0 0;
             padding: 16px;
-            min-height: 500px;
+
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
         }
 
         .message {
             margin-bottom: 14px;
             display: flex;
             flex-direction: column;
+            overflow: visible;
         }
 
         .sent {
@@ -56,6 +65,7 @@
             align-items: flex-end;
             gap: 6px;
             max-width: 75%;
+            overflow: visible;
         }
 
         .sent .bubble-wrap {
@@ -108,7 +118,7 @@
             flex-shrink: 0;
         }
 
-        .sent:hover .message-menu,
+        .message:hover .message-menu,
         .bubble-wrap:hover .message-menu {
             opacity: 1;
         }
@@ -126,7 +136,7 @@
             align-items: center;
             justify-content: center;
             padding: 0;
-            transition: background 0.15s;
+            transition: background 0.3s;
         }
 
         .menu-btn:hover {
@@ -160,6 +170,11 @@
             padding: 9px 12px;
             cursor: pointer;
             font-size: 13px;
+        }
+
+        .received .dropdown-menu {
+            right: auto;
+            left: 0;
         }
 
         .dropdown-menu button:hover {
@@ -210,7 +225,7 @@
         }
 
         .send-form {
-            margin-top: 16px;
+            margin-top: 10px;
             display: flex;
             gap: 10px;
             align-items: flex-end;
@@ -246,6 +261,60 @@
             background: #2779bd;
         }
 
+        .reply-preview {
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .clickable-reply {
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .clickable-reply:hover {
+            opacity: .8;
+        }
+
+        #reply-text {
+            overflow-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .sent .reply-preview {
+            background: rgba(255,255,255,.2);
+        }
+
+        .received .reply-preview {
+            background: rgba(0,0,0,.08);
+        }
+
+        .chat-footer {
+            background: white;
+            padding: 12px;
+            border-top: 1px solid #ddd;
+            border-radius: 0 0 12px 12px;
+            flex-shrink: 0;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .cancel-edit-btn {
+            background: #6c757d !important;
+        }
+
+        .cancel-edit-btn:hover {
+            background: #5a6268 !important;
+        }
+
         .back-btn {
             color: white;
             text-decoration: none;
@@ -256,9 +325,40 @@
 </head>
 
 <script>
-function openEdit(id) {
-    var el = document.getElementById('edit-' + id);
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+function openEdit(id)
+{
+    document
+        .querySelectorAll('.edit-form')
+        .forEach(form => {
+
+            if(form.id !== 'edit-' + id)
+            {
+                form.style.display = 'none';
+            }
+
+        });
+
+    const el =
+        document.getElementById(
+            'edit-' + id
+        );
+
+    el.style.display =
+        el.style.display === 'block'
+            ? 'none'
+            : 'block';
+}
+
+function closeEdit(id)
+{
+    const el = document.getElementById(
+            'edit-' + id
+        );
+
+    if (el)
+    {
+        el.style.display = 'none';
+    }
 }
 </script>
 
@@ -276,25 +376,61 @@ function openEdit(id) {
 
         @forelse($messages as $message)
 
-            <div class="message {{ $message->sender_id == auth()->id() ? 'sent' : 'received' }}">
+            <div id="message-{{ $message->id }}" class="message {{ $message->sender_id == auth()->id() ? 'sent' : 'received' }}">
 
                 <div class="bubble-wrap">
 
-                    @if($message->sender_id == auth()->id())
-                        <div class="message-menu">
-                            <button class="menu-btn" type="button">⋮</button>
-                            <div class="dropdown-menu">
-                                <button type="button" onclick="openEdit({{ $message->id }})">
+                    <div class="message-menu">
+                        <button class="menu-btn" type="button">⋮</button>
+
+                        <div class="dropdown-menu">
+
+                            <button
+                                type="button"
+                                onclick="setReply(
+                                    {{ $message->id }},
+                                    `{{ addslashes($message->message) }}`
+                                )"
+                            >
+                                Reply
+                            </button>
+
+                            @if($message->sender_id == auth()->id())
+
+                                <button
+                                    type="button"
+                                    onclick="openEdit({{ $message->id }})"
+                                >
                                     Edit pesan
                                 </button>
-                                <button type="button" class="delete-btn" data-id="{{ $message->id }}">
+
+                                <button
+                                    type="button"
+                                    class="delete-btn"
+                                    data-id="{{ $message->id }}"
+                                >
                                     Hapus pesan
                                 </button>
-                            </div>
+
+                            @endif
+
                         </div>
-                    @endif
+                    </div>
 
                     <div class="bubble">
+                            @if($message->replyTo)
+
+                                <div class="reply-preview clickable-reply" onclick="scrollToMessage({{ $message->replyTo->id }})">
+
+                                    {{ Str::limit(
+                                        $message->replyTo->message,
+                                        60
+                                    ) }}
+
+                                </div>
+
+                            @endif
+
                         {!! nl2br(e($message->message)) !!}
                         @if($message->edited_at)
                             <small>(edited)</small>
@@ -319,8 +455,28 @@ function openEdit(id) {
                         <form method="POST" action="/messages/{{ $message->id }}">
                             @csrf
                             @method('PUT')
-                            <textarea name="message" rows="2">{{ $message->message }}</textarea>
-                            <button type="submit">Simpan</button>
+
+                            <textarea
+                                name="message"
+                                rows="2"
+                            >{{ $message->message }}</textarea>
+
+                            <div class="edit-actions">
+
+                                <button type="submit">
+                                    Simpan
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="cancel-edit-btn"
+                                    onclick="closeEdit({{ $message->id }})"
+                                >
+                                    Batal
+                                </button>
+
+                            </div>
+
                         </form>
                     </div>
                 @endif
@@ -333,12 +489,65 @@ function openEdit(id) {
 
     </div>
 
-    <div class="send-form">
-        <textarea id="message-input" rows="3" placeholder="Ketik pesan..." required></textarea>
-        <button type="button" id="send-btn">Kirim</button>
-    </div>
+    <div class="chat-footer"></div>
+        <div
+            id="reply-preview"
+            style="
+                display:none;
+                background:white;
+                border-left:4px solid #3490dc;
+                padding:10px;
+                margin-top:15px;
+                border-radius:8px;
+            "
+        >
 
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                "
+            >
+
+                <strong>
+                    Replying to
+                </strong>
+
+                <button
+                    type="button"
+                    onclick="cancelReply()"
+                    style="
+                        background:none;
+                        border:none;
+                        cursor:pointer;
+                        color:red;
+                    "
+                >
+                    X
+                </button>
+
+            </div>
+
+            <div
+                id="reply-text"
+                style="
+                    margin-top:5px;
+                    color:#555;
+                "
+            ></div>
+
+        </div>
+
+        <div class="send-form">
+            <input type="hidden" id="reply-to-id">
+            <textarea id="message-input" rows="3" placeholder="Ketik pesan..." required></textarea>
+            <button type="button" id="send-btn">Kirim</button>
+        </div>
+    </div>
 </div>
+
+
 
 <script>
 const csrfToken = '{{ csrf_token() }}';
@@ -346,6 +555,79 @@ const receiverId = '{{ $user->id }}';
 const chatBox = document.querySelector('.chat-box');
 const messageInput = document.getElementById('message-input');
 const sendBtn = document.getElementById('send-btn');
+let currentReplyId = null;
+
+function setReply(id, text)
+{
+    currentReplyId = id;
+
+    document.getElementById(
+        'reply-preview'
+    ).style.display = 'block';
+
+    document.getElementById(
+        'reply-text'
+    ).innerText =
+        text.length > 80
+            ? text.substring(0, 80) + '...'
+            : text;
+
+    document.getElementById(
+        'reply-to-id'
+    ).value = id;
+
+    messageInput.focus();
+}
+
+function cancelReply()
+{
+    currentReplyId = null;
+
+    document.getElementById(
+        'reply-preview'
+    ).style.display = 'none';
+
+    document.getElementById(
+        'reply-to-id'
+    ).value = '';
+}
+
+function scrollToMessage(messageId)
+{
+    const target =
+        document.getElementById(
+            'message-' + messageId
+        );
+
+    if (!target) return;
+
+    target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+    });
+
+    target.style.transition =
+        'background-color .5s';
+
+    const bubble =
+        target.querySelector('.bubble');
+
+    if (bubble)
+    {
+        const original =
+            bubble.style.backgroundColor;
+
+        bubble.style.backgroundColor =
+            '#ffe082';
+
+        setTimeout(() => {
+
+            bubble.style.backgroundColor =
+                original;
+
+        }, 2000);
+    }
+}
 
 function formatTime(dateStr) {
     const d = new Date(dateStr);
@@ -362,23 +644,51 @@ function escapeHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function appendMessage(text, time, id) {
+function appendMessage(text, time, id, replyText = null, repliedMessageId = null) {
+
+    const replyBlock =
+        replyText
+            ? `
+                <div
+                    class="reply-preview clickable-reply"
+                    onclick="scrollToMessage(${repliedMessageId})"
+                >
+                    ${escapeHtml(replyText)}
+                </div>
+            `
+            : '';
+
     const empty = chatBox.querySelector('p');
     if (empty) empty.remove();
 
     const editForm = id ? `
-        <div id="edit-${id}" class="edit-form" style="display:none;">
-            <form class="edit-ajax-form" data-id="${id}">
-                <textarea name="message" rows="2">${escapeHtml(text)}</textarea>
+    <div id="edit-${id}" class="edit-form" style="display:none;">
+        <form class="edit-ajax-form" data-id="${id}">
+            <textarea name="message" rows="2">${escapeHtml(text)}</textarea>
+
+            <div class="edit-actions">
                 <button type="submit">Simpan</button>
-            </form>
-        </div>` : '';
+
+                <button
+                    type="button"
+                    class="cancel-edit-btn"
+                    onclick="closeEdit(${id})"
+                >
+                    Batal
+                </button>
+            </div>
+
+        </form>
+    </div>` : '';
 
     const menu = id ? `
         <div class="message-menu">
             <button class="menu-btn" type="button">⋮</button>
             <div class="dropdown-menu">
                 <button type="button" onclick="openEdit(${id})">Edit pesan</button>
+                <button type="button" onclick="setReply(${id},'${escapeHtml(text).replace(/'/g, "\\'")}')">
+                    Reply
+                </button>
                 <button type="button" class="delete-btn" data-id="${id}">Hapus pesan</button>
             </div>
         </div>` : '';
@@ -387,7 +697,10 @@ function appendMessage(text, time, id) {
         <div class="message sent">
             <div class="bubble-wrap">
                 ${menu}
-                <div class="bubble">${nl2br(escapeHtml(text))}</div>
+                <div class="bubble">
+                    ${replyBlock}
+                    ${nl2br(escapeHtml(text))}
+                </div>
             </div>
             <div class="message-time">${time} · Sent</div>
             ${editForm}
@@ -399,6 +712,15 @@ function appendMessage(text, time, id) {
 
 async function sendMessage() {
     const text = messageInput.value.trim().replace(/^\n+|\n+$/g, '');
+    const replyId =
+        document.getElementById(
+            'reply-to-id'
+        ).value;
+
+    const replyText =
+        document.getElementById(
+            'reply-text'
+        ).innerText;
     if (!text) return;
 
     sendBtn.disabled = true;
@@ -412,7 +734,7 @@ async function sendMessage() {
                 'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({ receiver_id: receiverId, message: text }),
+            body: JSON.stringify({ receiver_id: receiverId, message: text, reply_to_id: document.getElementById('reply-to-id').value }),
         });
 
         const responseText = await res.text();
@@ -424,6 +746,7 @@ async function sendMessage() {
             const time = formatTime(new Date().toISOString());
             appendMessage(text, time, null);
             messageInput.value = '';
+            cancelReply();
             return;
         }
 
@@ -434,8 +757,9 @@ async function sendMessage() {
         }
 
         const time = formatTime(data.created_at ?? new Date().toISOString());
-        appendMessage(text, time, data.id ?? null);
+        appendMessage(text, time, data.id ?? null, replyId ? replyText : null, replyId);
         messageInput.value = '';
+        cancelReply();
     } catch (e) {
         alert('Network error: ' + e.message);
     } finally {
@@ -538,7 +862,9 @@ document.addEventListener('click', async function(e) {
     }
 });
 
-chatBox.scrollTop = chatBox.scrollHeight;
+window.addEventListener('load', () => {
+    chatBox.scrollTop = chatBox.scrollHeight;
+});
 </script>
 </body>
 </html>

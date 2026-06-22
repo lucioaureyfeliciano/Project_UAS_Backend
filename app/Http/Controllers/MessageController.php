@@ -33,7 +33,35 @@ class MessageController extends Controller
 
             });
 
-        return view('message.inbox', compact('conversations'));
+
+        $unreadCounts = [];
+
+        foreach ($conversations as $conversation) {
+
+            $otherUserId =
+                $conversation->sender_id == $userId
+                    ? $conversation->receiver_id
+                    : $conversation->sender_id;
+
+            $unreadCounts[$otherUserId] = Message::where(
+                    'sender_id',
+                    $otherUserId
+                )
+                ->where(
+                    'receiver_id',
+                    $userId
+                )
+                ->whereNull('read_at')
+                ->count();
+        }
+
+        return view(
+            'message.inbox',
+            compact(
+                'conversations',
+                'unreadCounts'
+            )
+        );
     }
 
     public function chat($userId)
@@ -62,7 +90,7 @@ class MessageController extends Controller
 
             })
 
-            ->with('sender')
+            ->with(['sender', 'replyTo'])
             ->orderBy('created_at')
             ->get();
 
@@ -88,7 +116,12 @@ class MessageController extends Controller
         $message = Message::create([
             'sender_id' => auth()->id(),
             'receiver_id' => $request->receiver_id,
-            'message'     => preg_replace('/^\s+|\s+$/u', '', $request->message),
+            'message' => preg_replace(
+                '/^\s+|\s+$/u',
+                '',
+                $request->message
+            ),
+            'reply_to_id' => $request->reply_to_id
         ]);
 
         return response()->json($message, 201);
@@ -169,10 +202,32 @@ class MessageController extends Controller
 
             });
 
+        $unreadCounts = [];
+
+        foreach ($conversations as $conversation) {
+
+            $otherUserId =
+                $conversation->sender_id == auth()->id()
+                    ? $conversation->receiver_id
+                    : $conversation->sender_id;
+
+            $unreadCounts[$otherUserId] = Message::where(
+                    'sender_id',
+                    $otherUserId
+                )
+                ->where(
+                    'receiver_id',
+                    auth()->id()
+                )
+                ->whereNull('read_at')
+                ->count();
+        }
+
         return view('message.inbox', compact(
             'users',
             'conversations',
-            'keyword'
+            'keyword',
+            'unreadCounts'
         ));
     }
 }
