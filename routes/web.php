@@ -25,7 +25,7 @@ Route::get('/', function () {
 });
 
 # Dashboard Route
-Route::get('/dashboard', [FeedController::class, 'index'])->middleware('auth');
+Route::get('/dashboard', [FeedController::class, 'index'])->middleware('auth')->name('dashboard');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
