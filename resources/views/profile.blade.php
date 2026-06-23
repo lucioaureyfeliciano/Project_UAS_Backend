@@ -646,7 +646,7 @@
 
                         <div class="description-section">
                             <p class="description-text">
-                                {{ $user->description ?: 'No description yet.' }}
+                                {{ $user->bio ?: 'No description yet.' }}
                             </p>
                         </div>
                     </div>
@@ -711,7 +711,7 @@
                 <form action="/profile/update-description" method="POST">
                     @csrf
                     <textarea name="description" rows="4"
-                        placeholder="Write your description...">{{ $user->description }}</textarea>
+                        placeholder="Write your description...">{{ $user->bio }}</textarea>
                     <div class="description-actions">
                         <button type="submit" class="save-btn">Save</button>
                         <button type="button" class="cancel-btn" onclick="closeDescriptionEdit()">Cancel</button>

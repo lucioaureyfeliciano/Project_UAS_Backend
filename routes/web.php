@@ -114,7 +114,7 @@ Route::get('/mentions/search', [ProfileController::class, 'searchMentions'])->mi
 Route::get('user/{username}', [ProfileController::class, 'show'])->middleware('auth')->name('profile.show');
 
 # Update Description Profile
-Route::post('/profile/update-description', [ProfileController::class, 'updateDescription']);
+Route::post('/profile/update-description', [ProfileController::class, 'updateDescription'])->middleware('auth');
 
 # Repost Routes
 Route::post('/tweets/{tweet}/repost', [RepostController::class, 'toggle'])->middleware('auth');

@@ -8,10 +8,17 @@ use Illuminate\Http\Request;
 use App\Models\Mute;
 use App\Models\Hashtag;
 use App\Models\User;
-use App\Models\Notification;
+use App\Services\NotificationService;
 
 class TweetController extends Controller
 {
+    protected NotificationService $notifications;
+
+    public function __construct(NotificationService $notifications)
+    {
+        $this->notifications = $notifications;
+    }
+
     public function post_tweet(Request $request)
     {
         $request->validate([
@@ -26,13 +33,13 @@ class TweetController extends Controller
         ]);
 
         preg_match_all(
-            '/#([a-zA-Z0-9_]+)/',
+            '/@([a-zA-Z0-9_]+)/',
             $tweet->content,
-            $matches
+            $mentionMatches
         );
 
         $mentionedUsers = array_unique(
-            $matches[1]
+            $mentionMatches[1]
         );
 
         foreach ($mentionedUsers as $username) {
@@ -45,21 +52,23 @@ class TweetController extends Controller
                 $mentionedUser &&
                 $mentionedUser->id != auth()->id()
             ) {
-                Notification::create([
-                    'user_id' => $mentionedUser->id,
-                    'type' => 'mention',
-                    'message' =>
-                        auth()->user()->username .
-                        ' mentioned you in a tweet',
-                    'is_read' => false,
-                    'related_user_id' => auth()->id(),
-                    'tweet_id' => $tweet->id,
-                ]);
+                $this->notifications->create(
+                    $mentionedUser->id,
+                    'mention',
+                    auth()->user()->username . ' mentioned you in a tweet',
+                    auth()->id(),
+                    $tweet->id
+                );
             }
         }
 
-        foreach ($matches[1] as $tag) {
+        preg_match_all(
+            '/#([a-zA-Z0-9_]+)/',
+            $tweet->content,
+            $hashtagMatches
+        );
 
+        foreach ($hashtagMatches[1] as $tag) {
             $hashtag = Hashtag::firstOrCreate([
                 'name' => strtolower($tag)
             ]);
