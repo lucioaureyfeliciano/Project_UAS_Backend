@@ -2,40 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Like;
 use App\Models\Tweet;
-use App\Models\Notification;
+use App\Services\InteractionService;
 
 class LikeController extends Controller
 {
+    protected InteractionService $interactions;
+
+    public function __construct(InteractionService $interactions)
+    {
+        $this->interactions = $interactions;
+    }
+
     public function toggle(Tweet $tweet)
     {
         $user = auth()->user();
 
-        $like = $tweet->likes()->where('user_id', $user->id)->first();
-
-        if ($like) {
-            $like->delete();
-        } else {
-            $tweet->likes()->create([
-                'user_id' => $user->id
-            ]);
-
-            // notif from like
-            if ($tweet->user_id !== $user->id) {
-                Notification::create([
-                    'user_id'         => $tweet->user_id,
-                    'type'            => 'like',
-                    'message'         => $user->username . ' liked your tweet "' . $tweet->title . '"',
-                    'is_read'         => false,
-                    'related_user_id' => $user->id,
-                    'tweet_id'        => $tweet->id,
-                ]);
-            }
-        }
+        $result = $this->interactions->toggle(
+            $user,
+            $tweet,
+            'likes',
+            'like',
+            ':user liked your tweet ":title"'
+        );
 
         return request()->expectsJson()
-            ? response()->json(['count' => $tweet->likes()->count(), 'status' => $like ? 'removed' : 'added'])
+            ? response()->json(['count' => $result['count'], 'status' => $result['status']])
             : redirect()->back();
-        }
+    }
 }

@@ -3,48 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tweet;
-use App\Models\Repost;
-use App\Models\Notification;
+use App\Services\InteractionService;
 
 class RepostController extends Controller
 {
+    protected InteractionService $interactions;
+
+    public function __construct(InteractionService $interactions)
+    {
+        $this->interactions = $interactions;
+    }
+
     public function toggle(Tweet $tweet)
     {
         $user = auth()->user();
 
-        $repost = $tweet->reposts()
-            ->where('user_id', $user->id)
-            ->first();
+        $result = $this->interactions->toggle(
+            $user,
+            $tweet,
+            'reposts',
+            'repost',
+            ':user reposted your tweet ":title"'
+        );
 
-        if ($repost) {
-
-            $repost->delete();
-
-            $status = 'removed';
-
-        } else {
-
-            $tweet->reposts()->create([
-                'user_id' => $user->id
-            ]);
-
-            // notif from repost
-            if ($tweet->user_id !== $user->id) {
-                Notification::create([
-                    'user_id'         => $tweet->user_id,
-                    'type'            => 'repost',
-                    'message'         => $user->username . ' reposted your tweet "' . $tweet->title . '"',
-                    'is_read'         => false,
-                    'related_user_id' => $user->id,
-                    'tweet_id'        => $tweet->id,
-                ]);
-            }
-
-            $status = 'added';
-        }
-        
         return request()->expectsJson()
-            ? response()->json(['count' => $tweet->reposts()->count(), 'status' => $status])
+            ? response()->json(['count' => $result['count'], 'status' => $result['status']])
             : redirect()->back();
-        }
+    }
 }
