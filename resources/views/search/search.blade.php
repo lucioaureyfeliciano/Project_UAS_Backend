@@ -340,7 +340,7 @@
 
                             <div class="bio">
 
-                                {{ $user->description ?: 'No description yet.' }}
+                                {{ $user->bio ?: 'No description yet.' }}
 
                             </div>
 

@@ -7,10 +7,16 @@ use App\Models\Comment;
 use App\Models\Tweet;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Models\Notification;
+use App\Services\NotificationService;
 
 class CommentController extends Controller
 {
+    protected NotificationService $notifications;
+
+    public function __construct(NotificationService $notifications)
+    {
+        $this->notifications = $notifications;
+    }
     public function index($tweet_id)
     {
         $tweet = Tweet::with('user')->findOrFail($tweet_id);
@@ -54,25 +60,23 @@ class CommentController extends Controller
         if ($comment->parent_id) {
             $parentComment = Comment::find($comment->parent_id);
             if ($parentComment && $parentComment->user_id !== auth()->id()) {
-                Notification::create([
-                    'user_id' => $parentComment->user_id,
-                    'type' => 'comment',
-                    'message' => auth()->user()->username . ' replied to your comment',
-                    'is_read' => false,
-                    'related_user_id' => auth()->id(),
-                    'tweet_id' => $tweet_id,
-                ]);
+                $this->notifications->create(
+                    $parentComment->user_id,
+                    'comment',
+                    auth()->user()->username . ' replied to your comment',
+                    auth()->id(),
+                    $tweet_id
+                );
             }
 
         } elseif ($tweet && $tweet->user_id !== auth()->id()) {
-            Notification::create([
-                'user_id' => $tweet->user_id,
-                'type' => 'comment',
-                'message' => auth()->user()->username . ' commented on your tweet "' . $tweet->title . '"',
-                'is_read' => false,
-                'related_user_id' => auth()->id(),
-                'tweet_id' => $tweet_id,
-            ]);
+            $this->notifications->create(
+                $tweet->user_id,
+                'comment',
+                auth()->user()->username . ' commented on your tweet "' . $tweet->title . '"',
+                auth()->id(),
+                $tweet_id
+            );
         }
 
         preg_match_all(
@@ -95,16 +99,13 @@ class CommentController extends Controller
                 $mentionedUser &&
                 $mentionedUser->id != auth()->id()
             ) {
-                Notification::create([
-                    'user_id' => $mentionedUser->id,
-                    'type' => 'mention',
-                    'message' =>
-                        auth()->user()->username .
-                        ' mentioned you in a comment',
-                    'is_read' => false,
-                    'related_user_id' => auth()->id(),
-                    'tweet_id' => $tweet_id,
-                ]);
+                $this->notifications->create(
+                    $mentionedUser->id,
+                    'mention',
+                    auth()->user()->username . ' mentioned you in a comment',
+                    auth()->id(),
+                    $tweet_id
+                );
             }
         }
         return redirect()->route('tweets.show', $tweet_id)->with('success', 'Comment posted!');

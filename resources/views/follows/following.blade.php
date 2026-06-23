@@ -257,7 +257,7 @@
                                     </a>
 
                                     <div class="bio">
-                                        {{ $follow->following->description ?? 'No bio yet' }}
+                                        {{ $follow->following->bio ?? 'No bio yet' }}
                                     </div>
 
                                     <div class="since">
