@@ -239,9 +239,156 @@
         .mention-link:hover {
             text-decoration: underline;
         }
-    </style>
 
-</head>
+        .icon-img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .like-btn {
+            color: #3490dc;
+        }
+
+        .like-btn:hover {
+            background: #e8f5ff;
+            border-color: #3490dc;
+        }
+
+        .like-btn.active {
+            background: #dbeeff;
+            border-color: #3490dc;
+        }
+
+        .dislike-btn {
+            color: #e74c3c;
+        }
+
+        .dislike-btn:hover {
+            background: #ffe5e5;
+            border-color: #ff6b6b;
+        }
+
+        .dislike-btn.active {
+            background: #ffe5e5;
+            border-color: #e74c3c;
+        }
+
+        .repost-btn {
+            color: #6c5ce7;
+        }
+
+        .repost-btn:hover {
+            background: #f0e6ff;
+            border-color: #9b59b6;
+        }
+
+        .repost-btn.active {
+            background: #ede9fd;
+            border-color: #6c5ce7;
+        }
+
+        .bookmark-btn {
+            color: #ff9f43;
+        }
+
+        .bookmark-btn:hover {
+            background: #fff4e0;
+            border-color: #ff9f43;
+        }
+
+        .bookmark-btn.active {
+            background: #dbeeff;
+            border-color: #3490dc;
+        }
+
+        .share-modal {
+            display: none;
+            width: 100%;
+            flex-basis: 100%;
+            margin-top: 12px;
+            padding: 14px;
+            background: #fafafa;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-sizing: border-box;
+        }
+
+        .share-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #6c5ce7;
+        }
+
+        .share-select,
+        .share-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dcdcdc;
+            border-radius: 10px;
+            font-size: 13px;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        .share-select {
+            margin-bottom: 10px;
+        }
+
+        .share-textarea {
+            resize: none;
+            min-height: 70px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .share-textarea:focus,
+        .share-select:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        .share-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .share-send-btn {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .share-send-btn:hover {
+            background: #5a4fcf;
+        }
+
+        .share-cancel-btn {
+            background: #f1f1f1;
+            color: #555;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .share-cancel-btn:hover {
+            background: #e0e0e0;
+        }
+
 
 <body>
     @include('components.toast')
@@ -418,34 +565,89 @@
                         ) !!}
                         </div>
 
+                        @php
+                            $userLiked = $tweet->likes->contains('user_id', auth()->id());
+                            $userDisliked = $tweet->dislikes->contains('user_id', auth()->id());
+                            $userReposted = $tweet->reposts->contains('user_id', auth()->id());
+
+                            $userSaved = \App\Models\Bookmark::where('user_id', auth()->id())
+                                ->where('tweet_id', $tweet->id)
+                                ->exists();
+                        @endphp
+
                         <div class="tweet-actions">
 
-                            <span class="reaction-btn">
-                                👍 {{ $tweet->likes->count() }}
-                            </span>
+                            <button class="like-btn reaction-btn {{ $userLiked ? 'active' : '' }}" data-id="{{ $tweet->id }}"
+                                data-liked="{{ $userLiked ? '1' : '0' }}">
+                                <img src="{{ asset('image/' . ($userLiked ? 'liked.png' : 'like.png')) }}" class="icon-img"
+                                    alt="Like">
+                                <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes->count() }}</span>
+                            </button>
 
-                            <span class="reaction-btn">
-                                👎 {{ $tweet->dislikes->count() }}
-                            </span>
+                            <button type="button" class="dislike-btn reaction-btn {{ $userDisliked ? 'active' : '' }}"
+                                data-id="{{ $tweet->id }}">
+                                <img src="{{ asset('image/' . ($userDisliked ? 'liked.png' : 'like.png')) }}" class="icon-img"
+                                    alt="Dislike" style="transform: scaleY(-1);">
+                                <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
+                            </button>
 
-                            <span class="reaction-btn">
-                                🔁 {{ $tweet->reposts->count() }}
-                            </span>
+                            <button type="button" class="repost-btn reaction-btn {{ $userReposted ? 'active' : '' }}"
+                                data-id="{{ $tweet->id }}">
+                                <img src="{{ asset('image/repost.png') }}" class="icon-img" alt="Repost">
+                                <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
+                            </button>
 
                             <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
                                 style="text-decoration:none;">
-
-                                💬 {{ $tweet->comments->count() }}
-
+                                <img src="{{ asset('image/comment.png') }}" class="icon-img" alt="Comment">
+                                {{ $tweet->comments->count() }}
                             </a>
 
                             <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
                                 @csrf
                                 <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
-                                <button type="submit" class="reaction-btn" style="color:#3490dc; background:white; font-size:14px;">
-                                    🔖 Bookmark
+                                <button type="submit" class="reaction-btn bookmark-btn {{ $userSaved ? 'active' : '' }}">
+                                    <img src="{{ asset($userSaved ? 'image/saved.png' : 'image/save.png') }}" class="icon-img"
+                                        alt="Bookmark">
+                                    {{ $userSaved ? 'Saved' : 'Save' }}
                                 </button>
                             </form>
+
+                            <button class="reaction-btn share-btn" onclick="toggleShareModal('share-tw-{{ $tweet->id }}')">
+                                <img src="{{ asset('image/share.png') }}" class="icon-img" alt="Share">
+                                Share
+                            </button>
+
+                            <div id="share-tw-{{ $tweet->id }}" class="share-modal">
+                                <div class="share-header">
+                                    <img src="{{ asset('image/share.png') }}" class="icon-img" alt="Share">
+                                    Share to Message
+                                </div>
+
+                                <form method="POST" action="{{ route('messages.share') }}">
+                                    @csrf
+
+                                    <select name="receiver_id" required class="share-select">
+                                        <option value="">Select user...</option>
+
+                                        @foreach(\App\Models\User::where('id', '!=', auth()->id())->orderBy('username')->get() as $u)
+                                            <option value="{{ $u->id }}">
+                                                {{ $u->username }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+                                    <textarea name="message" class="share-textarea"
+                                        placeholder="Add a message...">[TWEET:{{ $tweet->id }}]</textarea>
+
+                                    <div class="share-actions">
+                                        <button type="button" class="share-cancel-btn"
+                                            onclick="toggleShareModal('share-tw-{{ $tweet->id }}')">Cancel</button>
+
+                                        <button type="submit" class="share-send-btn">Send</button>
+                                    </div>
+                                </form>
+                            </div>
 
                         </div>
 
@@ -496,6 +698,68 @@
                 behavior: 'smooth'
             });
 
+        }
+
+        document.querySelectorAll('.dislike-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const tweetId = this.dataset.id;
+                fetch(`/tweets/${tweetId}/dislike`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
+                    })
+                    .catch(err => console.log(err));
+            });
+        });
+
+        document.querySelectorAll('.like-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const tweetId = this.dataset.id;
+                fetch(`/tweets/${tweetId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(`like-count-${tweetId}`).innerText = data.count;
+                    })
+                    .catch(err => console.log(err));
+            });
+        });
+
+        document.querySelectorAll('.repost-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const tweetId = this.dataset.id;
+                fetch(`/tweets/${tweetId}/repost`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(`repost-count-${tweetId}`).innerText = data.count;
+                    });
+            });
+        });
+
+        function toggleShareModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
         }
 
     </script>
