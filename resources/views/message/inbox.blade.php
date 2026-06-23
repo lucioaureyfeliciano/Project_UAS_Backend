@@ -55,6 +55,29 @@ use Illuminate\Support\Str;
             color: #3490dc;
         }
 
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .unread-badge {
+            background: #e3342f;
+            color: white;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .has-unread {
+            border-left: 5px solid #3490dc;
+        }
+
         .preview {
             color: #555;
             margin-top: 5px;
@@ -201,10 +224,22 @@ use Illuminate\Support\Str;
                 : $conversation->sender;
         @endphp
 
-        <div class="message-card">
+        <div class="message-card {{ ($unreadCounts[$otherUser->id] ?? 0) > 0 ? 'has-unread' : '' }}">
 
-            <div class="username">
-                {{ $otherUser->username }}
+            <div class="user-header">
+
+                <div class="username">
+                    {{ $otherUser->username }}
+                </div>
+
+                @if(($unreadCounts[$otherUser->id] ?? 0) > 0)
+
+                    <div class="unread-badge">
+                        {{ $unreadCounts[$otherUser->id] }}
+                    </div>
+
+                @endif
+
             </div>
 
             <div class="preview">

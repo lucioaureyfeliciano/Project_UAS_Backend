@@ -9,7 +9,10 @@ class Message extends Model
     protected $fillable = [
         'sender_id',
         'receiver_id',
-        'message'
+        'message',
+        'read_at',
+        'edited_at',
+        'reply_to_id'
     ];
 
     public function sender()
@@ -20,6 +23,14 @@ class Message extends Model
     public function receiver()
     {
         return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    public function replyTo()
+    {
+        return $this->belongsTo(
+            Message::class,
+            'reply_to_id'
+        );
     }
     
     public static function linkify(string $text): string

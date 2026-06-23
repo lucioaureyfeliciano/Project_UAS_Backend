@@ -33,7 +33,35 @@ class MessageController extends Controller
 
             });
 
-        return view('message.inbox', compact('conversations'));
+
+        $unreadCounts = [];
+
+        foreach ($conversations as $conversation) {
+
+            $otherUserId =
+                $conversation->sender_id == $userId
+                    ? $conversation->receiver_id
+                    : $conversation->sender_id;
+
+            $unreadCounts[$otherUserId] = Message::where(
+                    'sender_id',
+                    $otherUserId
+                )
+                ->where(
+                    'receiver_id',
+                    $userId
+                )
+                ->whereNull('read_at')
+                ->count();
+        }
+
+        return view(
+            'message.inbox',
+            compact(
+                'conversations',
+                'unreadCounts'
+            )
+        );
     }
 
     public function chat($userId)
@@ -62,7 +90,7 @@ class MessageController extends Controller
 
             })
 
-            ->with('sender')
+            ->with(['sender', 'replyTo'])
             ->orderBy('created_at')
             ->get();
 
@@ -85,28 +113,48 @@ class MessageController extends Controller
             'message' => 'required|max:1000'
         ]);
 
-        Message::create([
+        $message = Message::create([
             'sender_id' => auth()->id(),
             'receiver_id' => $request->receiver_id,
-            'message' => $request->message
+            'message' => preg_replace(
+                '/^\s+|\s+$/u',
+                '',
+                $request->message
+            ),
+            'reply_to_id' => $request->reply_to_id
         ]);
 
-        return back();
+        return response()->json($message, 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $messageId)
     {
-        $message = Message::findOrFail($id);
+        $message = Message::findOrFail($messageId);
 
-        if ($message->sender_id != auth()->id()) {
+        if ($message->sender_id !== auth()->id()) {
             abort(403);
         }
 
+        if ($message->created_at->diffInMinutes(now()) > 5) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Pesan hanya bisa diedit dalam 5 menit.'], 403);
+            }
+            return back()->with('error', 'Message can only be edited within 5 minutes.');
+        }
+
+        $request->validate(['message' => 'required|string']);
+
         $message->update([
-            'message' => $request->message
+            'message'   => $request->message,
+            'edited_at' => now(),
+            'read_at'   => null
         ]);
 
-        return back();
+        if ($request->expectsJson()) {
+            return response()->json($message);
+        }
+
+        return back()->with('success', 'Message updated.');
     }
 
     public function destroy($id)
@@ -118,6 +166,10 @@ class MessageController extends Controller
         }
 
         $message->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Pesan berhasil dihapus.']);
+        }
 
         return back();
     }
@@ -150,10 +202,32 @@ class MessageController extends Controller
 
             });
 
+        $unreadCounts = [];
+
+        foreach ($conversations as $conversation) {
+
+            $otherUserId =
+                $conversation->sender_id == auth()->id()
+                    ? $conversation->receiver_id
+                    : $conversation->sender_id;
+
+            $unreadCounts[$otherUserId] = Message::where(
+                    'sender_id',
+                    $otherUserId
+                )
+                ->where(
+                    'receiver_id',
+                    auth()->id()
+                )
+                ->whereNull('read_at')
+                ->count();
+        }
+
         return view('message.inbox', compact(
             'users',
             'conversations',
-            'keyword'
+            'keyword',
+            'unreadCounts'
         ));
     }
 
