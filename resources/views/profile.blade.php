@@ -482,6 +482,105 @@
             object-fit: contain;
             margin-bottom: 10px;
         }
+
+        .card form input[type="text"],
+        .card form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            outline: none;
+        }
+
+        .share-modal {
+            display: none;
+            width: 100%;
+            flex-basis: 100%;
+            margin-top: 12px;
+            padding: 14px;
+            background: #fafafa;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-sizing: border-box;
+        }
+
+        .share-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #6c5ce7;
+        }
+
+        .share-select,
+        .share-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dcdcdc;
+            border-radius: 10px;
+            font-size: 13px;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        .share-select {
+            margin-bottom: 10px;
+        }
+
+        .share-textarea {
+            resize: none;
+            min-height: 70px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .share-textarea:focus,
+        .share-select:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        .share-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .share-send-btn {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .share-send-btn:hover {
+            background: #5a4fcf;
+        }
+
+        .share-cancel-btn {
+            background: #f1f1f1;
+            color: #555;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .share-cancel-btn:hover {
+            background: #e0e0e0;
+        }
     </style>
 
 </head>
@@ -514,7 +613,8 @@
                             @if(auth()->id() !== $user->id)
                                 <form method="POST" action="{{ route('follow', $user->id) }}" style="margin:0;">
                                     @csrf
-                                    <button type="submit" class="follow-btn-small" style="background: {{ $isFollowing ? '#95a5a6' : '#3490dc' }};">
+                                    <button type="submit" class="follow-btn-small"
+                                        style="background: {{ $isFollowing ? '#95a5a6' : '#3490dc' }};">
                                         {{ $isFollowing ? 'Following' : 'Follow' }}
                                     </button>
                                 </form>
@@ -523,14 +623,16 @@
                                     <button class="tweet-menu-btn">•️•️•️</button>
                                     <div class="tweet-dropdown" style="left: 0; right: auto; margin-top: 6px;">
 
-                                        <form action="{{ route('block', $user->id) }}" method="POST" onsubmit="return confirm('Apakah anda yakin ingin memproses akun ini?')">
+                                        <form action="{{ route('block', $user->id) }}" method="POST"
+                                            onsubmit="return confirm('Apakah anda yakin ingin memproses akun ini?')">
                                             @csrf
                                             <button type="submit" style="color: #333;">
                                                 Block
                                             </button>
                                         </form>
 
-                                        <form action="{{ route('mute', $user->id) }}" method="POST" onsubmit="return confirm('Apakah anda yakin ingin memproses status bisu akun ini?')">
+                                        <form action="{{ route('mute', $user->id) }}" method="POST"
+                                            onsubmit="return confirm('Apakah anda yakin ingin memproses status bisu akun ini?')">
                                             @csrf
                                             <button type="submit" style="color: #e67e22;">
                                                 Mute
@@ -553,14 +655,16 @@
 
             <div class="stats">
                 <div class="stat-box">
-                    <a href="{{ route('profile.following', $user->username) }}" style="text-decoration:none;color:black;">
+                    <a href="{{ route('profile.following', $user->username) }}"
+                        style="text-decoration:none;color:black;">
                         <div class="stat-title">Following</div>
                         <div class="stat-number">{{ $user->following->count() }}</div>
                     </a>
                 </div>
 
                 <div class="stat-box">
-                    <a href="{{ route('profile.followers', $user->username) }}" style="text-decoration:none;color:black;">
+                    <a href="{{ route('profile.followers', $user->username) }}"
+                        style="text-decoration:none;color:black;">
                         <div class="stat-title">Followers</div>
                         <div class="stat-number">{{ $user->followers->count() }}</div>
                     </a>
@@ -569,14 +673,16 @@
                 <div class="stat-box">
                     <div class="stat-title">Likes</div>
                     <div class="stat-number">
-                        {{ $tweets->sum(function ($tweet) { return $tweet->likes->count(); }) }}
+                        {{ $tweets->sum(function ($tweet) {
+    return $tweet->likes->count(); }) }}
                     </div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-title">Dislikes</div>
                     <div class="stat-number">
-                        {{ $tweets->sum(function ($tweet) { return $tweet->dislikes->count(); }) }}
+                        {{ $tweets->sum(function ($tweet) {
+    return $tweet->dislikes->count(); }) }}
                     </div>
                 </div>
 
@@ -588,7 +694,8 @@
                 <div class="stat-box">
                     <div class="stat-title">Repost</div>
                     <div class="stat-number">
-                        {{ $tweets->sum(function ($tweet) { return $tweet->reposts->count(); }) }}
+                        {{ $tweets->sum(function ($tweet) {
+    return $tweet->reposts->count(); }) }}
                     </div>
                 </div>
             </div>
@@ -603,7 +710,8 @@
             <div class="description-modal" id="descriptionModal">
                 <form action="/profile/update-description" method="POST">
                     @csrf
-                    <textarea name="description" rows="4" placeholder="Write your description...">{{ $user->description }}</textarea>
+                    <textarea name="description" rows="4"
+                        placeholder="Write your description...">{{ $user->description }}</textarea>
                     <div class="description-actions">
                         <button type="submit" class="save-btn">Save</button>
                         <button type="button" class="cancel-btn" onclick="closeDescriptionEdit()">Cancel</button>
@@ -614,10 +722,7 @@
 
         @if($isLocked)
             <div class="private-lock-box">
-                    <img
-                        src="{{ asset('image/lock.png') }}"
-                        class="private-lock-icon"
-                        alt="Private">
+                <img src="{{ asset('image/lock.png') }}" class="private-lock-icon" alt="Private">
                 <h3 style="margin: 0 0 10px 0; color: #333;">This Profile is Private</h3>
                 <p style="margin: 0; color: #777; font-size: 15px;">Follow this account to see posts</p>
             </div>
@@ -626,9 +731,9 @@
 
             @foreach ($tweets as $tweet)
                 @php
-                    $userLiked     = $tweet->likes->contains('user_id', auth()->id());
-                    $userDisliked  = $tweet->dislikes->contains('user_id', auth()->id());
-                    $userReposted  = $tweet->reposts->contains('user_id', auth()->id());
+                    $userLiked = $tweet->likes->contains('user_id', auth()->id());
+                    $userDisliked = $tweet->dislikes->contains('user_id', auth()->id());
+                    $userReposted = $tweet->reposts->contains('user_id', auth()->id());
 
                     $userSaved = \App\Models\Bookmark::where('user_id', auth()->id())
                         ->where('tweet_id', $tweet->id)
@@ -664,47 +769,83 @@
                     </div>
 
                     <div class="tweet-actions">
-                        <button type="button" class="like-btn reaction-btn{{ $userLiked ? 'active' : '' }}" data-id="{{ $tweet->id }}">
-                            <img
-                                src="{{ asset('image/' . ($userLiked ? 'liked.png' : 'like.png')) }}"
-                                class="icon-img"
+                        <button class="like-btn reaction-btn {{ $userLiked ? 'active' : '' }}" data-id="{{ $tweet->id }}"
+                            data-liked="{{ $userLiked ? '1' : '0' }}">
+
+                            <img src="{{ asset('image/' . ($userLiked ? 'liked.png' : 'like.png')) }}" class="icon-img"
                                 alt="Like">
-                            <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes ? $tweet->likes->count() : 0 }}</span>
+
+                            <span id="like-count-{{ $tweet->id }}">{{ $tweet->likes->count() }}</span>
                         </button>
 
-                        <button type="button" class="dislike-btn reaction-btn {{ $userDisliked ? 'active' : '' }}" data-id="{{ $tweet->id }}">
-                            <img
-                                src="{{ asset('image/' . ($userDisliked ? 'liked.png' : 'like.png')) }}"
-                                class="icon-img"
-                                alt="Dislike"
-                                style="transform: scaleY(-1);">
+                        <button type="button" class="dislike-btn reaction-btn {{ $userDisliked ? 'active' : '' }}"
+                            data-id="{{ $tweet->id }}">
+                            <img src="{{ asset('image/' . ($userDisliked ? 'liked.png' : 'like.png')) }}" class="icon-img"
+                                alt="Dislike" style="transform: scaleY(-1);">
                             <span id="dislike-count-{{ $tweet->id }}">{{ $tweet->dislikes->count() }}</span>
                         </button>
 
-                        <button type="button" class="repost-btn reaction-btn {{ $userReposted ? 'active' : '' }}" data-id="{{ $tweet->id }}">
-                            <img
-                                src="{{ asset('image/repost.png') }}"
-                                class="icon-img"
-                                alt="Repost">
+                        <button type="button" class="repost-btn reaction-btn {{ $userReposted ? 'active' : '' }}"
+                            data-id="{{ $tweet->id }}">
+                            <img src="{{ asset('image/repost.png') }}" class="icon-img" alt="Repost">
                             <span id="repost-count-{{ $tweet->id }}">{{ $tweet->reposts->count() }}</span>
                         </button>
 
                         <a href="{{ route('tweets.show', $tweet->id) }}" class="reaction-btn comment-btn"
                             style="text-decoration:none;">
-                            💬 {{ $tweet->comments->count() }}
+                            <img src="{{ asset('image/comment.png') }}" class="icon-img" alt="Comment">
+                            {{ $tweet->comments->count() }}
                         </a>
 
                         <form action="{{ route('bookmarks.store') }}" method="POST" style="display:inline;">
                             @csrf
                             <input type="hidden" name="tweet_id" value="{{ $tweet->id }}">
                             <button type="submit" class="reaction-btn bookmark-btn {{ $userSaved ? 'active' : '' }}">
-                                <img
-                                    src="{{ asset($userSaved ? 'image/saved.png' : 'image/save.png') }}"
-                                    class="icon-img"
+                                <img src="{{ asset($userSaved ? 'image/saved.png' : 'image/save.png') }}" class="icon-img"
                                     alt="Bookmark">
                                 {{ $userSaved ? 'Saved' : 'Save' }}
                             </button>
                         </form>
+
+                        <button class="reaction-btn share-btn" onclick="toggleShareModal('share-tw-{{ $tweet->id }}')">
+                            <img src="{{ asset('image/share.png') }}" class="icon-img" alt="Share">
+                            Share
+                        </button>
+
+                        <div id="share-tw-{{ $tweet->id }}" class="share-modal">
+                            <div class="share-header">
+                                <img src="{{ asset('image/share.png') }}" class="icon-img" alt="Share">
+                                Share to Message
+                            </div>
+
+                            <form method="POST" action="{{ route('messages.share') }}">
+                                @csrf
+
+                                <select name="receiver_id" required class="share-select">
+                                    <option value="">Select user...</option>
+
+                                    @foreach(\App\Models\User::where('id', '!=', auth()->id())->orderBy('username')->get() as $u)
+                                        <option value="{{ $u->id }}">
+                                            {{ $u->username }}
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                <textarea name="message" class="share-textarea"
+                                    placeholder="Add a message...">[TWEET:{{ $tweet->id }}]</textarea>
+
+                                <div class="share-actions">
+                                    <button type="button" class="share-cancel-btn"
+                                        onclick="toggleShareModal('share-tw-{{ $tweet->id }}')">
+                                        Cancel
+                                    </button>
+
+                                    <button type="submit" class="share-send-btn">
+                                        Send
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     <div class="edit-modal" id="edit-{{ $tweet->id }}">
@@ -719,6 +860,7 @@
                             </div>
                         </form>
                     </div>
+
                 </div>
             @endforeach
         @endif
@@ -757,6 +899,12 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function toggleShareModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
         document.querySelectorAll('.dislike-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const tweetId = this.dataset.id;
@@ -768,11 +916,11 @@
                         'Accept': 'application/json'
                     }
                 })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
-                })
-                .catch(err => console.log(err));
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(`dislike-count-${tweetId}`).innerText = data.count;
+                    })
+                    .catch(err => console.log(err));
             });
         });
 
@@ -787,11 +935,11 @@
                         'Accept': 'application/json'
                     }
                 })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById(`like-count-${tweetId}`).innerText = data.count;
-                })
-                .catch(err => console.log(err));
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(`like-count-${tweetId}`).innerText = data.count;
+                    })
+                    .catch(err => console.log(err));
             });
         });
 
@@ -806,12 +954,13 @@
                         'Accept': 'application/json'
                     }
                 })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById(`repost-count-${tweetId}`).innerText = data.count;
-                });
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(`repost-count-${tweetId}`).innerText = data.count;
+                    });
             });
         });
     </script>
 </body>
+
 </html>
