@@ -14,7 +14,7 @@ class FeedController extends Controller
 {
     public function index(Request $request)
     {
-        $currentTab = $request->query('tab', 'foryou');
+        $currentTab = $request->is('dashboard/following') ? 'following' : 'foryou';
         $authId = auth()->id();
 
         $excludedUserIds = Block::where('user_id', $authId)->pluck('blocked_user_id')->toArray();
